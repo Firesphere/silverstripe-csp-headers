@@ -1,0 +1,31 @@
+{
+  "name": "firesphere/cspheaders",
+  "description": "Setup CSP Headers for a website",
+  "type": "silverstripe-vendormodule",
+  "keywords": [
+    "silverstripe",
+    "CSP",
+    "Content",
+    "Security",
+    "Policies"
+  ],
+  "license": "BSD-3-Clause",
+  "authors": [
+    {
+      "name": "Simon 'Firesphere' Erkelens",
+      "email": "simonerkelens@silverstripe.com"
+    }
+  ],
+  "require": {
+    "silverstripe/framework": "^4",
+    "martijnc/php-csp": "dev-master"
+  },
+  "require-dev": {
+    "roave/security-advisories": "dev-master",
+    "scriptfusion/phpunit-immediate-exception-printer": "^1",
+    "phpunit/PHPUnit": "^5.7",
+    "friendsofphp/php-cs-fixer": "^2.13"
+  },
+  "prefer-stable": true,
+  "minimum-stability": "dev"
+}

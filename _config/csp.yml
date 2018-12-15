@@ -1,0 +1,41 @@
+---
+Name: CSPHeaders
+---
+Firesphere\CSPHeaders\View\CSPBackend:
+  report_to:
+    report_to_uri: ''
+    report: false
+    NEL: false
+  csp_config:
+    report_uri: ''
+    report_only_uri: ''
+    report_only: false
+    block_xss: false
+    https: false
+    upgrade_insecure_requests: false
+    default:
+      domains: []
+    img:
+      domains: []
+    media:
+      domains: []
+    frame:
+      domains: []
+    style:
+      domains: []
+      allow_inline: false
+    script:
+      domains: []
+    font:
+      domains: []
+    form:
+      domains: []
+---
+Only:
+  environment: dev
+---
+Firesphere\CSPHeaders\View\CSPBackend:
+  csp_config:
+    wizard: true
+    report_only: true
+    upgrade_insecure_requests: false

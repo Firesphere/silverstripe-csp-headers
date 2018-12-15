@@ -1,0 +1,4 @@
+SilverStripe\Core\Injector\Injector:
+  Firesphere\CSPHeaders\View\CSPBackend:
+    properties:
+      AssetHandler: '%$SilverStripe\Assets\Storage\GeneratedAssetHandler'
