@@ -145,9 +145,9 @@ class ControllerCSPExtension extends Extension
     {
         $config = CSPBackend::config()->get('csp_config');
 
-//        if ($config['https'] === true) {
-//            $policy->addSourceExpression(ContentSecurityPolicyHeaderBuilder::DIRECTIVE_BASE_URI, 'https:');
-//        }
+        if ($config['https'] === true) {
+            $policy->addSourceExpression(ContentSecurityPolicyHeaderBuilder::DIRECTIVE_BASE_URI, 'https:');
+        }
 
         if ($config['block_xss'] === true) {
             $policy->setReflectedXssPolicy(ContentSecurityPolicyHeaderBuilder::REFLECTED_XSS_BLOCK);
