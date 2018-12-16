@@ -22,10 +22,19 @@ use SilverStripe\Core\Injector\Injector;
  */
 class ControllerCSPExtension extends Extension
 {
+    /**
+     * @var array
+     */
     protected static $inlineJS = [];
 
+    /**
+     * @var array
+     */
     protected static $inlineCSS = [];
 
+    /**
+     * @var array
+     */
     protected $allowedDirectivesMap = [
         'default' => ContentSecurityPolicyHeaderBuilder::DIRECTIVE_DEFAULT_SRC,
         'font'    => ContentSecurityPolicyHeaderBuilder::DIRECTIVE_FONT_SRC,
@@ -37,14 +46,36 @@ class ControllerCSPExtension extends Extension
         'style'   => ContentSecurityPolicyHeaderBuilder::DIRECTIVE_STYLE_SRC,
     ];
 
+    /**
+     * @param string $js
+     */
     public static function addJS($js)
     {
         static::$inlineJS[] = $js;
     }
 
+    /**
+     * @param string $css
+     */
     public static function addCSS($css)
     {
         static::$inlineCSS[] = $css;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getInlineJS()
+    {
+        return static::$inlineJS;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getInlineCSS()
+    {
+        return static::$inlineCSS;
     }
 
     /**
@@ -85,7 +116,10 @@ class ControllerCSPExtension extends Extension
     protected function setDefaultPolicies()
     {
         $policy = Injector::inst()->get(ContentSecurityPolicyHeaderBuilder::class);
-        $policy->addSourceExpression(ContentSecurityPolicyHeaderBuilder::DIRECTIVE_DEFAULT_SRC, 'self');
+        foreach ($this->allowedDirectivesMap as $key => $directive) {
+            $policy->addSourceExpression($directive, 'self');
+        }
+
         $policy->addSourceExpression(
             ContentSecurityPolicyHeaderBuilder::DIRECTIVE_DEFAULT_SRC,
             Director::absoluteBaseURL()
@@ -95,12 +129,6 @@ class ControllerCSPExtension extends Extension
             ContentSecurityPolicyHeaderBuilder::DIRECTIVE_BASE_URI,
             Director::absoluteBaseURL()
         );
-        $policy->addSourceExpression(ContentSecurityPolicyHeaderBuilder::DIRECTIVE_FONT_SRC, 'self');
-        $policy->addSourceExpression(ContentSecurityPolicyHeaderBuilder::DIRECTIVE_STYLE_SRC, 'self');
-        $policy->addSourceExpression(ContentSecurityPolicyHeaderBuilder::DIRECTIVE_SCRIPT_SRC, 'self');
-        $policy->addSourceExpression(ContentSecurityPolicyHeaderBuilder::DIRECTIVE_FORM_ACTION, 'self');
-        $policy->addSourceExpression(ContentSecurityPolicyHeaderBuilder::DIRECTIVE_IMG_SRC, 'self');
-        $policy->addSourceExpression(ContentSecurityPolicyHeaderBuilder::DIRECTIVE_MEDIA_SRC, 'self');
 
         return $policy;
     }
@@ -117,9 +145,9 @@ class ControllerCSPExtension extends Extension
     {
         $config = CSPBackend::config()->get('csp_config');
 
-        if ($config['https'] === true) {
-            $policy->addSourceExpression(ContentSecurityPolicyHeaderBuilder::DIRECTIVE_BASE_URI, 'https:');
-        }
+//        if ($config['https'] === true) {
+//            $policy->addSourceExpression(ContentSecurityPolicyHeaderBuilder::DIRECTIVE_BASE_URI, 'https:');
+//        }
 
         if ($config['block_xss'] === true) {
             $policy->setReflectedXssPolicy(ContentSecurityPolicyHeaderBuilder::REFLECTED_XSS_BLOCK);
@@ -150,10 +178,6 @@ class ControllerCSPExtension extends Extension
             $policy->setReportUri($config['wizard_uri']);
         }
 
-        if ($config['report_uri'] === $config['report_only_uri']) {
-            throw new InvalidValueException('Report or ReportOnly URI can not be empty');
-        }
-
         if ($config['style']['allow_inline'] === true) {
             $policy->addSourceExpression(ContentSecurityPolicyHeaderBuilder::DIRECTIVE_STYLE_SRC, 'unsafe-inline');
         }
@@ -170,11 +194,15 @@ class ControllerCSPExtension extends Extension
     {
         $config = CSPBackend::config()->get('report_to');
         if ($config['report']) {
-            $this->owner->getResponse()->addHeader('Report-To',
-                '{"group":"default","max_age":31536000,"endpoints":[{"url":"' . $config['report_to_uri'] . '"}],"include_subdomains":true}');
+            $this->owner->getResponse()->addHeader(
+                'Report-To',
+                '{"group":"default","max_age":31536000,"endpoints":[{"url":"' . $config['report_to_uri'] . '"}],"include_subdomains":true}'
+            );
             if ($config['NEL']) {
-                $this->owner->getResponse()->addHeader('NEL',
-                    '{"report_to":"default","max_age":31536000,"include_subdomains":true}');
+                $this->owner->getResponse()->addHeader(
+                    'NEL',
+                    '{"report_to":"default","max_age":31536000,"include_subdomains":true}'
+                );
             }
         }
     }

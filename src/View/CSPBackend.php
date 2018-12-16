@@ -20,7 +20,7 @@ class CSPBackend extends Requirements_Backend
      * @param $identifier
      * @param $options
      */
-    public function insertJSTags($js, $identifier, $options)
+    public function insertJSTags($js, $identifier = null, $options = [])
     {
         $options = array_merge(['type' => 'application/javascript'], $options);
         $scriptTag = HTML::createTag(

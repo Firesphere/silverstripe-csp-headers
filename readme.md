@@ -59,7 +59,7 @@ Firesphere\CSPHeaders\View\CSPBackend:
         - 'www.youtube-nocookie.com'
     style:
       domains:
-        - 'self'
+        - 'mycssdomain.example.com'
       allow_inline: true
     script:
       domains:
@@ -71,7 +71,7 @@ Firesphere\CSPHeaders\View\CSPBackend:
         - 'fonts.gstatic.com'
     form:
       domains:
-        - 'self'
+        - 'myotherform.domain.com'
 ---
 Only:
   environment: dev
@@ -96,12 +96,16 @@ Configure the allowed domains. If domains change, they need to be added programm
 Enabling inline scripts can be done by using the `CSPRequirements` instead of the normal `Requirements`. It will give a new method to add inline javascripts via `CSPRequirements::insertJSTags($js, $identifier, $options);`
 The javascript _**must not**_ contain the `<script>` tags!
 
-## wizzard
+## wizard
 
 It's useful to only use the wizard in dev mode, to discover the URI's and sha's you need to add.
 This prevents needless reports and helps you set up the wizard.
 
 You do need to set your own wizard_uri though, otherwise the system will encounter a failure.
+
+## forms
+
+If you want to submit forms to a different domain, you can add the allowed domains under the forms section
 
 # Actual license
 
