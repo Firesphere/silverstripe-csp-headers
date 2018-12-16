@@ -151,7 +151,7 @@ class ControllerCSPExtension extends Extension
         }
 
         if ($config['report_uri'] === $config['report_only_uri']) {
-            throw new InvalidValueException('Report or ReportOnly URI can not be empty');
+            throw new InvalidValueException('Report or ReportOnly URI can not be empty or equal');
         }
 
         if ($config['style']['allow_inline'] === true) {
