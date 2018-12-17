@@ -25,6 +25,7 @@ After:
   - '#CSPHeaders'
 ---
 Firesphere\CSPHeaders\View\CSPBackend:
+  legacy_headers: false
   report_to:
     report_to_uri: 'https://myreporturi.report-uri.com/a/d/g'
     report: true
@@ -83,6 +84,10 @@ Firesphere\CSPHeaders\View\CSPBackend:
 
 ```
 
+## legacy_headers
+
+Setting the legacy headers flag to true, will add the IE legacy headers like `X-XSS-PROTECTION`. Default value is false
+
 ## report_to
 
 When you enable the Reporting API you will receive deprecation, intervention and crash reports from the browser. To enable this you need to set a HTTP response header with the following name and value.
@@ -106,6 +111,11 @@ You do need to set your own wizard_uri though, otherwise the system will encount
 ## forms
 
 If you want to submit forms to a different domain, you can add the allowed domains under the forms section
+
+# .htaccess
+
+Any header set in the `.htaccess`, Apache `site.conf` or `nginx.conf` files will override the headers
+set by this module.
 
 # Actual license
 

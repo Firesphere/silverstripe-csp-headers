@@ -2,6 +2,7 @@
 Name: CSPHeaders
 ---
 Firesphere\CSPHeaders\View\CSPBackend:
+  legacy_headers: false
   report_to:
     report_to_uri: ''
     report: false

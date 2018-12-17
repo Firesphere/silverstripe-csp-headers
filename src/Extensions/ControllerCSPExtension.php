@@ -89,7 +89,7 @@ class ControllerCSPExtension extends Extension
             $this->setConfigPolicies($policy);
             $this->setReportPolicy();
 
-            $headers = $policy->getHeaders(true);
+            $headers = $policy->getHeaders(CSPBackend::config()->get('legacy_headers'));
             foreach ($headers as $header) {
                 $this->owner->getResponse()->addHeader($header['name'], $header['value']);
             }
@@ -117,13 +117,11 @@ class ControllerCSPExtension extends Extension
     {
         $policy = Injector::inst()->get(ContentSecurityPolicyHeaderBuilder::class);
         foreach ($this->allowedDirectivesMap as $key => $directive) {
+            // Always allow self and the local domain
             $policy->addSourceExpression($directive, 'self');
+            $policy->addSourceExpression($directive, Director::absoluteBaseURL());
         }
 
-        $policy->addSourceExpression(
-            ContentSecurityPolicyHeaderBuilder::DIRECTIVE_DEFAULT_SRC,
-            Director::absoluteBaseURL()
-        );
         $policy->addSourceExpression(ContentSecurityPolicyHeaderBuilder::DIRECTIVE_BASE_URI, 'self');
         $policy->addSourceExpression(
             ContentSecurityPolicyHeaderBuilder::DIRECTIVE_BASE_URI,
