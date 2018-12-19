@@ -194,12 +194,25 @@ class ControllerCSPExtension extends Extension
         if ($config['report']) {
             $this->owner->getResponse()->addHeader(
                 'Report-To',
-                '{"group":"default","max_age":31536000,"endpoints":[{"url":"' . $config['report_to_uri'] . '"}],"include_subdomains":true}'
+                json_encode([
+                    "group"     => "default",
+                    "max_age"   => 31536000,
+                    "endpoints" => [
+                        [
+                            "url" => $config['report_to_uri']
+                        ],
+                        "include_subdomains" => true
+                    ]
+                ])
             );
             if ($config['NEL']) {
                 $this->owner->getResponse()->addHeader(
                     'NEL',
-                    '{"report_to":"default","max_age":31536000,"include_subdomains":true}'
+                    json_encode([
+                        "report_to"          => "default",
+                        "max_age"            => 31536000,
+                        "include_subdomains" => true
+                    ])
                 );
             }
         }
