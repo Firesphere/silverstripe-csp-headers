@@ -17,10 +17,7 @@ class CSPRequirements extends Requirements implements Flushable
     public static function backend()
     {
         if (!self::$backend) {
-            self::$backend = parent::backend();
-            if (!self::$backend) {
-                self::$backend = CSPBackend::create();
-            }
+            self::$backend = CSPBackend::create();
         }
 
         return self::$backend;

@@ -1,3 +1,6 @@
 PageController:
   extensions:
     - Firesphere\CSPHeaders\Extensions\ControllerCSPExtension
+SilverStripe\SiteConfig\SiteConfig:
+  extensions:
+    - Firesphere\CSPHeaders\Extensions\SiteConfigExtension

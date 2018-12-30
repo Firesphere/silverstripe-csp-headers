@@ -3,6 +3,7 @@
 
 namespace Firesphere\CSPHeaders\Extensions;
 
+use Firesphere\CSPHeaders\Models\CSPDomain;
 use Firesphere\CSPHeaders\View\CSPBackend;
 use Phpcsp\Security\ContentSecurityPolicyHeaderBuilder;
 use Phpcsp\Security\InvalidValueException;
@@ -11,6 +12,7 @@ use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Extension;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\SiteConfig\SiteConfig;
 
 /**
  * Class \Firesphere\CSPHeaders\Extensions\ControllerCSPExtension
@@ -87,6 +89,7 @@ class ControllerCSPExtension extends Extension
         if (Director::isLive() || $this->checkCookie($this->owner->getRequest())) {
             $policy = $this->setDefaultPolicies();
             $this->setConfigPolicies($policy);
+            $this->setSiteConfigPolicies($policy);
             $this->setReportPolicy();
 
             $headers = $policy->getHeaders(CSPBackend::config()->get('legacy_headers'));
@@ -99,6 +102,7 @@ class ControllerCSPExtension extends Extension
     /**
      * @param HTTPRequest $request
      * @return bool
+     * default-src 'self' http://192.168.33.5/ piwik.casa-laguna.net; font-src 'self' http://192.168.33.5/ netdna.bootstrapcdn.com fonts.gstatic.com; form-action 'self' http://192.168.33.5/; frame-src 'self' http://192.168.33.5/ *.vimeocdn.com player.vimeo.com www.youtube.com www.youtube-nocookie.com; img-src 'self' http://192.168.33.5/ secure.gravatar.com a.slack-edge.com avatars.slack-edge.com emoji.slack-edge.com *.imgur.com imgur.com *.wp.com piwik.casa-laguna.net data: i.ytimg.com packagist.org www.silverstripe.org www.silverstripe.com; media-src 'self' http://192.168.33.5/ *.vimeocdn.com player.vimeo.com www.youtube.com www.youtube-nocookie.com; script-src 'self' http://192.168.33.5/ code.jquery.com piwik.casa-laguna.net 'sha256-eMFqux9gzJQ++3HtmRPlbbsshtbkqI6ieVhYTWbaV1k='; style-src 'self' http://192.168.33.5/ 'unsafe-inline'; base-uri 'self' http://192.168.33.5/ https:; reflected-xss block; report-uri https://casalaguna.report-uri.com/r/d/csp/wizard;
      */
     protected function checkCookie($request)
     {
@@ -185,6 +189,22 @@ class ControllerCSPExtension extends Extension
                 ContentSecurityPolicyHeaderBuilder::HASH_SHA_256,
                 hash(ContentSecurityPolicyHeaderBuilder::HASH_SHA_256, $js, true)
             );
+        }
+    }
+
+    /**
+     * Add SiteConfig set domain policies
+     *
+     * @param ContentSecurityPolicyHeaderBuilder $policy
+     */
+    protected function setSiteConfigPolicies($policy)
+    {
+        /** @var DataList|CSPDomain[] $domains */
+        $domains = SiteConfig::current_site_config()->CSPDomains();
+        $map = $this->allowedDirectivesMap;
+
+        foreach ($domains as $domain) {
+            $policy->addSourceExpression($map[$domain->Source], $domain->Domain);
         }
     }
 
