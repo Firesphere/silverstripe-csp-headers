@@ -12,7 +12,7 @@ class CSPRequirements extends Requirements implements Flushable
 
 
     /**
-     * @return Requirements_Backend|CSPBackend
+     * @return CSPBackend
      */
     public static function backend()
     {

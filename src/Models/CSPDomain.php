@@ -68,7 +68,7 @@ class CSPDomain extends DataObject implements PermissionProvider
 
     public function canEdit($member = null)
     {
-        $canEdit = parent::canEdit($member, $context);
+        $canEdit = parent::canEdit($member);
 
         if ($canEdit) {
             return Permission::check('EDIT_CSPDomain', $member);
@@ -79,7 +79,7 @@ class CSPDomain extends DataObject implements PermissionProvider
 
     public function canView($member = null)
     {
-        $canView = parent::canView($member, $context);
+        $canView = parent::canView($member);
 
         if ($canView) {
             return Permission::check('VIEW_CSPDomain', $member);
@@ -90,7 +90,7 @@ class CSPDomain extends DataObject implements PermissionProvider
 
     public function canDelete($member = null)
     {
-        $canDelete = parent::canDelete($member, $context);
+        $canDelete = parent::canDelete($member);
 
         if ($canDelete) {
             return Permission::check('DELETE_CSPDOMAIN', $member);
