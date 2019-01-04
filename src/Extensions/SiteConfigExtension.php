@@ -4,11 +4,9 @@ namespace Firesphere\CSPHeaders\Extensions;
 
 use Firesphere\CSPHeaders\Models\CSPDomain;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\ORM\DataExtension;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig_RecordEditor;
-use SilverStripe\Forms\GridField\GridFieldExportButton;
-use SilverStripe\Forms\GridField\GridFieldAddNewButton;
+use SilverStripe\ORM\DataExtension;
 
 /**
  * Class \Firesphere\CSPHeaders\Extensions\SiteConfigExtension

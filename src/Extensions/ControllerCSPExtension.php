@@ -12,6 +12,7 @@ use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Extension;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\ORM\DataList;
 use SilverStripe\SiteConfig\SiteConfig;
 
 /**
@@ -102,7 +103,6 @@ class ControllerCSPExtension extends Extension
     /**
      * @param HTTPRequest $request
      * @return bool
-     * default-src 'self' http://192.168.33.5/ piwik.casa-laguna.net; font-src 'self' http://192.168.33.5/ netdna.bootstrapcdn.com fonts.gstatic.com; form-action 'self' http://192.168.33.5/; frame-src 'self' http://192.168.33.5/ *.vimeocdn.com player.vimeo.com www.youtube.com www.youtube-nocookie.com; img-src 'self' http://192.168.33.5/ secure.gravatar.com a.slack-edge.com avatars.slack-edge.com emoji.slack-edge.com *.imgur.com imgur.com *.wp.com piwik.casa-laguna.net data: i.ytimg.com packagist.org www.silverstripe.org www.silverstripe.com; media-src 'self' http://192.168.33.5/ *.vimeocdn.com player.vimeo.com www.youtube.com www.youtube-nocookie.com; script-src 'self' http://192.168.33.5/ code.jquery.com piwik.casa-laguna.net 'sha256-eMFqux9gzJQ++3HtmRPlbbsshtbkqI6ieVhYTWbaV1k='; style-src 'self' http://192.168.33.5/ 'unsafe-inline'; base-uri 'self' http://192.168.33.5/ https:; reflected-xss block; report-uri https://casalaguna.report-uri.com/r/d/csp/wizard;
      */
     protected function checkCookie($request)
     {
@@ -196,6 +196,7 @@ class ControllerCSPExtension extends Extension
      * Add SiteConfig set domain policies
      *
      * @param ContentSecurityPolicyHeaderBuilder $policy
+     * @throws \Phpcsp\Security\InvalidDirectiveException
      */
     protected function setSiteConfigPolicies($policy)
     {
@@ -215,13 +216,13 @@ class ControllerCSPExtension extends Extension
             $this->owner->getResponse()->addHeader(
                 'Report-To',
                 json_encode([
-                    "group"     => "default",
-                    "max_age"   => 31536000,
-                    "endpoints" => [
+                    'group'     => 'default',
+                    'max_age'   => 31536000,
+                    'endpoints' => [
                         [
-                            "url" => $config['report_to_uri']
+                            'url' => $config['report_to_uri']
                         ],
-                        "include_subdomains" => true
+                        'include_subdomains' => true
                     ]
                 ])
             );
@@ -229,9 +230,9 @@ class ControllerCSPExtension extends Extension
                 $this->owner->getResponse()->addHeader(
                     'NEL',
                     json_encode([
-                        "report_to"          => "default",
-                        "max_age"            => 31536000,
-                        "include_subdomains" => true
+                        'report_to'          => 'default',
+                        'max_age'            => 31536000,
+                        'include_subdomains' => true
                     ])
                 );
             }

@@ -4,12 +4,20 @@ namespace Firesphere\CSPHeaders\View;
 
 use SilverStripe\Core\Flushable;
 use SilverStripe\View\Requirements;
-use SilverStripe\View\Requirements_Backend;
 
 class CSPRequirements extends Requirements implements Flushable
 {
     private static $backend;
 
+    /**
+     * @param string $js
+     * @param null|string $identifier
+     * @param array $options
+     */
+    public static function insertJSTags($js, $identifier = null, $options = [])
+    {
+        static::backend()->insertJSTags($js, $identifier, $options);
+    }
 
     /**
      * @return CSPBackend
@@ -21,16 +29,6 @@ class CSPRequirements extends Requirements implements Flushable
         }
 
         return self::$backend;
-    }
-
-    /**
-     * @param string $js
-     * @param null|string $identifier
-     * @param array $options
-     */
-    public static function insertJSTags($js, $identifier = null, $options = [])
-    {
-        static::backend()->insertJSTags($js, $identifier, $options);
     }
 
     /**
