@@ -4,9 +4,13 @@ namespace Firesphere\CSPHeaders\View;
 
 use SilverStripe\Core\Flushable;
 use SilverStripe\View\Requirements;
+use SilverStripe\View\Requirements_Backend;
 
 class CSPRequirements extends Requirements implements Flushable
 {
+    /**
+     * @var CSPBackend|Requirements_Backend
+     */
     private static $backend;
 
     /**

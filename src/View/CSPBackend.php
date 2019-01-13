@@ -10,10 +10,10 @@ use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Manifest\ModuleResourceLoader;
-use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\Deprecation;
 use SilverStripe\Security\Security;
 use SilverStripe\View\HTML;
+use SilverStripe\View\Requirements;
 use SilverStripe\View\Requirements_Backend;
 
 class CSPBackend extends Requirements_Backend
@@ -40,7 +40,7 @@ class CSPBackend extends Requirements_Backend
 
         ControllerCSPExtension::addJS($js);
 
-        parent::insertHeadTags($scriptTag, $identifier);
+        Requirements::insertHeadTags($scriptTag, $identifier);
     }
 
     public function insertCSSTags($css, $identifier, $options)
@@ -54,7 +54,7 @@ class CSPBackend extends Requirements_Backend
 
         ControllerCSPExtension::addCSS($css);
 
-        parent::insertHeadTags($scriptTag, $identifier);
+        Requirements::insertHeadTags($scriptTag, $identifier);
     }
 
 
