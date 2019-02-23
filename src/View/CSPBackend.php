@@ -170,7 +170,6 @@ class CSPBackend extends Requirements_Backend
                 $htmlAttributes['media'] = $params['media'];
             }
 
-            $htmlAttributes = $this->setupSRI($file, $htmlAttributes, $params);
             $requirements .= HTML::createTag('link', $htmlAttributes);
             $requirements .= "\n";
         }

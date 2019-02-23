@@ -16,6 +16,9 @@ class SRI extends DataObject implements PermissionProvider
 {
     private static $table_name = 'SRI';
 
+    private static $singular_name = 'Subresource Integrity';
+    private static $plural_name = 'Subresource Integrities';
+
     private static $db = [
         'File' => 'Varchar(255)',
         'SRI'  => 'Varchar(255)'

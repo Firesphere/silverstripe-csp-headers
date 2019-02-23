@@ -5,6 +5,7 @@ namespace Firesphere\CSPHeaders\Extensions;
 
 use Firesphere\CSPHeaders\Models\CSPDomain;
 use Firesphere\CSPHeaders\View\CSPBackend;
+use PageController;
 use Phpcsp\Security\ContentSecurityPolicyHeaderBuilder;
 use Phpcsp\Security\InvalidValueException;
 use SilverStripe\Control\Cookie;
@@ -21,7 +22,7 @@ use SilverStripe\SiteConfig\SiteConfig;
  * This extension is applied to the PageController, to avoid duplicates.
  * Any duplicates may be caused by extended classes. It should however, not affect the outcome
  *
- * @property ControllerCSPExtension $owner
+ * @property PageController|ControllerCSPExtension $owner
  */
 class ControllerCSPExtension extends Extension
 {
@@ -201,11 +202,11 @@ class ControllerCSPExtension extends Extension
     protected function setSiteConfigPolicies($policy)
     {
         /** @var DataList|CSPDomain[] $domains */
-        $domains = SiteConfig::current_site_config()->CSPDomains();
+        $domains = CSPDomain::get()->map('Source', 'Domain')->toArray();
         $map = $this->allowedDirectivesMap;
 
         foreach ($domains as $domain) {
-            $policy->addSourceExpression($map[$domain->Source], $domain->Domain);
+            $policy->addSourceExpression($map[$domain['Source']], $domain['Domain']);
         }
     }
 
