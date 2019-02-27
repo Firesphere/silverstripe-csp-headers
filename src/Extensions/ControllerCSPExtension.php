@@ -13,6 +13,7 @@ use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Extension;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Dev\Debug;
 use SilverStripe\ORM\DataList;
 use SilverStripe\SiteConfig\SiteConfig;
 
@@ -205,8 +206,8 @@ class ControllerCSPExtension extends Extension
         $domains = CSPDomain::get()->map('Source', 'Domain')->toArray();
         $map = $this->allowedDirectivesMap;
 
-        foreach ($domains as $domain) {
-            $policy->addSourceExpression($map[$domain['Source']], $domain['Domain']);
+        foreach ($domains as $type => $domain) {
+            $policy->addSourceExpression($map[$type], $domain);
         }
     }
 

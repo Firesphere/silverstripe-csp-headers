@@ -221,7 +221,7 @@ class CSPBackend extends Requirements_Backend
             $htmlAttributes['defer'] = 'defer';
         }
 
-        $htmlAttributes = $this->setupSRI($file, $htmlAttributes, $attributes);
+        $htmlAttributes = $this->buildSRI($file, $htmlAttributes, $attributes);
 
         $jsRequirements .= HTML::createTag('script', $htmlAttributes);
         $jsRequirements .= "\n";
@@ -238,7 +238,7 @@ class CSPBackend extends Requirements_Backend
      * @throws \SilverStripe\ORM\ValidationException
      * @throws \Exception
      */
-    protected function setupSRI($file, array $htmlAttributes, $attributes)
+    protected function buildSRI($file, array $htmlAttributes, $attributes)
     {
         // Since this is the CSP Backend, an SRI for external files is automatically created
         /** @var Client $client */
@@ -279,13 +279,16 @@ class CSPBackend extends Requirements_Backend
             $sri->write();
         }
 
-        $htmlAttributes['integrity'] = ContentSecurityPolicyHeaderBuilder::HASH_SHA_256 . '-' . $sri->SRI;
-        if (!Director::is_site_url($file)) {
-            $htmlAttributes['crossorigin'] = 'anonymous';
-        }
+        // Don't write integrity in dev, it's breaking build scripts
+        if (Director::isLive()) {
+            $htmlAttributes['integrity'] = ContentSecurityPolicyHeaderBuilder::HASH_SHA_256 . '-' . $sri->SRI;
+            if (!Director::is_site_url($file)) {
+                $htmlAttributes['crossorigin'] = 'anonymous';
+            }
 
-        if (isset($attributes['fallback']) && $attributes['fallback'] !== false) {
-            $htmlAttributes['data-sri-fallback'] = $attributes['fallback'];
+            if (isset($attributes['fallback']) && $attributes['fallback'] !== false) {
+                $htmlAttributes['data-sri-fallback'] = $attributes['fallback'];
+            }
         }
 
         return $htmlAttributes;
