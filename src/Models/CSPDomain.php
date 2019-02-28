@@ -27,10 +27,6 @@ class CSPDomain extends DataObject implements PermissionProvider
         'Source' => 'Enum("default,script,style,img,media,font,form,Frame")'
     ];
 
-    private static $has_one = [
-        'SiteConfig' => SiteConfig::class
-    ];
-
     private static $summary_fields = [
         'Domain',
         'Source'

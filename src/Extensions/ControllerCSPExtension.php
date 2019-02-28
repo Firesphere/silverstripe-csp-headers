@@ -92,7 +92,7 @@ class ControllerCSPExtension extends Extension
         if (Director::isLive() || $this->checkCookie($this->owner->getRequest())) {
             $policy = $this->setDefaultPolicies();
             $this->setConfigPolicies($policy);
-            $this->setSiteConfigPolicies($policy);
+            $this->setCSPDomainPolicies($policy);
             $this->setReportPolicy();
 
             $headers = $policy->getHeaders(CSPBackend::config()->get('legacy_headers'));
@@ -200,15 +200,15 @@ class ControllerCSPExtension extends Extension
      * @param ContentSecurityPolicyHeaderBuilder $policy
      * @throws \Phpcsp\Security\InvalidDirectiveException
      */
-    protected function setSiteConfigPolicies($policy)
+    protected function setCSPDomainPolicies($policy)
     {
         /** @var DataList|CSPDomain[] $domains */
-        $domains = CSPDomain::get()->map('Source', 'Domain')->toArray();
+        $domains = CSPDomain::get()->map('Source', 'Domain');
         $map = $this->allowedDirectivesMap;
-
         foreach ($domains as $type => $domain) {
             $policy->addSourceExpression($map[$type], $domain);
         }
+        exit;
     }
 
     protected function setReportPolicy()
