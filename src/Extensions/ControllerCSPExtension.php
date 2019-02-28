@@ -208,7 +208,6 @@ class ControllerCSPExtension extends Extension
         foreach ($domains as $type => $domain) {
             $policy->addSourceExpression($map[$type], $domain);
         }
-        exit;
     }
 
     protected function setReportPolicy()
