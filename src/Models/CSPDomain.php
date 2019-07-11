@@ -5,15 +5,12 @@ namespace Firesphere\CSPHeaders\Models;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Permission;
 use SilverStripe\Security\PermissionProvider;
-use SilverStripe\SiteConfig\SiteConfig;
 
 /**
  * Class \Firesphere\CSPHeaders\Models\CSPDomain
  *
  * @property string $Domain
  * @property string $Source
- * @property int $SiteConfigID
- * @method SiteConfig SiteConfig()
  */
 class CSPDomain extends DataObject implements PermissionProvider
 {
@@ -24,7 +21,7 @@ class CSPDomain extends DataObject implements PermissionProvider
 
     private static $db = [
         'Domain' => 'Varchar(255)',
-        'Source' => 'Enum("default,script,style,img,media,font,form,Frame")'
+        'Source' => 'Enum("default,script,style,img,media,font,form,frame")'
     ];
 
     private static $summary_fields = [
@@ -43,12 +40,6 @@ class CSPDomain extends DataObject implements PermissionProvider
         $fields->removeByName(['SiteConfigID']);
 
         return $fields;
-    }
-
-    public function onBeforeWrite()
-    {
-        $this->SiteConfigID = SiteConfig::current_site_config()->ID;
-        parent::onBeforeWrite();
     }
 
     public function canCreate($member = null, $context = array())

@@ -2,15 +2,17 @@
 
 namespace Firesphere\CSPHeaders\View;
 
+use Exception;
 use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
 use Firesphere\CSPHeaders\Models\SRI;
 use GuzzleHttp\Client;
-use Phpcsp\Security\ContentSecurityPolicyHeaderBuilder;
+use GuzzleHttp\Exception\GuzzleException;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Manifest\ModuleResourceLoader;
 use SilverStripe\Dev\Deprecation;
+use SilverStripe\ORM\ValidationException;
 use SilverStripe\Security\Security;
 use SilverStripe\View\HTML;
 use SilverStripe\View\Requirements;
@@ -73,13 +75,7 @@ class CSPBackend extends Requirements_Backend
         $file = ModuleResourceLoader::singleton()->resolvePath($file);
 
         // Get type
-        $type = null;
-        if (isset($this->javascript[$file]['type'])) {
-            $type = $this->javascript[$file]['type'];
-        }
-        if (isset($options['type'])) {
-            $type = $options['type'];
-        }
+        $type = $options['type'] ?? $this->javascript[$file]['type'] ?? null;
 
         // make sure that async/defer is set if it is set once even if file is included multiple times
         $async = (
@@ -91,7 +87,7 @@ class CSPBackend extends Requirements_Backend
             || (isset($this->javascript[$file]['defer']) && $this->javascript[$file]['defer'] === true)
         );
 
-        $fallback = isset($options['fallback']) ? $options['fallback'] : false;
+        $fallback = $options['fallback'] ?? false;
 
 
         $this->javascript[$file] = array(
@@ -119,8 +115,8 @@ class CSPBackend extends Requirements_Backend
      * @param string $content HTML content that has already been parsed from the $templateFile
      *                             through {@link SSViewer}
      * @return string HTML content augmented with the requirements tags
-     * @throws \SilverStripe\ORM\ValidationException
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws ValidationException
+     * @throws GuzzleException
      */
     public function includeInHTML($content)
     {
@@ -204,14 +200,14 @@ class CSPBackend extends Requirements_Backend
      * @param $file
      * @param $jsRequirements
      * @return string
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \SilverStripe\ORM\ValidationException
+     * @throws GuzzleException
+     * @throws ValidationException
      */
     protected function buildAttributes($attributes, $file, $jsRequirements)
     {
         // Build html attributes
         $htmlAttributes = [
-            'type' => isset($attributes['type']) ? $attributes['type'] : 'application/javascript',
+            'type' => $attributes['type'] ?? 'application/javascript',
             'src'  => $this->pathForFile($file),
         ];
         if (!empty($attributes['async'])) {
@@ -234,45 +230,43 @@ class CSPBackend extends Requirements_Backend
      * @param array $htmlAttributes
      * @param $attributes
      * @return array
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \SilverStripe\ORM\ValidationException
-     * @throws \Exception
+     * @throws GuzzleException
+     * @throws ValidationException
+     * @throws Exception
      */
     protected function buildSRI($file, array $htmlAttributes, $attributes)
     {
-        // Since this is the CSP Backend, an SRI for external files is automatically created
-        /** @var Client $client */
-        $client = new Client();
-        $location = $file;
-        $body = '';
-        if (Director::is_site_url($file)) {
-            $body = file_get_contents(Director::baseFolder() . '/' . $file);
-        }
         $sri = SRI::get()->filter(['File' => $file])->first();
         // Create on first time it's run, or if it's been deleted because the file has changed, known to the admin
         if (
             !$sri ||
             (
+                Controller::curr()->getRequest()->getVar('updatesri') &&
                 Security::getCurrentUser() &&
-                Security::getCurrentUser()->inGroup('administrators') &&
-                Controller::curr()->getRequest()->getVar('updatesri')
+                Security::getCurrentUser()->inGroup('administrators')
             )
         ) {
-            if ($sri) {
-                // Delete existing SRI, only option to get here is if the user is admin and an update is requested
-                $sri->delete();
-            }
+            // Since this is the CSP Backend, an SRI for external files is automatically created
+            /** @var Client $client */
+            $client = new Client();
+            $location = $file;
+
             if (!Director::is_site_url($file)) {
                 $result = $client->request('GET', $location);
                 $body = $result->getBody()->getContents();
+            } else {
+                $body = file_get_contents(Director::baseFolder() . '/' . $location);
             }
 
             if ($body === '') {
                 throw new \RuntimeException('ERROR no file contents given');
             }
-            $sri = SRI::create([
+            if (!$sri) {
+                $sri = SRI::create();
+            }
+            $sri->update([
                 'File' => $file,
-                'SRI'  => base64_encode(hash(ContentSecurityPolicyHeaderBuilder::HASH_SHA_256, $body, true))
+                'SRI'  => base64_encode(hash('sha384', $body, true))
 
             ]);
 
@@ -280,8 +274,8 @@ class CSPBackend extends Requirements_Backend
         }
 
         // Don't write integrity in dev, it's breaking build scripts
-        if (Director::isLive()) {
-            $htmlAttributes['integrity'] = ContentSecurityPolicyHeaderBuilder::HASH_SHA_256 . '-' . $sri->SRI;
+        if (($sri && Director::isLive()) || ControllerCSPExtension::checkCookie(Controller::curr()->getRequest())) {
+            $htmlAttributes['integrity'] = 'sha384-' . $sri->SRI;
             if (!Director::is_site_url($file)) {
                 $htmlAttributes['crossorigin'] = 'anonymous';
             }

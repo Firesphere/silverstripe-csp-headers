@@ -5,17 +5,14 @@ namespace Firesphere\CSPHeaders\Extensions;
 
 use Firesphere\CSPHeaders\Models\CSPDomain;
 use Firesphere\CSPHeaders\View\CSPBackend;
+use LeKoala\DebugBar\DebugBar;
 use PageController;
-use Phpcsp\Security\ContentSecurityPolicyHeaderBuilder;
-use Phpcsp\Security\InvalidValueException;
+use ParagonIE\CSPBuilder\CSPBuilder;
 use SilverStripe\Control\Cookie;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Extension;
-use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Dev\Debug;
 use SilverStripe\ORM\DataList;
-use SilverStripe\SiteConfig\SiteConfig;
 
 /**
  * Class \Firesphere\CSPHeaders\Extensions\ControllerCSPExtension
@@ -36,20 +33,6 @@ class ControllerCSPExtension extends Extension
      * @var array
      */
     protected static $inlineCSS = [];
-
-    /**
-     * @var array
-     */
-    protected $allowedDirectivesMap = [
-        'default' => ContentSecurityPolicyHeaderBuilder::DIRECTIVE_DEFAULT_SRC,
-        'font'    => ContentSecurityPolicyHeaderBuilder::DIRECTIVE_FONT_SRC,
-        'form'    => ContentSecurityPolicyHeaderBuilder::DIRECTIVE_FORM_ACTION,
-        'frame'   => ContentSecurityPolicyHeaderBuilder::DIRECTIVE_FRAME_SRC,
-        'img'     => ContentSecurityPolicyHeaderBuilder::DIRECTIVE_IMG_SRC,
-        'media'   => ContentSecurityPolicyHeaderBuilder::DIRECTIVE_MEDIA_SRC,
-        'script'  => ContentSecurityPolicyHeaderBuilder::DIRECTIVE_SCRIPT_SRC,
-        'style'   => ContentSecurityPolicyHeaderBuilder::DIRECTIVE_STYLE_SRC,
-    ];
 
     /**
      * @param string $js
@@ -84,20 +67,29 @@ class ControllerCSPExtension extends Extension
     }
 
     /**
-     * @throws \Phpcsp\Security\InvalidDirectiveException
-     * @throws \Phpcsp\Security\InvalidValueException
+     * Add the needed headers from the database and config
+     * @throws \Exception
      */
     public function onAfterInit()
     {
-        if (Director::isLive() || $this->checkCookie($this->owner->getRequest())) {
-            $policy = $this->setDefaultPolicies();
-            $this->setConfigPolicies($policy);
-            $this->setCSPDomainPolicies($policy);
-            $this->setReportPolicy();
+        if (Director::isLive() || static::checkCookie($this->owner->getRequest())) {
+            $config = CSPBackend::config()->get('csp_config');
+            $legacy = $config['legacy'] ?? true;
+            /** @var CSPBuilder $policy */
+            $policy = CSPBuilder::fromArray($config);
 
-            $headers = $policy->getHeaders(CSPBackend::config()->get('legacy_headers'));
-            foreach ($headers as $header) {
-                $this->owner->getResponse()->addHeader($header['name'], $header['value']);
+            $this->addCSP($policy);
+            $this->addInline($policy);
+            $policy->setReportUri($config['report-uri']);
+            if (class_exists(DebugBar::class)) {
+                $policy->nonce('script-src', 'phpdebugbar');
+            }
+
+            $policy->saveSnippet('tmp.conf', CSPBuilder::FORMAT_APACHE);
+
+            $headers = $policy->getHeaderArray($legacy);
+            foreach ($headers as $name => $header) {
+                $this->owner->getResponse()->addHeader($name, $header);
             }
         }
     }
@@ -106,7 +98,7 @@ class ControllerCSPExtension extends Extension
      * @param HTTPRequest $request
      * @return bool
      */
-    protected function checkCookie($request)
+    public static function checkCookie($request)
     {
         if ($request->getVar('build-headers')) {
             Cookie::set('buildHeaders', $request->getVar('build-headers'));
@@ -116,127 +108,27 @@ class ControllerCSPExtension extends Extension
     }
 
     /**
-     * Setup the default allowed URI's
-     * @return ContentSecurityPolicyHeaderBuilder
+     * @param CSPBuilder $policy
      */
-    protected function setDefaultPolicies()
+    public function addCSP($policy)
     {
-        $policy = Injector::inst()->get(ContentSecurityPolicyHeaderBuilder::class);
-        foreach ($this->allowedDirectivesMap as $key => $directive) {
-            // Always allow self and the local domain
-            $policy->addSourceExpression($directive, 'self');
-            $policy->addSourceExpression($directive, Director::absoluteBaseURL());
-        }
+        /** @var DataList|CSPDomain[] $cspDomains */
+        $cspDomains = CSPDomain::get();
 
-        $policy->addSourceExpression(ContentSecurityPolicyHeaderBuilder::DIRECTIVE_BASE_URI, 'self');
-        $policy->addSourceExpression(
-            ContentSecurityPolicyHeaderBuilder::DIRECTIVE_BASE_URI,
-            Director::absoluteBaseURL()
-        );
-
-        return $policy;
-    }
-
-    /**
-     * Any setting that is not set, this will be assumed as true, except for the reporting-only mode
-     *
-     *
-     * @param ContentSecurityPolicyHeaderBuilder $policy
-     * @throws \Phpcsp\Security\InvalidDirectiveException
-     * @throws \Phpcsp\Security\InvalidValueException
-     */
-    protected function setConfigPolicies($policy)
-    {
-        $config = CSPBackend::config()->get('csp_config');
-
-        if ($config['https'] === true) {
-            $policy->addSourceExpression(ContentSecurityPolicyHeaderBuilder::DIRECTIVE_BASE_URI, 'https:');
-        }
-
-        if ($config['block_xss'] === true) {
-            $policy->setReflectedXssPolicy(ContentSecurityPolicyHeaderBuilder::REFLECTED_XSS_BLOCK);
-        }
-
-        if ($config['upgrade_insecure_requests'] === true) {
-            $policy->setUpgradeInsecureRequests(true);
-        }
-
-        foreach ($this->allowedDirectivesMap as $key => $directive) {
-            foreach ($config[$key]['domains'] as $domain) {
-                $policy->addSourceExpression($directive, $domain);
-            }
-        }
-        if ($config['report_uri'] !== '') {
-            $policy->setReportUri($config['report_uri']);
-        }
-
-        if ($config['report_only'] === true) {
-            $policy->enforcePolicy(false);
-            if ($config['report_only_uri'] === '') {
-                throw new InvalidValueException('No report URI given for report-only directive', 1);
-            }
-            $policy->setReportUri($config['report_only_uri']);
-        }
-
-        if ($config['wizard']) {
-            $policy->setReportUri($config['wizard_uri']);
-        }
-
-        if ($config['style']['allow_inline'] === true) {
-            $policy->addSourceExpression(ContentSecurityPolicyHeaderBuilder::DIRECTIVE_STYLE_SRC, 'unsafe-inline');
-        }
-
-        foreach (static::$inlineJS as $js) {
-            $policy->addHash(
-                ContentSecurityPolicyHeaderBuilder::HASH_SHA_256,
-                hash(ContentSecurityPolicyHeaderBuilder::HASH_SHA_256, $js, true)
-            );
+        foreach ($cspDomains as $domain) {
+            $policy->addSource($domain->Source, $domain->Domain);
         }
     }
 
     /**
-     * Add SiteConfig set domain policies
-     *
-     * @param ContentSecurityPolicyHeaderBuilder $policy
-     * @throws \Phpcsp\Security\InvalidDirectiveException
+     * @param CSPBuilder $policy
      */
-    protected function setCSPDomainPolicies($policy)
+    public function addInline($policy)
     {
-        /** @var DataList|CSPDomain[] $domains */
-        $domains = CSPDomain::get()->map('Source', 'Domain');
-        $map = $this->allowedDirectivesMap;
-        foreach ($domains as $type => $domain) {
-            $policy->addSourceExpression($map[$type], $domain);
-        }
-    }
+        $inline = static::$inlineJS;
 
-    protected function setReportPolicy()
-    {
-        $config = CSPBackend::config()->get('report_to');
-        if ($config['report']) {
-            $this->owner->getResponse()->addHeader(
-                'Report-To',
-                json_encode([
-                    'group'     => 'default',
-                    'max_age'   => 31536000,
-                    'endpoints' => [
-                        [
-                            'url' => $config['report_to_uri']
-                        ],
-                        'include_subdomains' => true
-                    ]
-                ])
-            );
-            if ($config['NEL']) {
-                $this->owner->getResponse()->addHeader(
-                    'NEL',
-                    json_encode([
-                        'report_to'          => 'default',
-                        'max_age'            => 31536000,
-                        'include_subdomains' => true
-                    ])
-                );
-            }
+        foreach ($inline as $item) {
+            $policy->hash('script-src', $item);
         }
     }
 }
