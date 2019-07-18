@@ -10,6 +10,7 @@ use LeKoala\DebugBar\DebugBar;
 use PageController;
 use ParagonIE\ConstantTime\Base64;
 use ParagonIE\CSPBuilder\CSPBuilder;
+use SilverStripe\Control\Controller;
 use SilverStripe\Control\Cookie;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
@@ -106,8 +107,10 @@ class ControllerCSPExtension extends Extension
             $policy->setReportUri($config['report-uri']);
 
             $headers = $policy->getHeaderArray($legacy);
+            /** @var Controller $owner */
+            $owner = $this->owner;
             foreach ($headers as $name => $header) {
-                $this->owner->getResponse()->addHeader($name, $header);
+                $owner->getResponse()->addHeader($name, $header);
             }
         }
     }

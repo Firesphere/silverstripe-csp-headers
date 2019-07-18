@@ -356,10 +356,6 @@ class CSPBackend extends Requirements_Backend
             } else {
                 $body = file_get_contents(Director::baseFolder() . '/' . $location);
             }
-
-            if ($body === '') {
-                throw new RuntimeException('ERROR no file contents given');
-            }
             if (!$sri) {
                 $sri = SRI::create();
             }

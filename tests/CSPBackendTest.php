@@ -16,9 +16,9 @@ class CSPBackendTest extends SapphireTest
         /** @var CSPBackend $backend */
         $backend = Injector::inst()->get(CSPBackend::class);
 
-        $backend->insertJSTags($js);
+        $backend->customScript($js);
 
-        $tags = $backend->getCustomHeadTags();
+        $tags = $backend->getCustomScripts();
 
         $this->assertContains('<script type="application/javascript">alert("hello world");</script>', $tags[0]);
         $this->assertContains($js, ControllerCSPExtension::getInlineJS());
