@@ -1,4 +1,4 @@
-checks: 
+checks:
   php: true
 
 build:

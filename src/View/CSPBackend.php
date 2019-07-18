@@ -7,6 +7,7 @@ use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
 use Firesphere\CSPHeaders\Models\SRI;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use RuntimeException;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\Config\Configurable;
@@ -15,50 +16,146 @@ use SilverStripe\Dev\Deprecation;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\Security\Security;
 use SilverStripe\View\HTML;
-use SilverStripe\View\Requirements;
 use SilverStripe\View\Requirements_Backend;
 
 class CSPBackend extends Requirements_Backend
 {
     use Configurable;
 
-    protected static $csp_config;
+    public const SHA256 = 'sha256';
+    public const SHA384 = 'sha384';
+
+    /**
+     * @var bool
+     */
+    protected static $jsSRI;
+
+    /**
+     * CSS defaults to false.
+     * It's causing a lot of trouble with CDN's usually
+     * @var bool
+     */
+    protected static $cssSRI;
+    /**
+     * JS to be inserted in to the head
+     * @var array
+     */
+    protected static $headJS = [];
+    /**
+     * CSS to be inserted in to the head
+     * @var array
+     */
+    protected static $headCSS = [];
+    /**
+     * @var bool
+     */
+    protected static $useNonce = false;
+
+    /**
+     * @return bool
+     */
+    public static function isJsSRI(): bool
+    {
+        return self::$jsSRI;
+    }
+
+    /**
+     * @param bool $jsSRI
+     */
+    public static function setJsSRI(bool $jsSRI): void
+    {
+        self::$jsSRI = $jsSRI;
+    }
+
+    /**
+     * @return bool
+     */
+    public static function isCssSRI(): bool
+    {
+        return self::$cssSRI;
+    }
+
+    /**
+     * @param bool $cssSRI
+     */
+    public static function setCssSRI(bool $cssSRI): void
+    {
+        self::$cssSRI = $cssSRI;
+    }
+
+    /**
+     * @return bool
+     */
+    public static function isUseNonce(): bool
+    {
+        return static::config()->get('useNonce');;
+    }
+
+    /**
+     * @param bool static::isUseNonce()
+     */
+    public static function setUseNonce(bool $useNonce): void
+    {
+        self::$useNonce = $useNonce;
+    }
 
     /**
      * Specific method for JS insertion
      *
      * @param $js
-     * @param $identifier
-     * @param $options
+     * @param null $uniquenessID
      */
-    public function insertJSTags($js, $identifier = null, $options = [])
+    public function customScript($js, $uniquenessID = null)
     {
-        $options = array_merge(['type' => 'application/javascript'], $options);
-        $scriptTag = HTML::createTag(
-            'script',
-            $options,
-            $js
-        );
-
         ControllerCSPExtension::addJS($js);
 
-        Requirements::insertHeadTags($scriptTag, $identifier);
+        parent::customScript($js, $uniquenessID);
     }
 
-    public function insertCSSTags($css, $identifier, $options)
+    /**
+     * @param $css
+     * @param null $uniquenessID
+     */
+    public function customCSS($css, $uniquenessID = null)
     {
-        $options = array_merge(['type' => 'text/css'], $options);
-        $scriptTag = HTML::createTag(
-            'style',
-            $options,
-            $css
-        );
-
         ControllerCSPExtension::addCSS($css);
 
-        Requirements::insertHeadTags($scriptTag, $identifier);
+        parent::customCSS($css, $uniquenessID);
     }
 
+    public function getTagType($html)
+    {
+        $html = trim($html);
+        if (strpos($html, '<script') === 0) {
+            return 'javascript';
+        }
+        if (strpos($html, '<style') === 0) {
+            return 'css';
+        }
+
+        return null;
+    }
+
+    /**
+     * Add the following custom HTML code to the `<head>` section of the page
+     *
+     * @param string $html Custom HTML code
+     * @param string $uniquenessID A unique ID that ensures a piece of code is only added once
+     */
+    public function insertHeadTags($html, $uniquenessID = null)
+    {
+        $uniquenessID = $uniquenessID ?: uniqid('tag', false);
+        $type = $this->getTagType($html);
+        if ($type === 'javascript') {
+            static::$headJS[$uniquenessID] = strip_tags($html);
+            ControllerCSPExtension::addJS(strip_tags($html));
+        } elseif ($type === 'css') {
+            static::$headCSS[$uniquenessID] = strip_tags($html);
+            ControllerCSPExtension::addCSS(strip_tags($html));
+        } else {
+            $this->customHeadTags[$uniquenessID] = $html;
+        }
+    }
 
     /**
      * Register the given JavaScript file as required.
@@ -88,7 +185,6 @@ class CSPBackend extends Requirements_Backend
         );
 
         $fallback = $options['fallback'] ?? false;
-
 
         $this->javascript[$file] = array(
             'async'    => $async,
@@ -142,14 +238,18 @@ class CSPBackend extends Requirements_Backend
 
         // Script tags for js links
         foreach ($this->getJavascript() as $file => $attributes) {
-            $jsRequirements = $this->buildAttributes($attributes, $file, $jsRequirements);
+            $jsRequirements = $this->buildJSTag($attributes, $file, $jsRequirements);
         }
 
         // Add all inline JavaScript *after* including external files they might rely on
         foreach ($this->getCustomScripts() as $script) {
+            $options = ['type' => 'application/javascript'];
+            if (static::isUseNonce()) {
+                $options['nonce'] = Controller::curr()->getNonce();
+            }
             $jsRequirements .= HTML::createTag(
                 'script',
-                ['type' => 'application/javascript'],
+                $options,
                 "//<![CDATA[\n{$script}\n//]]>"
             );
             $jsRequirements .= "\n";
@@ -157,30 +257,24 @@ class CSPBackend extends Requirements_Backend
 
         // CSS file links
         foreach ($this->getCSS() as $file => $params) {
-            $htmlAttributes = [
-                'rel'  => 'stylesheet',
-                'type' => 'text/css',
-                'href' => $this->pathForFile($file),
-            ];
-            if (!empty($params['media'])) {
-                $htmlAttributes['media'] = $params['media'];
-            }
-
-            $requirements .= HTML::createTag('link', $htmlAttributes);
-            $requirements .= "\n";
+            $requirements = $this->buildCSSTags($file, $params, $requirements);
         }
 
         // Literal custom CSS content
         foreach ($this->getCustomCSS() as $css) {
-            $requirements .= HTML::createTag('style', ['type' => 'text/css'], "\n{$css}\n");
+            $options = ['type' => 'text/css'];
+            // Use nonces for inlines if requested
+            if (static::isUseNonce()) {
+                $htmlAttributes['nonce'] = base64_encode(Controller::curr()->getNonce());
+            }
+
+            $requirements .= HTML::createTag('style', $options, "\n{$css}\n");
             $requirements .= "\n";
         }
 
-        foreach ($this->getCustomHeadTags() as $customHeadTag) {
-            $requirements .= "{$customHeadTag}\n";
-        }
+        $requirements = $this->createHeadTags($requirements);
 
-        // Inject CSS  into body
+        // Inject CSS into body
         $content = $this->insertTagsIntoHead($requirements, $content);
 
         // Inject scripts
@@ -203,7 +297,7 @@ class CSPBackend extends Requirements_Backend
      * @throws GuzzleException
      * @throws ValidationException
      */
-    protected function buildAttributes($attributes, $file, $jsRequirements)
+    protected function buildJSTag($attributes, $file, $jsRequirements)
     {
         // Build html attributes
         $htmlAttributes = [
@@ -217,7 +311,14 @@ class CSPBackend extends Requirements_Backend
             $htmlAttributes['defer'] = 'defer';
         }
 
-        $htmlAttributes = $this->buildSRI($file, $htmlAttributes, $attributes);
+        // Build SRI if it's enabled
+        if (static::config()->get('jsSRI')) {
+            $htmlAttributes = $this->buildSRI($file, $htmlAttributes, $attributes);
+        }
+        // Use nonces for inlines if requested
+        if (static::config()->get('useNonce')) {
+            $htmlAttributes['nonce'] = base64_encode(Controller::curr()->getNonce());
+        }
 
         $jsRequirements .= HTML::createTag('script', $htmlAttributes);
         $jsRequirements .= "\n";
@@ -238,20 +339,13 @@ class CSPBackend extends Requirements_Backend
     {
         $sri = SRI::get()->filter(['File' => $file])->first();
         // Create on first time it's run, or if it's been deleted because the file has changed, known to the admin
-        if (
-            !$sri ||
-            (
-                Controller::curr()->getRequest()->getVar('updatesri') &&
-                Security::getCurrentUser() &&
-                Security::getCurrentUser()->inGroup('administrators')
-            )
-        ) {
+        if (!$sri || (Controller::curr()->getRequest()->getVar('updatesri') && $this->canUpdateSRI())) {
             // Since this is the CSP Backend, an SRI for external files is automatically created
-            /** @var Client $client */
-            $client = new Client();
             $location = $file;
 
             if (!Director::is_site_url($file)) {
+                /** @var Client $client */
+                $client = new Client();
                 $result = $client->request('GET', $location);
                 $body = $result->getBody()->getContents();
             } else {
@@ -259,23 +353,26 @@ class CSPBackend extends Requirements_Backend
             }
 
             if ($body === '') {
-                throw new \RuntimeException('ERROR no file contents given');
+                throw new RuntimeException('ERROR no file contents given');
             }
             if (!$sri) {
                 $sri = SRI::create();
             }
             $sri->update([
                 'File' => $file,
-                'SRI'  => base64_encode(hash('sha384', $body, true))
+                'SRI'  => base64_encode(hash(static::SHA384, $body, true))
 
             ]);
 
             $sri->write();
         }
 
+        $request = Controller::curr()->getRequest();
+        $cookieSet = ControllerCSPExtension::checkCookie($request);
+
         // Don't write integrity in dev, it's breaking build scripts
-        if (($sri && Director::isLive()) || ControllerCSPExtension::checkCookie(Controller::curr()->getRequest())) {
-            $htmlAttributes['integrity'] = 'sha384-' . $sri->SRI;
+        if ($sri && (Director::isLive() || $cookieSet)) {
+            $htmlAttributes['integrity'] = sprintf('%s-%s', static::SHA384, $sri->SRI);
             if (!Director::is_site_url($file)) {
                 $htmlAttributes['crossorigin'] = 'anonymous';
             }
@@ -286,5 +383,84 @@ class CSPBackend extends Requirements_Backend
         }
 
         return $htmlAttributes;
+    }
+
+    private function canUpdateSRI()
+    {
+        return (
+            // Does the user have the powers
+            (
+                Security::getCurrentUser() &&
+                Security::getCurrentUser()->inGroup('administrators')
+            ) ||
+            // OR the site is in dev mode
+            Director::isDev()
+        );
+    }
+
+    /**
+     * @param $file
+     * @param $params
+     * @param string $requirements
+     * @return string
+     * @throws GuzzleException
+     * @throws ValidationException
+     */
+    protected function buildCSSTags($file, $params, string $requirements): string
+    {
+        $htmlAttributes = [
+            'rel'  => 'stylesheet',
+            'type' => 'text/css',
+            'href' => $this->pathForFile($file),
+        ];
+        if (!empty($params['media'])) {
+            $htmlAttributes['media'] = $params['media'];
+        }
+        if (static::config()->get('cssSRI')) {
+            $htmlAttributes = $this->buildSRI($file, $htmlAttributes, []);
+        }
+
+        $requirements .= HTML::createTag('link', $htmlAttributes);
+        $requirements .= "\n";
+
+        return $requirements;
+    }
+
+    /**
+     * @param string $requirements
+     * @return string
+     */
+    protected function createHeadTags(string $requirements): string
+    {
+        foreach (static::$headCSS as $css) {
+            $options = ['type' => 'text/css'];
+            if (static::config()->get('useNonce')) {
+                $options['nonce'] = Controller::curr()->getNonce();
+            }
+            $requirements .= HTML::createTag(
+                'style',
+                $options,
+                "\n{$css}\n"
+            );
+            $requirements .= "\n";
+        }
+        foreach (static::$headJS as $script) {
+            $options = ['type' => 'application/javascript'];
+            if (static::config()->get('useNonce')) {
+                $options['nonce'] = Controller::curr()->getNonce();
+            }
+            $requirements .= HTML::createTag(
+                'script',
+                $options,
+                "//<![CDATA[\n{$script}\n//]]>"
+            );
+            $requirements .= "\n";
+        }
+
+        foreach ($this->getCustomHeadTags() as $customHeadTag) {
+            $requirements .= "{$customHeadTag}\n";
+        }
+
+        return $requirements;
     }
 }

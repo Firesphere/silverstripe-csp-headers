@@ -2,8 +2,6 @@
 
 Adds CSP headers to your request, based on configuration in a yml file.
 
-Requires `martijnc/php-csp` on dev-master for support of upgrading insecure requests.
-
 [Setting up a report-uri account is free and easy](https://report-uri.com)
 
 # Requirements
@@ -15,72 +13,69 @@ PHP 5.6+
 
 `composer require firesphere/cspheaders`
 
+# WARNING
+
+When using this module and have CSS hashes or nonces enabled, any inline styles declared on HTML Elements themselves will not work anymore.
+
+To enable or disable inline javascripts or css, set the appropriate flag (`allow-inline`) in your yml config.
+
+Same goes for javascripts. Javascripts specifically should live either in a separate file, or be added using `Requirementns::customScripts()`
+
+Default for nonce is therefore `false`.
+
 # Configuration
 
 ```yaml
 
----
-Name: AppCSPHeaders
-After:
-  - '#CSPHeaders'
----
 Firesphere\CSPHeaders\View\CSPBackend:
-  legacy_headers: false
-  report_to:
-    report_to_uri: 'https://myreporturi.report-uri.com/a/d/g'
-    report: true
-    NEL: true
+Firesphere\CSPHeaders\View\CSPBackend:
   csp_config:
-    report_uri: 'https://myreporturi.report-uri.com/r/d/csp/enforce'
-    report_only_uri: 'https://myreporturi.report-uri.com/r/d/csp/reportOnly'
-    report_only: true
-    default:
-      domains:
-        - 'analytics.mydomain.com'
-    img:
-      domains:
-        - 'secure.gravatar.com'
-        - 'a.slack-edge.com'
-        - 'avatars.slack-edge.com'
-        - 'emoji.slack-edge.com'
-        - 'analytics.mydomain.com'
-        - 'data:'
-        - 'i.ytimg.com'
-    media:
-      domains:
-        - '*.vimeocdn.com'
-        - 'player.vimeo.com'
-        - 'www.youtube.com'
-        - 'www.youtube-nocookie.com'
-    frame:
-      domains:
-        - '*.vimeocdn.com'
-        - 'player.vimeo.com'
-        - 'www.youtube.com'
-        - 'www.youtube-nocookie.com'
-    style:
-      domains:
-        - 'mycssdomain.example.com'
-      allow_inline: true
-    script:
-      domains:
-        - 'code.jquery.com'
-        - 'analytics.mydomain.com'
-    font:
-      domains:
-        - 'netdna.bootstrapcdn.com'
-        - 'fonts.gstatic.com'
-    form:
-      domains:
-        - 'myotherform.domain.com'
+    report-only: false
+    report-uri: "https://mydomain.report-uri.com"
+    base-uri:
+      allow: []
+      self: true
+    default-src: []
+    child-src:
+      allow: []
+      self: false
+    connect-src:
+      allow: []
+      self: true
+    font-src:
+      allow: []
+      self: true
+    form-action:
+      self: true
+    frame-ancestors: []
+    img-src:
+      allow: []
+      blob: true
+      self: true
+      data: true
+    media-src: []
+    object-src: []
+    plugin-types: []
+    script-src:
+      allow: []
+      self: true
+      unsafe-inline: false
+      unsafe-eval: false
+    style-src:
+      self: true
+      unsafe-inline: true
+    upgrade-insecure-requests: true
+  jsSRI: true
+  cssSRI: false
+  useNonce: false
 ---
 Only:
-  environment: dev
+  environment: 'dev'
 ---
 Firesphere\CSPHeaders\View\CSPBackend:
   csp_config:
-    wizard: true
-    wizard_uri: 'https://myreporturi.report-uri.com/r/d/csp/wizard'
+    report-only: true
+
 
 ```
 
@@ -96,17 +91,16 @@ When you enable the Reporting API you will receive deprecation, intervention and
 
 Configure the allowed domains. If domains change, they need to be added programmatically.
 
-## inline scripts
+### Using a nonce
 
-Enabling inline scripts can be done by using the `CSPRequirements` instead of the normal `Requirements`. It will give a new method to add inline javascripts via `CSPRequirements::insertJSTags($js, $identifier, $options);`
-The javascript _**must not**_ contain the `<script>` tags!
+If you don't want to use the script tag, use the nonce. In the template, you can use `$Nonce` to get the current request nonce, e.g. if you are using <script> tags in your template
 
 ## wizard
 
 It's useful to only use the wizard in dev mode, to discover the URI's and sha's you need to add.
 This prevents needless reports and helps you set up the wizard.
 
-You do need to set your own wizard_uri though, otherwise the system will encounter a failure.
+You do need to set the report-to uri to your wizard uri, otherwise the system will encounter a failure.
 
 ## forms
 

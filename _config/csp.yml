@@ -4,7 +4,7 @@ Name: CSPHeaders
 Firesphere\CSPHeaders\View\CSPBackend:
   csp_config:
     report-only: false
-    report-uri: "https://report-uri.com"
+    report-uri: "https://report-uri.com/r/d/csp/enforce"
     base-uri:
       allow: []
       self: true
@@ -38,6 +38,9 @@ Firesphere\CSPHeaders\View\CSPBackend:
       self: true
       unsafe-inline: true
     upgrade-insecure-requests: true
+  jsSRI: true
+  cssSRI: false
+  useNonce: false
 ---
 Only:
   environment: 'dev'

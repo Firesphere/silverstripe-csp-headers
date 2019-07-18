@@ -3,16 +3,19 @@
 
 namespace Firesphere\CSPHeaders\Extensions;
 
+use Exception;
 use Firesphere\CSPHeaders\Models\CSPDomain;
 use Firesphere\CSPHeaders\View\CSPBackend;
 use LeKoala\DebugBar\DebugBar;
 use PageController;
+use ParagonIE\ConstantTime\Base64;
 use ParagonIE\CSPBuilder\CSPBuilder;
 use SilverStripe\Control\Cookie;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Extension;
 use SilverStripe\ORM\DataList;
+use function hash;
 
 /**
  * Class \Firesphere\CSPHeaders\Extensions\ControllerCSPExtension
@@ -27,8 +30,20 @@ class ControllerCSPExtension extends Extension
     /**
      * @var array
      */
+    protected $headTags = [];
+    /**
+     * @var string randomised sha512 nonce for enabling scripts if you don't want to use validating of the full script
+     */
+    protected $nonce;
+    /**
+     * Base CSP configuration
+     * @var array
+     */
+    protected static $csp_config;
+    /**
+     * @var array
+     */
     protected static $inlineJS = [];
-
     /**
      * @var array
      */
@@ -68,7 +83,7 @@ class ControllerCSPExtension extends Extension
 
     /**
      * Add the needed headers from the database and config
-     * @throws \Exception
+     * @throws Exception
      */
     public function onAfterInit()
     {
@@ -77,15 +92,18 @@ class ControllerCSPExtension extends Extension
             $legacy = $config['legacy'] ?? true;
             /** @var CSPBuilder $policy */
             $policy = CSPBuilder::fromArray($config);
-
-            $this->addCSP($policy);
-            $this->addInline($policy);
-            $policy->setReportUri($config['report-uri']);
-            if (class_exists(DebugBar::class)) {
-                $policy->nonce('script-src', 'phpdebugbar');
+            if (!$this->nonce) {
+                $this->nonce = Base64::encode(hash('sha512', uniqid('nonce', true) . time()));
             }
 
-            $policy->saveSnippet('tmp.conf', CSPBuilder::FORMAT_APACHE);
+            $this->addCSP($policy);
+            $this->addInlineJSPolicy($policy, $config);
+            $this->addInlineCSSPolicy($policy, $config);
+            // When in dev, add the debugbar nonce
+            if (Director::isDev() && class_exists(DebugBar::class)) {
+                $policy->nonce('script-src', 'debugbar');
+            }
+            $policy->setReportUri($config['report-uri']);
 
             $headers = $policy->getHeaderArray($legacy);
             foreach ($headers as $name => $header) {
@@ -98,7 +116,7 @@ class ControllerCSPExtension extends Extension
      * @param HTTPRequest $request
      * @return bool
      */
-    public static function checkCookie($request)
+    public static function checkCookie($request): bool
     {
         if ($request->getVar('build-headers')) {
             Cookie::set('buildHeaders', $request->getVar('build-headers'));
@@ -110,7 +128,7 @@ class ControllerCSPExtension extends Extension
     /**
      * @param CSPBuilder $policy
      */
-    public function addCSP($policy)
+    protected function addCSP($policy): void
     {
         /** @var DataList|CSPDomain[] $cspDomains */
         $cspDomains = CSPDomain::get();
@@ -122,13 +140,51 @@ class ControllerCSPExtension extends Extension
 
     /**
      * @param CSPBuilder $policy
+     * @param array $config
+     * @throws Exception
      */
-    public function addInline($policy)
+    protected function addInlineJSPolicy($policy, $config): void
     {
-        $inline = static::$inlineJS;
-
-        foreach ($inline as $item) {
-            $policy->hash('script-src', $item);
+        if ($config['script-src']['unsafe-inline']) {
+            return;
         }
+
+        if (CSPBackend::config()->get('useNonce')) {
+            $policy->nonce('script-src', $this->nonce);
+        }
+
+        $inline = static::$inlineJS;
+        foreach ($inline as $item) {
+            $policy->hash('script-src', "//<![CDATA[\n{$item}\n//]]>");
+        }
+    }
+
+    /**
+     * @param CSPBuilder $policy
+     * @param array $config
+     * @throws Exception
+     */
+    protected function addInlineCSSPolicy($policy, $config): void
+    {
+        if ($config['style-src']['unsafe-inline']) {
+            return;
+        }
+
+        if (CSPBackend::config()->get('useNonce')) {
+            $policy->nonce('style-src', $this->nonce);
+        }
+
+        $inline = static::$inlineCSS;
+        foreach ($inline as $css) {
+            $policy->hash('style-src', "\n{$css}\n");
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getNonce(): string
+    {
+        return $this->nonce;
     }
 }

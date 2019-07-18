@@ -21,7 +21,6 @@
     "paragonie/csp-builder": "^2"
   },
   "require-dev": {
-    "roave/security-advisories": "dev-master",
     "scriptfusion/phpunit-immediate-exception-printer": "^1",
     "phpunit/PHPUnit": "^5.7",
     "friendsofphp/php-cs-fixer": "^2.13"
