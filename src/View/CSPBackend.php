@@ -88,7 +88,7 @@ class CSPBackend extends Requirements_Backend
      */
     public static function isUseNonce(): bool
     {
-        return static::config()->get('useNonce');;
+        return static::config()->get('useNonce');
     }
 
     /**
@@ -103,7 +103,7 @@ class CSPBackend extends Requirements_Backend
      * Specific method for JS insertion
      *
      * @param $js
-     * @param null $uniquenessID
+     * @param null|string $uniquenessID
      */
     public function customScript($js, $uniquenessID = null)
     {
@@ -114,7 +114,7 @@ class CSPBackend extends Requirements_Backend
 
     /**
      * @param $css
-     * @param null $uniquenessID
+     * @param null|string $uniquenessID
      */
     public function customCSS($css, $uniquenessID = null)
     {
@@ -123,6 +123,11 @@ class CSPBackend extends Requirements_Backend
         parent::customCSS($css, $uniquenessID);
     }
 
+    /**
+     * Determine the type of the head tag if it's js or css
+     * @param string  $html
+     * @return string|null
+     */
     public function getTagType($html)
     {
         $html = trim($html);
@@ -140,7 +145,7 @@ class CSPBackend extends Requirements_Backend
      * Add the following custom HTML code to the `<head>` section of the page
      *
      * @param string $html Custom HTML code
-     * @param string $uniquenessID A unique ID that ensures a piece of code is only added once
+     * @param string|null $uniquenessID A unique ID that ensures a piece of code is only added once
      */
     public function insertHeadTags($html, $uniquenessID = null)
     {

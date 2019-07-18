@@ -21,13 +21,12 @@ To enable or disable inline javascripts or css, set the appropriate flag (`allow
 
 Same goes for javascripts. Javascripts specifically should live either in a separate file, or be added using `Requirementns::customScripts()`
 
-Default for nonce is therefore `false`.
+Default for css is therefore `false`, javascript however defaults to `true` for security reasongs.
 
 # Configuration
 
 ```yaml
 
-Firesphere\CSPHeaders\View\CSPBackend:
 Firesphere\CSPHeaders\View\CSPBackend:
   csp_config:
     report-only: false
@@ -36,7 +35,7 @@ Firesphere\CSPHeaders\View\CSPBackend:
       allow: []
       self: true
     default-src: []
-    child-src:
+    frame-src:
       allow: []
       self: false
     connect-src:
@@ -75,7 +74,6 @@ Only:
 Firesphere\CSPHeaders\View\CSPBackend:
   csp_config:
     report-only: true
-
 
 ```
 
