@@ -7,7 +7,6 @@ use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
 use Firesphere\CSPHeaders\Models\SRI;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use RuntimeException;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\Config\Configurable;
@@ -125,7 +124,7 @@ class CSPBackend extends Requirements_Backend
 
     /**
      * Determine the type of the head tag if it's js or css
-     * @param string  $html
+     * @param string $html
      * @return string|null
      */
     public function getTagType($html)
@@ -344,7 +343,8 @@ class CSPBackend extends Requirements_Backend
     {
         $sri = SRI::get()->filter(['File' => $file])->first();
         // Create on first time it's run, or if it's been deleted because the file has changed, known to the admin
-        if (!$sri || (Controller::curr()->getRequest()->getVar('updatesri') && $this->canUpdateSRI())) {
+        if ((!$sri || !$sri->exists()) ||
+            (Controller::curr()->getRequest()->getVar('updatesri') && $this->canUpdateSRI())) {
             // Since this is the CSP Backend, an SRI for external files is automatically created
             $location = $file;
 
@@ -356,7 +356,7 @@ class CSPBackend extends Requirements_Backend
             } else {
                 $body = file_get_contents(Director::baseFolder() . '/' . $location);
             }
-            if (!$sri) {
+            if (!$sri || !$sri->exists()) {
                 $sri = SRI::create();
             }
             $sri->update([

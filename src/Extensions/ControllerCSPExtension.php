@@ -88,7 +88,9 @@ class ControllerCSPExtension extends Extension
      */
     public function onAfterInit()
     {
-        if (Director::isLive() || static::checkCookie($this->owner->getRequest())) {
+        /** @var Controller $owner */
+        $owner = $this->owner;
+        if (Director::isLive() || static::checkCookie($owner->getRequest())) {
             $config = CSPBackend::config()->get('csp_config');
             $legacy = $config['legacy'] ?? true;
             /** @var CSPBuilder $policy */
@@ -107,8 +109,6 @@ class ControllerCSPExtension extends Extension
             $policy->setReportUri($config['report-uri']);
 
             $headers = $policy->getHeaderArray($legacy);
-            /** @var Controller $owner */
-            $owner = $this->owner;
             foreach ($headers as $name => $header) {
                 $owner->getResponse()->addHeader($name, $header);
             }
