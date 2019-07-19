@@ -1,6 +1,8 @@
 version: 2
 jobs:
   build:
+    environment:
+      CC_TEST_REPORTER_ID: 8fc82e19673fd65485d0f66a05d94bad2d3da1df8a848349fcdabab0767f452b
     docker:
       - image: brettt89/silverstripe-web:7.1-platform
         environment:
