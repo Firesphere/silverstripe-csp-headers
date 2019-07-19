@@ -22,7 +22,7 @@ jobs:
     working_directory: ~/var/www
 
     steps:
-      - run: apt-get update && apt-get install -y apt-transport-https lsb-release netcat
+      - run: apt-get update && apt-get install -y apt-transport-https lsb-release netcat wget
       # Install additional requirements
       - run: composer self-update
       - checkout
