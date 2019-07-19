@@ -28,20 +28,18 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v2-cache-{{ checksum "composer.lock" }}
+            - v2-cache-{{ checksum "composer.json" }}
             # fallback to using the latest cache if no exact match is found
             - v2-cache-
       - run: composer install
-      # Manually copy, for some reason
-      - run: cp -R vendor/silverstripe/recipe-cms/* .
-      - run: composer vendor-expose
       # Save all dependencies to cache
       - save_cache:
           key: v2-cache-{{ checksum "composer.lock" }}
           paths:
             - vendor
-            - mysite
-            - resources
+            - app
+            - public
+      - run: cp .circleci/circleci.env .env
       - run:
           name: Setup Code Climate and Scrutinizer test-reporter
           command: |
