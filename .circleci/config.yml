@@ -26,7 +26,11 @@ jobs:
       # Install additional requirements
       - run: composer self-update
       - checkout
-      - run: composer require silverstripe/recipe-cms
+      - restore_cache:
+          keys:
+            - v2-cache-{{ checksum "composer.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v2-cache-
       - run: composer install
       # Save all dependencies to cache
       - save_cache:
