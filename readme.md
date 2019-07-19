@@ -104,6 +104,10 @@ You do need to set the report-to uri to your wizard uri, otherwise the system wi
 
 If you want to submit forms to a different domain, you can add the allowed domains under the forms section
 
+## inline scripts or custom scripts
+
+If you use the default methods provided by the `Requirements` class, the needed SHA's and SRI's are automatically calculated for you.
+
 # .htaccess
 
 Any header set in the `.htaccess`, Apache `site.conf` or `nginx.conf` files will override the headers

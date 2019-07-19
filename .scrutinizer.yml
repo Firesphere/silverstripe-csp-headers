@@ -11,3 +11,6 @@ filter:
   paths: ["src/*", "tests/*"]
   excluded_paths:
     - "tests/mock/"
+
+tools:
+  external_code_coverage: true

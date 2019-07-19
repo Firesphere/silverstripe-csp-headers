@@ -28,7 +28,6 @@ class CSPBackend extends Requirements_Backend
      * @var bool
      */
     protected static $jsSRI;
-
     /**
      * CSS defaults to false.
      * It's causing a lot of trouble with CDN's usually

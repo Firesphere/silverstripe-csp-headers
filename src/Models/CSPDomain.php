@@ -62,7 +62,7 @@ class CSPDomain extends DataObject implements PermissionProvider
         $fields = parent::getCMSFields();
         $fields->removeByName(['SiteConfigID']);
 
-        $fields->dataFieldByName('Source')->setSource(static::$sourceMap);
+        $fields->dataFieldByName('Source')->setSource(self::$sourceMap);
 
         return $fields;
     }

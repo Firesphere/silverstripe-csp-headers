@@ -1,0 +1,65 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: brettt89/silverstripe-web:7.1-platform
+        environment:
+          - SS_DATABASE_CLASS=MySQLPDODatabase
+          - SS_DATABASE_SERVER=127.0.0.1
+          - SS_DATABASE_USERNAME=root
+          - SS_DATABASE_PASSWORD=ubuntu
+          - SS_DATABASE_NAME=circle_test
+          - SS_ENVIRONMENT_TYPE=test
+          - SS_DEFAULT_ADMIN_USERNAME=admin
+          - SS_DEFAULT_ADMIN_PASSWORD=password
+      - image: circleci/mysql:5.7
+        environment:
+          - MYSQL_USER=root
+          - MYSQL_ROOT_PASSWORD=ubuntu
+          - MYSQL_DATABASE=circle_test
+          - MYSQL_HOST=127.0.0.1
+
+    working_directory: ~/var/www
+
+    steps:
+      - run: apt-get update && apt-get install -y apt-transport-https lsb-release netcat
+      # Install additional requirements
+      - run: composer self-update
+      - checkout
+      - restore_cache:
+          keys:
+            - v2-cache-{{ checksum "composer.lock" }}
+            # fallback to using the latest cache if no exact match is found
+            - v2-cache-
+      - run: composer install
+      # Manually copy, for some reason
+      - run: cp -R vendor/silverstripe/recipe-cms/* .
+      - run: composer vendor-expose
+      # Save all dependencies to cache
+      - save_cache:
+          key: v2-cache-{{ checksum "composer.lock" }}
+          paths:
+            - vendor
+            - mysite
+            - resources
+      - run:
+          name: Setup Code Climate and Scrutinizer test-reporter
+          command: |
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+            chmod +x ./cc-test-reporter
+            ./cc-test-reporter before-build
+            wget https://scrutinizer-ci.com/ocular.phar
+
+      # run tests!
+      - run: until nc -z -v -w30 127.0.0.1 3306; do sleep 1; done
+      - run: vendor/bin/sake dev/build flush=all skipannotation=true
+      - run: vendor/bin/phpunit --coverage-clover=coverage.xml --log-junit ./coverage/junit.xml -d memory_limit=512M tests/unit
+      - run:
+          name: Code coverage reports
+          command: |
+            php ocular.phar code-coverage:upload --format=php-clover clover.xml
+            bash <(curl -s https://codecov.io/bash) -f clover.xml
+            ./cc-test-reporter after-build --coverage-input-type clover --exit-code $?
+      - run: vendor/bin/phpcs --standard=phpcs.xml.dist src tests/unit
+      - store_test_results:
+          path: ~/var/www/coverage
