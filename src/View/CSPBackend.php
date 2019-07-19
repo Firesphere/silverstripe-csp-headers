@@ -47,7 +47,7 @@ class CSPBackend extends Requirements_Backend
     /**
      * @var bool
      */
-    protected static $useNonce = false;
+    protected static $usesNonce = false;
 
     /**
      * @return bool
@@ -84,7 +84,7 @@ class CSPBackend extends Requirements_Backend
     /**
      * @return bool
      */
-    public static function isUseNonce(): bool
+    public static function isUsesNonce(): bool
     {
         return static::config()->get('useNonce');
     }
@@ -92,9 +92,9 @@ class CSPBackend extends Requirements_Backend
     /**
      * @param bool static::isUseNonce()
      */
-    public static function setUseNonce(bool $useNonce): void
+    public static function setUsesNonce(bool $usesNonce): void
     {
-        self::$useNonce = $useNonce;
+        self::$usesNonce = $usesNonce;
     }
 
     /**
@@ -170,7 +170,7 @@ class CSPBackend extends Requirements_Backend
      * - 'defer' : Boolean value to set defer attribute to script tag
      * - 'type' : Override script type= value.
      */
-    public function javascript($file, $options = array())
+    public function javascript($file, $options = [])
     {
         $file = ModuleResourceLoader::singleton()->resolvePath($file);
 
@@ -189,12 +189,12 @@ class CSPBackend extends Requirements_Backend
 
         $fallback = $options['fallback'] ?? false;
 
-        $this->javascript[$file] = array(
+        $this->javascript[$file] = [
             'async'    => $async,
             'defer'    => $defer,
             'type'     => $type,
             'fallback' => $fallback
-        );
+        ];
 
         // Record scripts included in this file
         if (isset($options['provides'])) {
@@ -244,35 +244,9 @@ class CSPBackend extends Requirements_Backend
             $jsRequirements = $this->buildJSTag($attributes, $file, $jsRequirements);
         }
 
-        // Add all inline JavaScript *after* including external files they might rely on
-        foreach ($this->getCustomScripts() as $script) {
-            $options = ['type' => 'application/javascript'];
-            if (static::isUseNonce()) {
-                $options['nonce'] = Controller::curr()->getNonce();
-            }
-            $jsRequirements .= HTML::createTag(
-                'script',
-                $options,
-                "//<![CDATA[\n{$script}\n//]]>"
-            );
-            $jsRequirements .= "\n";
-        }
-
         // CSS file links
         foreach ($this->getCSS() as $file => $params) {
             $requirements = $this->buildCSSTags($file, $params, $requirements);
-        }
-
-        // Literal custom CSS content
-        foreach ($this->getCustomCSS() as $css) {
-            $options = ['type' => 'text/css'];
-            // Use nonces for inlines if requested
-            if (static::isUseNonce()) {
-                $htmlAttributes['nonce'] = base64_encode(Controller::curr()->getNonce());
-            }
-
-            $requirements .= HTML::createTag('style', $options, "\n{$css}\n");
-            $requirements .= "\n";
         }
 
         $requirements = $this->createHeadTags($requirements);
@@ -326,6 +300,20 @@ class CSPBackend extends Requirements_Backend
         $jsRequirements .= HTML::createTag('script', $htmlAttributes);
         $jsRequirements .= "\n";
 
+        // Add all inline JavaScript *after* including external files they might rely on
+        foreach ($this->getCustomScripts() as $script) {
+            $options = ['type' => 'application/javascript'];
+            if (static::isUsesNonce()) {
+                $options['nonce'] = Controller::curr()->getNonce();
+            }
+            $jsRequirements .= HTML::createTag(
+                'script',
+                $options,
+                "//<![CDATA[\n{$script}\n//]]>"
+            );
+            $jsRequirements .= "\n";
+        }
+
         return $jsRequirements;
     }
 
@@ -342,7 +330,10 @@ class CSPBackend extends Requirements_Backend
     {
         $sri = SRI::get()->filter(['File' => $file])->first();
         // Create on first time it's run, or if it's been deleted because the file has changed, known to the admin
-        if ((!$sri || !$sri->exists()) ||
+        if (!$sri || !$sri->exists()) {
+            $sri = SRI::create();
+        }
+        if (!$sri->exists() ||
             (Controller::curr()->getRequest()->getVar('updatesri') && $this->canUpdateSRI())) {
             // Since this is the CSP Backend, an SRI for external files is automatically created
             $location = $file;
@@ -354,9 +345,6 @@ class CSPBackend extends Requirements_Backend
                 $body = $result->getBody()->getContents();
             } else {
                 $body = file_get_contents(Director::baseFolder() . '/' . $location);
-            }
-            if (!$sri || !$sri->exists()) {
-                $sri = SRI::create();
             }
             $sri->update([
                 'File' => $file,
@@ -422,6 +410,18 @@ class CSPBackend extends Requirements_Backend
 
         $requirements .= HTML::createTag('link', $htmlAttributes);
         $requirements .= "\n";
+
+        // Literal custom CSS content
+        foreach ($this->getCustomCSS() as $css) {
+            $options = ['type' => 'text/css'];
+            // Use nonces for inlines if requested
+            if (static::isUsesNonce()) {
+                $htmlAttributes['nonce'] = base64_encode(Controller::curr()->getNonce());
+            }
+
+            $requirements .= HTML::createTag('style', $options, "\n{$css}\n");
+            $requirements .= "\n";
+        }
 
         return $requirements;
     }
