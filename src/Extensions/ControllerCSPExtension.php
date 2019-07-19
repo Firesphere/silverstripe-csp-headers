@@ -134,7 +134,10 @@ class ControllerCSPExtension extends Extension
     protected function addCSP($policy): void
     {
         /** @var DataList|CSPDomain[] $cspDomains */
-        $cspDomains = CSPDomain::get();
+        $cspDomains = CSPDomain::get()
+            ->filterAny([
+                'Pages.ID' => [null, $this->owner->ID]
+            ]);
 
         foreach ($cspDomains as $domain) {
             $policy->addSource($domain->Source, $domain->Domain);

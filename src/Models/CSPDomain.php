@@ -2,7 +2,9 @@
 
 namespace Firesphere\CSPHeaders\Models;
 
+use Page;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\ManyManyList;
 use SilverStripe\Security\Permission;
 use SilverStripe\Security\PermissionProvider;
 
@@ -11,6 +13,7 @@ use SilverStripe\Security\PermissionProvider;
  *
  * @property string $Domain
  * @property string $Source
+ * @method ManyManyList|Page[] Pages()
  */
 class CSPDomain extends DataObject implements PermissionProvider
 {
@@ -24,7 +27,27 @@ class CSPDomain extends DataObject implements PermissionProvider
         'Source' => 'Enum("default,script,style,img,media,font,form,frame")'
     ];
 
+    private static $belongs_many_many = [
+        'Pages' => Page::class
+    ];
+
     private static $summary_fields = [
+        'Domain',
+        'Source'
+    ];
+
+    private static $sourceMap = [
+        'default' => 'All',
+        'script'  => 'Javascripts',
+        'style'   => 'Styling',
+        'img'     => 'Images',
+        'media'   => 'Embedded media (e.g. YouTube)',
+        'font'    => 'Fonts',
+        'form'    => 'Forms',
+        'frame'   => 'Iframes'
+    ];
+
+    private static $searchable_fields = [
         'Domain',
         'Source'
     ];
@@ -38,6 +61,8 @@ class CSPDomain extends DataObject implements PermissionProvider
     {
         $fields = parent::getCMSFields();
         $fields->removeByName(['SiteConfigID']);
+
+        $fields->dataFieldByName('Source')->setSource(static::$sourceMap);
 
         return $fields;
     }

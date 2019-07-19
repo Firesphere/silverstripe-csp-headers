@@ -1,3 +1,6 @@
 PageController:
   extensions:
     - Firesphere\CSPHeaders\Extensions\ControllerCSPExtension
+Page:
+  extensions:
+    - Firesphere\CSPHeaders\Extensions\PageExtension
