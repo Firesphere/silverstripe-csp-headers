@@ -277,20 +277,14 @@ class CSPBackend extends Requirements_Backend
     protected function buildJSTag($attributes, $file, $jsRequirements)
     {
         // Build html attributes
-        $htmlAttributes = [
+        $htmlAttributes = array_merge([
             'type' => $attributes['type'] ?? 'application/javascript',
             'src'  => $this->pathForFile($file),
-        ];
-        if (!empty($attributes['async'])) {
-            $htmlAttributes['async'] = 'async';
-        }
-        if (!empty($attributes['defer'])) {
-            $htmlAttributes['defer'] = 'defer';
-        }
+        ], $attributes);
 
         // Build SRI if it's enabled
         if (static::config()->get('jsSRI')) {
-            $htmlAttributes = $this->buildSRI($file, $htmlAttributes, $attributes);
+            $htmlAttributes = $this->buildSRI($file, $htmlAttributes);
         }
         // Use nonces for inlines if requested
         if (static::config()->get('useNonce')) {
@@ -320,21 +314,22 @@ class CSPBackend extends Requirements_Backend
     /**
      * @param $file
      * @param array $htmlAttributes
-     * @param $attributes
      * @return array
      * @throws GuzzleException
      * @throws ValidationException
      * @throws Exception
      */
-    protected function buildSRI($file, array $htmlAttributes, $attributes)
+    protected function buildSRI($file, array $htmlAttributes): array
     {
+        /** @var SRI|null $sri */
         $sri = SRI::get()->filter(['File' => $file])->first();
         // Create on first time it's run, or if it's been deleted because the file has changed, known to the admin
-        if (!$sri || !$sri->exists()) {
+        if (!$sri || !$sri->isInDB()) {
             $sri = SRI::create();
         }
-        if (!$sri->exists() ||
-            (Controller::curr()->getRequest()->getVar('updatesri') && $this->canUpdateSRI())) {
+        if (!$sri->isInDB() ||
+            (Controller::curr()->getRequest()->getVar('updatesri') && $this->canUpdateSRI())
+        ) {
             // Since this is the CSP Backend, an SRI for external files is automatically created
             $location = $file;
 
@@ -359,20 +354,19 @@ class CSPBackend extends Requirements_Backend
         $cookieSet = ControllerCSPExtension::checkCookie($request);
 
         // Don't write integrity in dev, it's breaking build scripts
-        if ($sri && (Director::isLive() || $cookieSet)) {
+        if ($sri->isInDB() && (Director::isLive() || $cookieSet)) {
             $htmlAttributes['integrity'] = sprintf('%s-%s', static::SHA384, $sri->SRI);
             if (!Director::is_site_url($file)) {
                 $htmlAttributes['crossorigin'] = 'anonymous';
-            }
-
-            if (isset($attributes['fallback']) && $attributes['fallback'] !== false) {
-                $htmlAttributes['data-sri-fallback'] = $attributes['fallback'];
             }
         }
 
         return $htmlAttributes;
     }
 
+    /**
+     * @return bool
+     */
     private function canUpdateSRI()
     {
         return (
@@ -405,7 +399,7 @@ class CSPBackend extends Requirements_Backend
             $htmlAttributes['media'] = $params['media'];
         }
         if (static::config()->get('cssSRI')) {
-            $htmlAttributes = $this->buildSRI($file, $htmlAttributes, []);
+            $htmlAttributes = $this->buildSRI($file, $htmlAttributes);
         }
 
         $requirements .= HTML::createTag('link', $htmlAttributes);
@@ -416,7 +410,7 @@ class CSPBackend extends Requirements_Backend
             $options = ['type' => 'text/css'];
             // Use nonces for inlines if requested
             if (static::isUsesNonce()) {
-                $htmlAttributes['nonce'] = base64_encode(Controller::curr()->getNonce());
+                $options['nonce'] = base64_encode(Controller::curr()->getNonce());
             }
 
             $requirements .= HTML::createTag('style', $options, "\n{$css}\n");
