@@ -3,7 +3,6 @@
 
 namespace Firesphere\CSPHeaders\Tests;
 
-use Firesphere\CSPHeaders\Builders\CSSBuilder;
 use Firesphere\CSPHeaders\Builders\JSBuilder;
 use Firesphere\CSPHeaders\Builders\SRIBuilder;
 use Firesphere\CSPHeaders\View\CSPBackend;
