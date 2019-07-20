@@ -10,6 +10,7 @@ use LeKoala\DebugBar\DebugBar;
 use PageController;
 use ParagonIE\ConstantTime\Base64;
 use ParagonIE\CSPBuilder\CSPBuilder;
+use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Cookie;
 use SilverStripe\Control\Director;
@@ -28,6 +29,10 @@ use function hash;
  */
 class ControllerCSPExtension extends Extension
 {
+    /**
+     * @var bool
+     */
+    protected $generate;
     /**
      * Base CSP configuration
      * @var array
@@ -83,6 +88,14 @@ class ControllerCSPExtension extends Extension
     }
 
     /**
+     * Check and set if we need to generate the CSP and SRI
+     */
+    public function onBeforeInit()
+    {
+        $this->generate = Director::isLive() || static::checkCookie($this->owner->getRequest());
+    }
+
+    /**
      * Add the needed headers from the database and config
      * @throws Exception
      */
@@ -90,7 +103,7 @@ class ControllerCSPExtension extends Extension
     {
         /** @var Controller $owner */
         $owner = $this->owner;
-        if (Director::isLive() || static::checkCookie($owner->getRequest())) {
+        if ($this->generate) {
             $config = CSPBackend::config()->get('csp_config');
             $legacy = $config['legacy'] ?? true;
             /** @var CSPBuilder $policy */
@@ -133,11 +146,10 @@ class ControllerCSPExtension extends Extension
      */
     protected function addCSP($policy): void
     {
+        /** @var SiteTree $owner */
+        $owner = $this->owner;
         /** @var DataList|CSPDomain[] $cspDomains */
-        $cspDomains = CSPDomain::get()
-            ->filterAny([
-                'Pages.ID' => [null, $this->owner->ID]
-            ]);
+        $cspDomains = CSPDomain::get()->filterAny(['Pages.ID' => [null, $owner->ID]]);
 
         foreach ($cspDomains as $domain) {
             $policy->addSource($domain->Source, $domain->Domain);
