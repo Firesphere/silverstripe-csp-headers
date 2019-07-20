@@ -108,7 +108,7 @@ class ControllerCSPExtension extends Extension
             $legacy = $config['legacy'] ?? true;
             /** @var CSPBuilder $policy */
             $policy = CSPBuilder::fromArray($config);
-            if (!$this->nonce && CSPBackend::config()->get('useNonce')) {
+            if (!$this->nonce && CSPBackend::isUsesNonce()) {
                 $this->nonce = Base64::encode(hash('sha512', uniqid('nonce', true) . time()));
             }
 

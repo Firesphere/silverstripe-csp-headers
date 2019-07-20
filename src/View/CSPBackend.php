@@ -224,7 +224,7 @@ class CSPBackend extends Requirements_Backend
         // Skip if content isn't injectable, or there is nothing to inject
         $shouldContinue = $this->shouldContinue($content);
 
-        if ($shouldContinue) {
+        if (!$shouldContinue) {
             return $content;
         }
         $requirements = '';
