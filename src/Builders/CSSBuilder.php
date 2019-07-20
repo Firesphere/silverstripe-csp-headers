@@ -3,6 +3,7 @@
 
 namespace Firesphere\CSPHeaders\Builders;
 
+use Firesphere\CSPHeaders\Interfaces\BuilderInterface;
 use Firesphere\CSPHeaders\View\CSPBackend;
 use GuzzleHttp\Exception\GuzzleException;
 use SilverStripe\Control\Controller;
@@ -10,7 +11,7 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\View\HTML;
 
-class CSSBuilder
+class CSSBuilder implements BuilderInterface
 {
     /**
      * @var CSPBackend
@@ -40,7 +41,7 @@ class CSSBuilder
      * @throws GuzzleException
      * @throws ValidationException
      */
-    public function buildCSSTags($file, $params, string $requirements, string $path): string
+    public function buildTags($file, $params, string $requirements, string $path): string
     {
         $htmlAttributes = array_merge([
             'rel'  => 'stylesheet',
@@ -54,41 +55,6 @@ class CSSBuilder
 
         $requirements .= HTML::createTag('link', $htmlAttributes);
         $requirements .= "\n";
-
-        // Literal custom CSS content
-        foreach ($this->owner->getCustomCSS() as $css) {
-            $options = ['type' => 'text/css'];
-            // Use nonces for inlines if requested
-            if (CSPBackend::isUsesNonce()) {
-                $options['nonce'] = base64_encode(Controller::curr()->getNonce());
-            }
-
-            $requirements .= HTML::createTag('style', $options, "\n{$css}\n");
-            $requirements .= "\n";
-        }
-
-        return $requirements;
-    }
-
-
-    /**
-     * @param string $requirements
-     * @return string
-     */
-    public function getCSSHeadTags(string $requirements): string
-    {
-        $options = ['type' => 'text/css'];
-        foreach (CSPBackend::getHeadCSS() as $css) {
-            if (CSPBackend::isUsesNonce()) {
-                $options['nonce'] = Controller::curr()->getNonce();
-            }
-            $requirements .= HTML::createTag(
-                'style',
-                $options,
-                "\n{$css}\n"
-            );
-            $requirements .= "\n";
-        }
 
         return $requirements;
     }
@@ -107,6 +73,49 @@ class CSSBuilder
     public function setSriBuilder(SRIBuilder $sriBuilder): void
     {
         $this->sriBuilder = $sriBuilder;
+    }
+
+    /**
+     * @param string $requirements
+     * @return string
+     */
+    public function getHeadTags(string $requirements): string
+    {
+        $options = ['type' => 'text/css'];
+        foreach (CSPBackend::getHeadCSS() as $css) {
+            if (CSPBackend::isUsesNonce()) {
+                $options['nonce'] = Controller::curr()->getNonce();
+            }
+            $requirements .= HTML::createTag(
+                'style',
+                $options,
+                "\n{$css}\n"
+            );
+            $requirements .= "\n";
+        }
+
+        return $requirements;
+    }
+
+    /**
+     * @param string $requirements
+     * @return string
+     */
+    public function getCustomTags(string $requirements): string
+    {
+        // Literal custom CSS content
+        foreach ($this->owner->getCustomCSS() as $css) {
+            $options = ['type' => 'text/css'];
+            // Use nonces for inlines if requested
+            if (CSPBackend::isUsesNonce()) {
+                $options['nonce'] = base64_encode(Controller::curr()->getNonce());
+            }
+
+            $requirements .= HTML::createTag('style', $options, "\n{$css}\n");
+            $requirements .= "\n";
+        }
+
+        return $requirements;
     }
 
     /**

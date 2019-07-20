@@ -3,6 +3,7 @@
 
 namespace Firesphere\CSPHeaders\Builders;
 
+use Firesphere\CSPHeaders\Interfaces\BuilderInterface;
 use Firesphere\CSPHeaders\View\CSPBackend;
 use GuzzleHttp\Exception\GuzzleException;
 use SilverStripe\Control\Controller;
@@ -10,7 +11,7 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\View\HTML;
 
-class JSBuilder
+class JSBuilder implements BuilderInterface
 {
     /**
      * @var CSPBackend
@@ -40,7 +41,7 @@ class JSBuilder
      * @throws GuzzleException
      * @throws ValidationException
      */
-    public function buildJSTag($attributes, $file, $jsRequirements, $path): string
+    public function buildTags($file, $attributes, $jsRequirements, $path): string
     {
         // Build html attributes
         $htmlAttributes = array_merge([
@@ -60,28 +61,30 @@ class JSBuilder
         $jsRequirements .= HTML::createTag('script', $htmlAttributes);
         $jsRequirements .= "\n";
 
-        // Add all inline JavaScript *after* including external files they might rely on
-        foreach ($this->owner->getCustomScripts() as $script) {
-            $options = ['type' => 'application/javascript'];
-            if (CSPBackend::isUsesNonce()) {
-                $options['nonce'] = Controller::curr()->getNonce();
-            }
-            $jsRequirements .= HTML::createTag(
-                'script',
-                $options,
-                "//<![CDATA[\n{$script}\n//]]>"
-            );
-            $jsRequirements .= "\n";
-        }
-
         return $jsRequirements;
+    }
+
+    /**
+     * @return SRIBuilder
+     */
+    public function getSriBuilder(): SRIBuilder
+    {
+        return $this->sriBuilder;
+    }
+
+    /**
+     * @param SRIBuilder $sriBuilder
+     */
+    public function setSriBuilder(SRIBuilder $sriBuilder): void
+    {
+        $this->sriBuilder = $sriBuilder;
     }
 
     /**
      * @param string $requirements
      * @return string
      */
-    public function getJSHeadTags(string $requirements): string
+    public function getHeadTags(string $requirements): string
     {
         $options = ['type' => 'application/javascript'];
         foreach (CSPBackend::getHeadJS() as $script) {
@@ -100,19 +103,26 @@ class JSBuilder
     }
 
     /**
-     * @return SRIBuilder
+     * @param string $requirements
+     * @return string
      */
-    public function getSriBuilder(): SRIBuilder
+    public function getCustomTags(string $requirements): string
     {
-        return $this->sriBuilder;
-    }
+        // Add all inline JavaScript *after* including external files they might rely on
+        foreach ($this->owner->getCustomScripts() as $script) {
+            $options = ['type' => 'application/javascript'];
+            if (CSPBackend::isUsesNonce()) {
+                $options['nonce'] = Controller::curr()->getNonce();
+            }
+            $requirements .= HTML::createTag(
+                'script',
+                $options,
+                "//<![CDATA[\n{$script}\n//]]>"
+            );
+            $requirements .= "\n";
+        }
 
-    /**
-     * @param SRIBuilder $sriBuilder
-     */
-    public function setSriBuilder(SRIBuilder $sriBuilder): void
-    {
-        $this->sriBuilder = $sriBuilder;
+        return $requirements;
     }
 
     /**

@@ -6,12 +6,10 @@ use Firesphere\CSPHeaders\Builders\CSSBuilder;
 use Firesphere\CSPHeaders\Builders\JSBuilder;
 use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
 use GuzzleHttp\Exception\GuzzleException;
-use SilverStripe\Control\Controller;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Manifest\ModuleResourceLoader;
 use SilverStripe\Dev\Deprecation;
 use SilverStripe\ORM\ValidationException;
-use SilverStripe\View\HTML;
 use SilverStripe\View\Requirements_Backend;
 
 class CSPBackend extends Requirements_Backend
@@ -121,6 +119,22 @@ class CSPBackend extends Requirements_Backend
     public static function setHeadJS(array $headJS): void
     {
         self::$headJS = $headJS;
+    }
+
+    /**
+     * @return bool
+     */
+    public static function isUsesNonce(): bool
+    {
+        return static::config()->get('useNonce') || self::$usesNonce;
+    }
+
+    /**
+     * @param bool static::isUseNonce()
+     */
+    public static function setUsesNonce(bool $usesNonce): void
+    {
+        self::$usesNonce = $usesNonce;
     }
 
     /**
@@ -268,14 +282,16 @@ class CSPBackend extends Requirements_Backend
         // Script tags for js links
         foreach ($this->getJavascript() as $file => $attributes) {
             $path = $this->pathForFile($file);
-            $jsRequirements = $this->jsBuilder->buildJSTag($attributes, $file, $jsRequirements, $path);
+            $jsRequirements = $this->getJsBuilder()->buildTags($file, $attributes, $jsRequirements, $path);
         }
+        $jsRequirements = $this->getJsBuilder()->getCustomTags($jsRequirements);
 
         // CSS file links
-        foreach ($this->getCSS() as $file => $params) {
+        foreach ($this->getCSS() as $file => $attributes) {
             $path = $this->pathForFile($file);
-            $requirements = $this->cssBuilder->buildCSSTags($file, $params, $requirements, $path);
+            $requirements = $this->getCssBuilder()->buildTags($file, $attributes, $requirements, $path);
         }
+        $requirements = $this->getCssBuilder()->getCustomTags($requirements);
 
         $requirements = $this->createHeadTags($requirements);
         $content = $this->insertContent($content, $requirements, $jsRequirements);
@@ -300,35 +316,51 @@ class CSPBackend extends Requirements_Backend
     }
 
     /**
+     * @return JSBuilder
+     */
+    public function getJsBuilder(): JSBuilder
+    {
+        return $this->jsBuilder;
+    }
+
+    /**
+     * @param JSBuilder $jsBuilder
+     */
+    public function setJsBuilder(JSBuilder $jsBuilder): void
+    {
+        $this->jsBuilder = $jsBuilder;
+    }
+
+    /**
+     * @return CSSBuilder
+     */
+    public function getCssBuilder(): CSSBuilder
+    {
+        return $this->cssBuilder;
+    }
+
+    /**
+     * @param CSSBuilder $cssBuilder
+     */
+    public function setCssBuilder(CSSBuilder $cssBuilder): void
+    {
+        $this->cssBuilder = $cssBuilder;
+    }
+
+    /**
      * @param string $requirements
      * @return string
      */
     protected function createHeadTags(string $requirements): string
     {
-        $requirements = $this->getCssBuilder()->getCSSHeadTags($requirements);
-        $requirements = $this->getJsBuilder()->getJSHeadTags($requirements);
+        $requirements = $this->getCssBuilder()->getHeadTags($requirements);
+        $requirements = $this->getJsBuilder()->getHeadTags($requirements);
 
         foreach ($this->getCustomHeadTags() as $customHeadTag) {
             $requirements .= "{$customHeadTag}\n";
         }
 
         return $requirements;
-    }
-
-    /**
-     * @return bool
-     */
-    public static function isUsesNonce(): bool
-    {
-        return static::config()->get('useNonce') || self::$usesNonce;
-    }
-
-    /**
-     * @param bool static::isUseNonce()
-     */
-    public static function setUsesNonce(bool $usesNonce): void
-    {
-        self::$usesNonce = $usesNonce;
     }
 
     /**
@@ -352,37 +384,5 @@ class CSPBackend extends Requirements_Backend
         }
 
         return $content;
-    }
-
-    /**
-     * @return CSSBuilder
-     */
-    public function getCssBuilder(): CSSBuilder
-    {
-        return $this->cssBuilder;
-    }
-
-    /**
-     * @param CSSBuilder $cssBuilder
-     */
-    public function setCssBuilder(CSSBuilder $cssBuilder): void
-    {
-        $this->cssBuilder = $cssBuilder;
-    }
-
-    /**
-     * @return JSBuilder
-     */
-    public function getJsBuilder(): JSBuilder
-    {
-        return $this->jsBuilder;
-    }
-
-    /**
-     * @param JSBuilder $jsBuilder
-     */
-    public function setJsBuilder(JSBuilder $jsBuilder): void
-    {
-        $this->jsBuilder = $jsBuilder;
     }
 }
