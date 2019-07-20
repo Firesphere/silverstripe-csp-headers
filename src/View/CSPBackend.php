@@ -223,7 +223,12 @@ class CSPBackend extends Requirements_Backend
 
         // Skip if content isn't injectable, or there is nothing to inject
         $tagsAvailable = preg_match('#</head\b#', $content);
-        $hasFiles = $this->css || $this->javascript || $this->customCSS || $this->customScript || $this->customHeadTags;
+        $hasFiles = count($this->css) ||
+            count($this->javascript) ||
+            count($this->customCSS) ||
+            count($this->customScript) ||
+            count($this->customHeadTags);
+
         if (!$tagsAvailable || !$hasFiles) {
             return $content;
         }

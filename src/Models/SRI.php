@@ -3,6 +3,7 @@
 namespace Firesphere\CSPHeaders\Models;
 
 use SilverStripe\ORM\DataObject;
+use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
 use SilverStripe\Security\PermissionProvider;
 
@@ -30,7 +31,7 @@ class SRI extends DataObject implements PermissionProvider
 
     /**
      * Created on request
-     * @param null $member
+     * @param null|Member $member
      * @param array $context
      * @return bool
      */
@@ -41,7 +42,7 @@ class SRI extends DataObject implements PermissionProvider
 
     /**
      * If it needs to be edited, it should actually be recreated
-     * @param null $member
+     * @param null|Member $member
      * @return bool
      */
     public function canEdit($member = null)
@@ -50,7 +51,7 @@ class SRI extends DataObject implements PermissionProvider
     }
 
     /**
-     * @param null $member
+     * @param null|Member $member
      * @return bool|int
      */
     public function canDelete($member = null)
