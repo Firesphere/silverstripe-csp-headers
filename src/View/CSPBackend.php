@@ -327,7 +327,7 @@ class CSPBackend extends Requirements_Backend
         if (!$sri || !$sri->isInDB()) {
             $sri = SRI::create(['File' => $file]);
         }
-        if (!$sri->isInDB() ||
+        if (!$sri->SRI ||
             (Controller::curr()->getRequest()->getVar('updatesri') && $this->canUpdateSRI())
         ) {
             // Since this is the CSP Backend, an SRI for external files is automatically created
