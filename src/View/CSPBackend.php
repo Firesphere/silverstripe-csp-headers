@@ -222,14 +222,9 @@ class CSPBackend extends Requirements_Backend
         }
 
         // Skip if content isn't injectable, or there is nothing to inject
-        $tagsAvailable = preg_match('#</head\b#', $content);
-        $hasFiles = count($this->css) ||
-            count($this->javascript) ||
-            count($this->customCSS) ||
-            count($this->customScript) ||
-            count($this->customHeadTags);
+        $shouldContinue = $this->shouldContinue($content);
 
-        if (!$tagsAvailable || !$hasFiles) {
+        if ($shouldContinue) {
             return $content;
         }
         $requirements = '';
@@ -319,5 +314,21 @@ class CSPBackend extends Requirements_Backend
     public static function setUsesNonce(bool $usesNonce): void
     {
         self::$usesNonce = $usesNonce;
+    }
+
+    /**
+     * @param $content
+     * @return bool
+     */
+    protected function shouldContinue($content): bool
+    {
+        $tagsAvailable = preg_match('#</head\b#', $content);
+        $hasFiles = count($this->css) ||
+            count($this->javascript) ||
+            count($this->customCSS) ||
+            count($this->customScript) ||
+            count($this->customHeadTags);
+
+        return $tagsAvailable && $hasFiles;
     }
 }
