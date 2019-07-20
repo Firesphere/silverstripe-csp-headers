@@ -6,6 +6,7 @@ use Page;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ManyManyList;
+use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
 use SilverStripe\Security\PermissionProvider;
 
@@ -79,7 +80,7 @@ class CSPDomain extends DataObject implements PermissionProvider
     }
 
     /**
-     * @param null $member
+     * @param null|Member $member
      * @param array $context
      * @return bool|int
      */
@@ -95,7 +96,7 @@ class CSPDomain extends DataObject implements PermissionProvider
     }
 
     /**
-     * @param null $member
+     * @param null|Member $member
      * @return bool|int
      */
     public function canEdit($member = null)
@@ -110,7 +111,7 @@ class CSPDomain extends DataObject implements PermissionProvider
     }
 
     /**
-     * @param null $member
+     * @param null|Member $member
      * @return bool|int
      */
     public function canView($member = null)
@@ -125,7 +126,7 @@ class CSPDomain extends DataObject implements PermissionProvider
     }
 
     /**
-     * @param null $member
+     * @param null|Member $member
      * @return bool|int
      */
     public function canDelete($member = null)
