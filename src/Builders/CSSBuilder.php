@@ -3,7 +3,6 @@
 
 namespace Firesphere\CSPHeaders\Builders;
 
-
 use Firesphere\CSPHeaders\View\CSPBackend;
 use GuzzleHttp\Exception\GuzzleException;
 use SilverStripe\Control\Controller;
@@ -21,7 +20,7 @@ class CSSBuilder
      * @var SRIBuilder
      */
     protected $sriBuilder;
-    
+
     public function __construct($backend)
     {
         $this->owner = $backend;
@@ -66,5 +65,4 @@ class CSSBuilder
 
         return $requirements;
     }
-
 }

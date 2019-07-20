@@ -29,14 +29,6 @@ use function hash;
 class ControllerCSPExtension extends Extension
 {
     /**
-     * @var array
-     */
-    protected $headTags = [];
-    /**
-     * @var string randomised sha512 nonce for enabling scripts if you don't want to use validating of the full script
-     */
-    protected $nonce;
-    /**
      * Base CSP configuration
      * @var array
      */
@@ -49,6 +41,14 @@ class ControllerCSPExtension extends Extension
      * @var array
      */
     protected static $inlineCSS = [];
+    /**
+     * @var array
+     */
+    protected $headTags = [];
+    /**
+     * @var string randomised sha512 nonce for enabling scripts if you don't want to use validating of the full script
+     */
+    protected $nonce;
 
     /**
      * @param string $js

@@ -3,7 +3,6 @@
 
 namespace Firesphere\CSPHeaders\Builders;
 
-
 use Firesphere\CSPHeaders\View\CSPBackend;
 use GuzzleHttp\Exception\GuzzleException;
 use SilverStripe\Control\Controller;

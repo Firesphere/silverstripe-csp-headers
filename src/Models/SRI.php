@@ -28,16 +28,31 @@ class SRI extends DataObject implements PermissionProvider
         'File'
     ];
 
+    /**
+     * Created on request
+     * @param null $member
+     * @param array $context
+     * @return bool
+     */
     public function canCreate($member = null, $context = array())
     {
         return false;
     }
 
+    /**
+     * If it needs to be edited, it should actually be recreated
+     * @param null $member
+     * @return bool
+     */
     public function canEdit($member = null)
     {
         return false;
     }
 
+    /**
+     * @param null $member
+     * @return bool|int
+     */
     public function canDelete($member = null)
     {
         return Permission::checkMember($member, 'DELETE_SRI');

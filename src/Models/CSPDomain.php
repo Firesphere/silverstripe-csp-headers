@@ -3,6 +3,7 @@
 namespace Firesphere\CSPHeaders\Models;
 
 use Page;
+use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ManyManyList;
 use SilverStripe\Security\Permission;
@@ -36,6 +37,10 @@ class CSPDomain extends DataObject implements PermissionProvider
         'Source'
     ];
 
+    /**
+     * @todo make translatable
+     * @var array
+     */
     private static $sourceMap = [
         'default' => 'All',
         'script'  => 'Javascripts',
@@ -52,11 +57,17 @@ class CSPDomain extends DataObject implements PermissionProvider
         'Source'
     ];
 
+    /**
+     * @return string
+     */
     public function getTitle()
     {
         return $this->Domain;
     }
 
+    /**
+     * @return FieldList
+     */
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
@@ -67,6 +78,11 @@ class CSPDomain extends DataObject implements PermissionProvider
         return $fields;
     }
 
+    /**
+     * @param null $member
+     * @param array $context
+     * @return bool|int
+     */
     public function canCreate($member = null, $context = array())
     {
         $canCreate = parent::canCreate($member, $context);
@@ -78,6 +94,10 @@ class CSPDomain extends DataObject implements PermissionProvider
         return $canCreate;
     }
 
+    /**
+     * @param null $member
+     * @return bool|int
+     */
     public function canEdit($member = null)
     {
         $canEdit = parent::canEdit($member);
@@ -89,6 +109,10 @@ class CSPDomain extends DataObject implements PermissionProvider
         return $canEdit;
     }
 
+    /**
+     * @param null $member
+     * @return bool|int
+     */
     public function canView($member = null)
     {
         $canView = parent::canView($member);
@@ -100,6 +124,10 @@ class CSPDomain extends DataObject implements PermissionProvider
         return $canView;
     }
 
+    /**
+     * @param null $member
+     * @return bool|int
+     */
     public function canDelete($member = null)
     {
         $canDelete = parent::canDelete($member);

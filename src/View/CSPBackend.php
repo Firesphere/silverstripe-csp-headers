@@ -2,15 +2,11 @@
 
 namespace Firesphere\CSPHeaders\View;
 
-use Exception;
 use Firesphere\CSPHeaders\Builders\CSSBuilder;
 use Firesphere\CSPHeaders\Builders\JSBuilder;
 use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
-use Firesphere\CSPHeaders\Models\SRI;
-use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use SilverStripe\Control\Controller;
-use SilverStripe\Control\Director;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Manifest\ModuleResourceLoader;
 use SilverStripe\Dev\Deprecation;
@@ -24,15 +20,6 @@ class CSPBackend extends Requirements_Backend
 
     public const SHA256 = 'sha256';
     public const SHA384 = 'sha384';
-
-    /**
-     * @var CSSBuilder
-     */
-    protected $cssBuilder;
-    /**
-     * @var JSBuilder
-     */
-    protected $jsBuilder;
     /**
      * @var bool
      */
@@ -57,6 +44,14 @@ class CSPBackend extends Requirements_Backend
      * @var bool
      */
     protected static $usesNonce = false;
+    /**
+     * @var CSSBuilder
+     */
+    protected $cssBuilder;
+    /**
+     * @var JSBuilder
+     */
+    protected $jsBuilder;
 
     public function __construct()
     {
@@ -97,22 +92,6 @@ class CSPBackend extends Requirements_Backend
     }
 
     /**
-     * @return bool
-     */
-    public static function isUsesNonce(): bool
-    {
-        return static::config()->get('useNonce') || self::$usesNonce;
-    }
-
-    /**
-     * @param bool static::isUseNonce()
-     */
-    public static function setUsesNonce(bool $usesNonce): void
-    {
-        self::$usesNonce = $usesNonce;
-    }
-
-    /**
      * Specific method for JS insertion
      *
      * @param $js
@@ -137,24 +116,6 @@ class CSPBackend extends Requirements_Backend
     }
 
     /**
-     * Determine the type of the head tag if it's js or css
-     * @param string $html
-     * @return string|null
-     */
-    public function getTagType($html)
-    {
-        $html = trim($html);
-        if (strpos($html, '<script') === 0) {
-            return 'javascript';
-        }
-        if (strpos($html, '<style') === 0) {
-            return 'css';
-        }
-
-        return null;
-    }
-
-    /**
      * Add the following custom HTML code to the `<head>` section of the page
      *
      * @param string $html Custom HTML code
@@ -173,6 +134,24 @@ class CSPBackend extends Requirements_Backend
         } else {
             $this->customHeadTags[$uniquenessID] = $html;
         }
+    }
+
+    /**
+     * Determine the type of the head tag if it's js or css
+     * @param string $html
+     * @return string|null
+     */
+    public function getTagType($html)
+    {
+        $html = trim($html);
+        if (strpos($html, '<script') === 0) {
+            return 'javascript';
+        }
+        if (strpos($html, '<style') === 0) {
+            return 'css';
+        }
+
+        return null;
     }
 
     /**
@@ -319,5 +298,21 @@ class CSPBackend extends Requirements_Backend
         }
 
         return $requirements;
+    }
+
+    /**
+     * @return bool
+     */
+    public static function isUsesNonce(): bool
+    {
+        return static::config()->get('useNonce') || self::$usesNonce;
+    }
+
+    /**
+     * @param bool static::isUseNonce()
+     */
+    public static function setUsesNonce(bool $usesNonce): void
+    {
+        self::$usesNonce = $usesNonce;
     }
 }
