@@ -36,6 +36,7 @@ class SRIBuilder
     {
         $sri = SRI::findOrCreate($file);
         if ($this->shouldUpdateSRI()) {
+            $sri->SRI = null;
             $sri->forceChange();
             $sri->write();
         }
