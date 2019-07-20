@@ -18,7 +18,8 @@
   ],
   "require": {
     "silverstripe/framework": "^4",
-    "paragonie/csp-builder": "^2"
+    "paragonie/csp-builder": "^2",
+    "guzzlehttp/guzzle": "^6"
   },
   "require-dev": {
     "scriptfusion/phpunit-immediate-exception-printer": "^1",
