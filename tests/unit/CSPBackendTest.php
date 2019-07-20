@@ -34,4 +34,19 @@ class CSPBackendTest extends SapphireTest
         $this->assertContains('alert("hello world");', $tags[0]);
         $this->assertContains($js, ControllerCSPExtension::getInlineJS());
     }
+
+    public function testInsertCSSTag()
+    {
+        $css = 'body { color: red; }';
+
+        /** @var CSPBackend $backend */
+        $backend = Injector::inst()->get(CSPBackend::class);
+
+        $backend->customCSS($css);
+
+        $tags = $backend->getCustomCSS();
+
+        $this->assertContains('body { color: red; }', $tags[0]);
+        $this->assertContains($css, ControllerCSPExtension::getInlineCSS());
+    }
 }
