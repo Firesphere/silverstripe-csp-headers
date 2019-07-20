@@ -92,6 +92,38 @@ class CSPBackend extends Requirements_Backend
     }
 
     /**
+     * @return array
+     */
+    public static function getHeadCSS(): array
+    {
+        return self::$headCSS;
+    }
+
+    /**
+     * @param array $headCSS
+     */
+    public static function setHeadCSS(array $headCSS): void
+    {
+        self::$headCSS = $headCSS;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getHeadJS(): array
+    {
+        return self::$headJS;
+    }
+
+    /**
+     * @param array $headJS
+     */
+    public static function setHeadJS(array $headJS): void
+    {
+        self::$headJS = $headJS;
+    }
+
+    /**
      * Specific method for JS insertion
      *
      * @param $js
@@ -273,30 +305,8 @@ class CSPBackend extends Requirements_Backend
      */
     protected function createHeadTags(string $requirements): string
     {
-        foreach (static::$headCSS as $css) {
-            $options = ['type' => 'text/css'];
-            if (static::isUsesNonce()) {
-                $options['nonce'] = Controller::curr()->getNonce();
-            }
-            $requirements .= HTML::createTag(
-                'style',
-                $options,
-                "\n{$css}\n"
-            );
-            $requirements .= "\n";
-        }
-        foreach (static::$headJS as $script) {
-            $options = ['type' => 'application/javascript'];
-            if (static::isUsesNonce()) {
-                $options['nonce'] = Controller::curr()->getNonce();
-            }
-            $requirements .= HTML::createTag(
-                'script',
-                $options,
-                "//<![CDATA[\n{$script}\n//]]>"
-            );
-            $requirements .= "\n";
-        }
+        $requirements = $this->getCssBuilder()->getCSSHeadTags($requirements);
+        $requirements = $this->getJsBuilder()->getJSHeadTags($requirements);
 
         foreach ($this->getCustomHeadTags() as $customHeadTag) {
             $requirements .= "{$customHeadTag}\n";

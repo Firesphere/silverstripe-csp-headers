@@ -78,6 +78,28 @@ class JSBuilder
     }
 
     /**
+     * @param string $requirements
+     * @return string
+     */
+    public function getJSHeadTags(string $requirements): string
+    {
+        $options = ['type' => 'application/javascript'];
+        foreach (CSPBackend::getHeadJS() as $script) {
+            if (CSPBackend::isUsesNonce()) {
+                $options['nonce'] = Controller::curr()->getNonce();
+            }
+            $requirements .= HTML::createTag(
+                'script',
+                $options,
+                "//<![CDATA[\n{$script}\n//]]>"
+            );
+            $requirements .= "\n";
+        }
+
+        return $requirements;
+    }
+
+    /**
      * @return SRIBuilder
      */
     public function getSriBuilder(): SRIBuilder

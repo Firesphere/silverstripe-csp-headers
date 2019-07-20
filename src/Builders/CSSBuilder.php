@@ -70,6 +70,29 @@ class CSSBuilder
         return $requirements;
     }
 
+
+    /**
+     * @param string $requirements
+     * @return string
+     */
+    public function getCSSHeadTags(string $requirements): string
+    {
+        $options = ['type' => 'text/css'];
+        foreach (CSPBackend::getHeadCSS() as $css) {
+            if (CSPBackend::isUsesNonce()) {
+                $options['nonce'] = Controller::curr()->getNonce();
+            }
+            $requirements .= HTML::createTag(
+                'style',
+                $options,
+                "\n{$css}\n"
+            );
+            $requirements .= "\n";
+        }
+
+        return $requirements;
+    }
+
     /**
      * @return SRIBuilder
      */
