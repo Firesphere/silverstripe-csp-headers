@@ -343,4 +343,36 @@ class CSPBackend extends Requirements_Backend
 
         return $content;
     }
+
+    /**
+     * @return CSSBuilder
+     */
+    public function getCssBuilder(): CSSBuilder
+    {
+        return $this->cssBuilder;
+    }
+
+    /**
+     * @param CSSBuilder $cssBuilder
+     */
+    public function setCssBuilder(CSSBuilder $cssBuilder): void
+    {
+        $this->cssBuilder = $cssBuilder;
+    }
+
+    /**
+     * @return JSBuilder
+     */
+    public function getJsBuilder(): JSBuilder
+    {
+        return $this->jsBuilder;
+    }
+
+    /**
+     * @param JSBuilder $jsBuilder
+     */
+    public function setJsBuilder(JSBuilder $jsBuilder): void
+    {
+        $this->jsBuilder = $jsBuilder;
+    }
 }

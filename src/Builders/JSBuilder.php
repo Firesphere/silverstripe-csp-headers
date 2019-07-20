@@ -21,6 +21,10 @@ class JSBuilder
      */
     protected $sriBuilder;
 
+    /**
+     * JSBuilder constructor.
+     * @param CSPBackend $backend
+     */
     public function __construct($backend)
     {
         $this->owner = $backend;
@@ -46,7 +50,7 @@ class JSBuilder
 
         // Build SRI if it's enabled
         if (CSPBackend::isJsSRI()) {
-            $htmlAttributes = $this->sriBuilder->buildSRI($file, $htmlAttributes);
+            $htmlAttributes = $this->getSriBuilder()->buildSRI($file, $htmlAttributes);
         }
         // Use nonces for inlines if requested
         if (CSPBackend::isUsesNonce()) {
@@ -71,5 +75,37 @@ class JSBuilder
         }
 
         return $jsRequirements;
+    }
+
+    /**
+     * @return CSPBackend
+     */
+    public function getOwner(): CSPBackend
+    {
+        return $this->owner;
+    }
+
+    /**
+     * @param CSPBackend $owner
+     */
+    public function setOwner(CSPBackend $owner): void
+    {
+        $this->owner = $owner;
+    }
+
+    /**
+     * @return SRIBuilder
+     */
+    public function getSriBuilder(): SRIBuilder
+    {
+        return $this->sriBuilder;
+    }
+
+    /**
+     * @param SRIBuilder $sriBuilder
+     */
+    public function setSriBuilder(SRIBuilder $sriBuilder): void
+    {
+        $this->sriBuilder = $sriBuilder;
     }
 }

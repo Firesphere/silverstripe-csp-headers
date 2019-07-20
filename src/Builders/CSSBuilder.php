@@ -21,6 +21,10 @@ class CSSBuilder
      */
     protected $sriBuilder;
 
+    /**
+     * CSSBuilder constructor.
+     * @param CSPBackend $backend
+     */
     public function __construct($backend)
     {
         $this->owner = $backend;
@@ -45,7 +49,7 @@ class CSSBuilder
         ], $params);
 
         if (CSPBackend::isCssSRI()) {
-            $htmlAttributes = $this->sriBuilder->buildSRI($file, $htmlAttributes);
+            $htmlAttributes = $this->getSriBuilder()->buildSRI($file, $htmlAttributes);
         }
 
         $requirements .= HTML::createTag('link', $htmlAttributes);
@@ -64,5 +68,37 @@ class CSSBuilder
         }
 
         return $requirements;
+    }
+
+    /**
+     * @return SRIBuilder
+     */
+    public function getSriBuilder(): SRIBuilder
+    {
+        return $this->sriBuilder;
+    }
+
+    /**
+     * @param SRIBuilder $sriBuilder
+     */
+    public function setSriBuilder(SRIBuilder $sriBuilder): void
+    {
+        $this->sriBuilder = $sriBuilder;
+    }
+
+    /**
+     * @return CSPBackend
+     */
+    public function getOwner(): CSPBackend
+    {
+        return $this->owner;
+    }
+
+    /**
+     * @param CSPBackend $owner
+     */
+    public function setOwner(CSPBackend $owner): void
+    {
+        $this->owner = $owner;
     }
 }

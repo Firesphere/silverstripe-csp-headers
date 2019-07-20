@@ -33,7 +33,15 @@ class ControllerCSPExtension extends Extension
     /**
      * @var bool
      */
-    protected $generate;
+    protected $generatePolicies;
+    /**
+     * @var string randomised sha512 nonce for enabling scripts if you don't want to use validating of the full script
+     */
+    protected $nonce;
+    /**
+     * @var array
+     */
+    protected $headTags = [];
     /**
      * Base CSP configuration
      * @var array
@@ -47,14 +55,6 @@ class ControllerCSPExtension extends Extension
      * @var array
      */
     protected static $inlineCSS = [];
-    /**
-     * @var array
-     */
-    protected $headTags = [];
-    /**
-     * @var string randomised sha512 nonce for enabling scripts if you don't want to use validating of the full script
-     */
-    protected $nonce;
 
     /**
      * @param string $js
@@ -95,7 +95,7 @@ class ControllerCSPExtension extends Extension
     {
         /** @var ContentController $owner */
         $owner = $this->owner;
-        $this->generate = Director::isLive() || static::checkCookie($owner->getRequest());
+        $this->generatePolicies = Director::isLive() || static::checkCookie($owner->getRequest());
     }
 
     /**
@@ -106,7 +106,7 @@ class ControllerCSPExtension extends Extension
     {
         /** @var Controller $owner */
         $owner = $this->owner;
-        if ($this->generate) {
+        if ($this->generatePolicies) {
             $config = CSPBackend::config()->get('csp_config');
             $legacy = $config['legacy'] ?? true;
             /** @var CSPBuilder $policy */
