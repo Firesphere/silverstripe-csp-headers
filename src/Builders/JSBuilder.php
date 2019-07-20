@@ -35,13 +35,12 @@ class JSBuilder implements BuilderInterface
     /**
      * @param $attributes
      * @param $file
-     * @param $jsRequirements
+     * @param $requirements
      * @param $path
      * @return string
-     * @throws GuzzleException
      * @throws ValidationException
      */
-    public function buildTags($file, $attributes, $jsRequirements, $path): string
+    public function buildTags($file, $attributes, string $requirements, string $path): string
     {
         // Build html attributes
         $htmlAttributes = array_merge([

@@ -5,7 +5,6 @@ namespace Firesphere\CSPHeaders\Builders;
 
 use Firesphere\CSPHeaders\Interfaces\BuilderInterface;
 use Firesphere\CSPHeaders\View\CSPBackend;
-use GuzzleHttp\Exception\GuzzleException;
 use SilverStripe\Control\Controller;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\ValidationException;
@@ -34,20 +33,19 @@ class CSSBuilder implements BuilderInterface
 
     /**
      * @param $file
-     * @param $params
+     * @param $attributes
      * @param string $requirements
      * @param string $path
      * @return string
-     * @throws GuzzleException
      * @throws ValidationException
      */
-    public function buildTags($file, $params, string $requirements, string $path): string
+    public function buildTags($file, $attributes, string $requirements, string $path): string
     {
         $htmlAttributes = array_merge([
             'rel'  => 'stylesheet',
             'type' => 'text/css',
             'href' => $path,
-        ], $params);
+        ], $attributes);
 
         if (CSPBackend::isCssSRI()) {
             $htmlAttributes = $this->getSriBuilder()->buildSRI($file, $htmlAttributes);
