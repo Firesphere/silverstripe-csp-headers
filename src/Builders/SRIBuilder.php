@@ -7,7 +7,6 @@ use Exception;
 use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
 use Firesphere\CSPHeaders\Models\SRI;
 use Firesphere\CSPHeaders\View\CSPBackend;
-use GuzzleHttp\Client;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\ORM\ValidationException;
@@ -15,15 +14,6 @@ use SilverStripe\Security\Security;
 
 class SRIBuilder
 {
-    /**
-     * @var Client
-     */
-    protected $client;
-
-    public function __construct()
-    {
-        $this->setClient(new Client());
-    }
 
     /**
      * @param $file
@@ -64,21 +54,5 @@ class SRIBuilder
             ((Security::getCurrentUser() && Security::getCurrentUser()->inGroup('administrators')) ||
                 // OR the site is in dev mode
                 Director::isDev()));
-    }
-
-    /**
-     * @return Client
-     */
-    public function getClient(): Client
-    {
-        return $this->client;
-    }
-
-    /**
-     * @param Client $client
-     */
-    public function setClient(Client $client): void
-    {
-        $this->client = $client;
     }
 }
