@@ -34,13 +34,7 @@ class SRIBuilder
      */
     public function buildSRI($file, array $htmlAttributes): array
     {
-        /** @var SRI|null $sri */
-        $sri = SRI::get()->filter(['File' => $file])->first();
-        // Create on first time it's run, or if it's been deleted because the file has changed, known to the admin
-        if (!$sri || !$sri->isInDB()) {
-            $sri = SRI::create(['File' => $file]);
-            $sri->write();
-        }
+        $sri = SRI::findOrCreate($file);
         if ($this->shouldUpdateSRI()) {
             $sri->forceChange();
             $sri->write();
