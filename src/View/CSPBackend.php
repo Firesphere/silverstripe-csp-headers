@@ -5,6 +5,7 @@ namespace Firesphere\CSPHeaders\View;
 use Firesphere\CSPHeaders\Builders\CSSBuilder;
 use Firesphere\CSPHeaders\Builders\JSBuilder;
 use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
+use Firesphere\CSPHeaders\Traits\CSPBackendTrait;
 use GuzzleHttp\Exception\GuzzleException;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Manifest\ModuleResourceLoader;
@@ -15,126 +16,15 @@ use SilverStripe\View\Requirements_Backend;
 class CSPBackend extends Requirements_Backend
 {
     use Configurable;
+    use CSPBackendTrait;
 
     public const SHA256 = 'sha256';
     public const SHA384 = 'sha384';
-    /**
-     * @var bool
-     */
-    protected static $jsSRI;
-    /**
-     * CSS defaults to false.
-     * It's causing a lot of trouble with CDN's usually
-     * @var bool
-     */
-    protected static $cssSRI;
-    /**
-     * JS to be inserted in to the head
-     * @var array
-     */
-    protected static $headJS = [];
-    /**
-     * CSS to be inserted in to the head
-     * @var array
-     */
-    protected static $headCSS = [];
-    /**
-     * @var bool
-     */
-    protected static $usesNonce = false;
-    /**
-     * @var CSSBuilder
-     */
-    protected $cssBuilder;
-    /**
-     * @var JSBuilder
-     */
-    protected $jsBuilder;
 
     public function __construct()
     {
-        $this->cssBuilder = new CSSBuilder($this);
-        $this->jsBuilder = new JSBuilder($this);
-    }
-
-    /**
-     * @return bool
-     */
-    public static function isJsSRI(): bool
-    {
-        return static::config()->get('jsSRI') || self::$jsSRI;
-    }
-
-    /**
-     * @param bool $jsSRI
-     */
-    public static function setJsSRI(bool $jsSRI): void
-    {
-        self::$jsSRI = $jsSRI;
-    }
-
-    /**
-     * @return bool
-     */
-    public static function isCssSRI(): bool
-    {
-        return static::config()->get('cssSRI') || self::$cssSRI;
-    }
-
-    /**
-     * @param bool $cssSRI
-     */
-    public static function setCssSRI(bool $cssSRI): void
-    {
-        self::$cssSRI = $cssSRI;
-    }
-
-    /**
-     * @return array
-     */
-    public static function getHeadCSS(): array
-    {
-        return self::$headCSS;
-    }
-
-    /**
-     * @param array $headCSS
-     */
-    public static function setHeadCSS(array $headCSS): void
-    {
-        self::$headCSS = $headCSS;
-    }
-
-    /**
-     * @return array
-     */
-    public static function getHeadJS(): array
-    {
-        return self::$headJS;
-    }
-
-    /**
-     * @param array $headJS
-     */
-    public static function setHeadJS(array $headJS): void
-    {
-        self::$headJS = $headJS;
-    }
-
-    /**
-     * @return bool
-     */
-    public static function isUsesNonce(): bool
-    {
-        return static::config()->get('useNonce') || self::$usesNonce;
-    }
-
-    /**
-     * @param bool static::isUseNonce()
-     */
-    public static function setUsesNonce(bool $usesNonce): void
-    {
-        self::$usesNonce = $usesNonce;
+        $this->setCssBuilder(new CSSBuilder($this));
+        $this->setJsBuilder(new JSBuilder($this));
     }
 
     /**
@@ -143,7 +33,7 @@ class CSPBackend extends Requirements_Backend
      * @param $js
      * @param null|string $uniquenessID
      */
-    public function customScript($js, $uniquenessID = null)
+    public function customScript($js, $uniquenessID = null): void
     {
         ControllerCSPExtension::addJS($js);
 
@@ -154,7 +44,7 @@ class CSPBackend extends Requirements_Backend
      * @param $css
      * @param null|string $uniquenessID
      */
-    public function customCSS($css, $uniquenessID = null)
+    public function customCSS($css, $uniquenessID = null): void
     {
         ControllerCSPExtension::addCSS($css);
 
@@ -167,7 +57,7 @@ class CSPBackend extends Requirements_Backend
      * @param string $html Custom HTML code
      * @param string|null $uniquenessID A unique ID that ensures a piece of code is only added once
      */
-    public function insertHeadTags($html, $uniquenessID = null)
+    public function insertHeadTags($html, $uniquenessID = null): void
     {
         $uniquenessID = $uniquenessID ?: uniqid('tag', false);
         $type = $this->getTagType($html);
@@ -187,7 +77,7 @@ class CSPBackend extends Requirements_Backend
      * @param string $html
      * @return string|null
      */
-    public function getTagType($html)
+    public function getTagType($html): ?string
     {
         $html = trim($html);
         if (strpos($html, '<script') === 0) {
@@ -210,7 +100,7 @@ class CSPBackend extends Requirements_Backend
      * - 'defer' : Boolean value to set defer attribute to script tag
      * - 'type' : Override script type= value.
      */
-    public function javascript($file, $options = [])
+    public function javascript($file, $options = []): void
     {
         $file = ModuleResourceLoader::singleton()->resolvePath($file);
 
@@ -278,20 +168,8 @@ class CSPBackend extends Requirements_Backend
 
         // Combine files - updates $this->javascript and $this->css
         $this->processCombinedFiles();
-
-        // Script tags for js links
-        foreach ($this->getJavascript() as $file => $attributes) {
-            $path = $this->pathForFile($file);
-            $jsRequirements = $this->getJsBuilder()->buildTags($file, $attributes, $jsRequirements, $path);
-        }
-        $jsRequirements = $this->getJsBuilder()->getCustomTags($jsRequirements);
-
-        // CSS file links
-        foreach ($this->getCSS() as $file => $attributes) {
-            $path = $this->pathForFile($file);
-            $requirements = $this->getCssBuilder()->buildTags($file, $attributes, $requirements, $path);
-        }
-        $requirements = $this->getCssBuilder()->getCustomTags($requirements);
+        $jsRequirements = $this->getJSRequirements($jsRequirements);
+        $requirements = $this->getCSSRequirements($requirements);
 
         $requirements = $this->createHeadTags($requirements);
         $content = $this->insertContent($content, $requirements, $jsRequirements);
@@ -313,38 +191,6 @@ class CSPBackend extends Requirements_Backend
             count($this->customHeadTags);
 
         return $tagsAvailable && $hasFiles;
-    }
-
-    /**
-     * @return JSBuilder
-     */
-    public function getJsBuilder(): JSBuilder
-    {
-        return $this->jsBuilder;
-    }
-
-    /**
-     * @param JSBuilder $jsBuilder
-     */
-    public function setJsBuilder(JSBuilder $jsBuilder): void
-    {
-        $this->jsBuilder = $jsBuilder;
-    }
-
-    /**
-     * @return CSSBuilder
-     */
-    public function getCssBuilder(): CSSBuilder
-    {
-        return $this->cssBuilder;
-    }
-
-    /**
-     * @param CSSBuilder $cssBuilder
-     */
-    public function setCssBuilder(CSSBuilder $cssBuilder): void
-    {
-        $this->cssBuilder = $cssBuilder;
     }
 
     /**
@@ -384,5 +230,41 @@ class CSPBackend extends Requirements_Backend
         }
 
         return $content;
+    }
+
+    /**
+     * @param string $jsRequirements
+     * @return string
+     * @throws GuzzleException
+     * @throws ValidationException
+     */
+    protected function getJSRequirements(string $jsRequirements): string
+    {
+        // Script tags for js links
+        foreach ($this->getJavascript() as $file => $attributes) {
+            $path = $this->pathForFile($file);
+            $jsRequirements = $this->getJsBuilder()->buildTags($file, $attributes, $jsRequirements, $path);
+        }
+        $jsRequirements = $this->getJsBuilder()->getCustomTags($jsRequirements);
+
+        return $jsRequirements;
+    }
+
+    /**
+     * @param string $requirements
+     * @return string
+     * @throws GuzzleException
+     * @throws ValidationException
+     */
+    protected function getCSSRequirements(string $requirements): string
+    {
+        // CSS file links
+        foreach ($this->getCSS() as $file => $attributes) {
+            $path = $this->pathForFile($file);
+            $requirements = $this->getCssBuilder()->buildTags($file, $attributes, $requirements, $path);
+        }
+        $requirements = $this->getCssBuilder()->getCustomTags($requirements);
+
+        return $requirements;
     }
 }
