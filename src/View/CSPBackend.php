@@ -3,6 +3,8 @@
 namespace Firesphere\CSPHeaders\View;
 
 use Exception;
+use Firesphere\CSPHeaders\Builders\CSSBuilder;
+use Firesphere\CSPHeaders\Builders\JSBuilder;
 use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
 use Firesphere\CSPHeaders\Models\SRI;
 use GuzzleHttp\Client;
@@ -13,7 +15,6 @@ use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Manifest\ModuleResourceLoader;
 use SilverStripe\Dev\Deprecation;
 use SilverStripe\ORM\ValidationException;
-use SilverStripe\Security\Security;
 use SilverStripe\View\HTML;
 use SilverStripe\View\Requirements_Backend;
 
@@ -24,6 +25,14 @@ class CSPBackend extends Requirements_Backend
     public const SHA256 = 'sha256';
     public const SHA384 = 'sha384';
 
+    /**
+     * @var CSSBuilder
+     */
+    protected $cssBuilder;
+    /**
+     * @var JSBuilder
+     */
+    protected $jsBuilder;
     /**
      * @var bool
      */
@@ -48,6 +57,12 @@ class CSPBackend extends Requirements_Backend
      * @var bool
      */
     protected static $usesNonce = false;
+
+    public function __construct()
+    {
+        $this->cssBuilder = new CSSBuilder($this);
+        $this->jsBuilder = new JSBuilder($this);
+    }
 
     /**
      * @return bool
@@ -241,12 +256,14 @@ class CSPBackend extends Requirements_Backend
 
         // Script tags for js links
         foreach ($this->getJavascript() as $file => $attributes) {
-            $jsRequirements = $this->buildJSTag($attributes, $file, $jsRequirements);
+            $path = $this->pathForFile($file);
+            $jsRequirements = $this->jsBuilder->buildJSTag($attributes, $file, $jsRequirements, $path);
         }
 
         // CSS file links
         foreach ($this->getCSS() as $file => $params) {
-            $requirements = $this->buildCSSTags($file, $params, $requirements);
+            $path = $this->pathForFile($file);
+            $requirements = $this->cssBuilder->buildCSSTags($file, $params, $requirements, $path);
         }
 
         $requirements = $this->createHeadTags($requirements);
@@ -264,158 +281,6 @@ class CSPBackend extends Requirements_Backend
         }
 
         return $content;
-    }
-
-    /**
-     * @param $attributes
-     * @param $file
-     * @param $jsRequirements
-     * @return string
-     * @throws GuzzleException
-     * @throws ValidationException
-     */
-    protected function buildJSTag($attributes, $file, $jsRequirements): string
-    {
-        // Build html attributes
-        $htmlAttributes = array_merge([
-            'type' => $attributes['type'] ?? 'application/javascript',
-            'src'  => $this->pathForFile($file),
-        ], $attributes);
-
-        // Build SRI if it's enabled
-        if (static::isJsSRI()) {
-            $htmlAttributes = $this->buildSRI($file, $htmlAttributes);
-        }
-        // Use nonces for inlines if requested
-        if (static::isUsesNonce()) {
-            $htmlAttributes['nonce'] = base64_encode(Controller::curr()->getNonce());
-        }
-
-        $jsRequirements .= HTML::createTag('script', $htmlAttributes);
-        $jsRequirements .= "\n";
-
-        // Add all inline JavaScript *after* including external files they might rely on
-        foreach ($this->getCustomScripts() as $script) {
-            $options = ['type' => 'application/javascript'];
-            if (static::isUsesNonce()) {
-                $options['nonce'] = Controller::curr()->getNonce();
-            }
-            $jsRequirements .= HTML::createTag(
-                'script',
-                $options,
-                "//<![CDATA[\n{$script}\n//]]>"
-            );
-            $jsRequirements .= "\n";
-        }
-
-        return $jsRequirements;
-    }
-
-    /**
-     * @param $file
-     * @param array $htmlAttributes
-     * @return array
-     * @throws GuzzleException
-     * @throws ValidationException
-     * @throws Exception
-     */
-    protected function buildSRI($file, array $htmlAttributes): array
-    {
-        /** @var SRI|null $sri */
-        $sri = SRI::get()->filter(['File' => $file])->first();
-        // Create on first time it's run, or if it's been deleted because the file has changed, known to the admin
-        if (!$sri || !$sri->isInDB()) {
-            $sri = SRI::create(['File' => $file]);
-        }
-        if (!$sri->SRI ||
-            (Controller::curr()->getRequest()->getVar('updatesri') && $this->canUpdateSRI())
-        ) {
-            // Since this is the CSP Backend, an SRI for external files is automatically created
-            $location = $file;
-
-            if (!Director::is_site_url($file)) {
-                /** @var Client $client */
-                $client = new Client();
-                $result = $client->request('GET', $location);
-                $body = $result->getBody()->getContents();
-            } else {
-                $body = file_get_contents(Director::baseFolder() . '/' . $location);
-            }
-            $hash = hash(static::SHA384, $body, true);
-
-            $sri->update([
-                'SRI'  => base64_encode($hash)
-            ]);
-        }
-
-        $sri->write();
-
-        $request = Controller::curr()->getRequest();
-        $cookieSet = ControllerCSPExtension::checkCookie($request);
-
-        // Don't write integrity in dev, it's breaking build scripts
-        if ($sri->SRI && (Director::isLive() || $cookieSet)) {
-            $htmlAttributes['integrity'] = sprintf('%s-%s', static::SHA384, $sri->SRI);
-            if (!Director::is_site_url($file)) {
-                $htmlAttributes['crossorigin'] = 'anonymous';
-            }
-        }
-
-        return $htmlAttributes;
-    }
-
-    /**
-     * @return bool
-     */
-    private function canUpdateSRI()
-    {
-        return (
-            // Does the user have the powers
-            (
-                Security::getCurrentUser() &&
-                Security::getCurrentUser()->inGroup('administrators')
-            ) ||
-            // OR the site is in dev mode
-            Director::isDev()
-        );
-    }
-
-    /**
-     * @param $file
-     * @param $params
-     * @param string $requirements
-     * @return string
-     * @throws GuzzleException
-     * @throws ValidationException
-     */
-    protected function buildCSSTags($file, $params, string $requirements): string
-    {
-        $htmlAttributes = array_merge([
-            'rel'  => 'stylesheet',
-            'type' => 'text/css',
-            'href' => $this->pathForFile($file),
-        ], $params);
-
-        if (static::isCssSRI()) {
-            $htmlAttributes = $this->buildSRI($file, $htmlAttributes);
-        }
-
-        $requirements .= HTML::createTag('link', $htmlAttributes);
-        $requirements .= "\n";
-
-        // Literal custom CSS content
-        foreach ($this->getCustomCSS() as $css) {
-            $options = ['type' => 'text/css'];
-            // Use nonces for inlines if requested
-            if (static::isUsesNonce()) {
-                $options['nonce'] = base64_encode(Controller::curr()->getNonce());
-            }
-
-            $requirements .= HTML::createTag('style', $options, "\n{$css}\n");
-            $requirements .= "\n";
-        }
-
-        return $requirements;
     }
 
     /**
