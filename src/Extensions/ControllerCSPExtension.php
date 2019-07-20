@@ -10,6 +10,7 @@ use LeKoala\DebugBar\DebugBar;
 use PageController;
 use ParagonIE\ConstantTime\Base64;
 use ParagonIE\CSPBuilder\CSPBuilder;
+use SilverStripe\CMS\Controllers\ContentController;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Cookie;
@@ -92,7 +93,9 @@ class ControllerCSPExtension extends Extension
      */
     public function onBeforeInit()
     {
-        $this->generate = Director::isLive() || static::checkCookie($this->owner->getRequest());
+        /** @var ContentController $owner */
+        $owner = $this->owner;
+        $this->generate = Director::isLive() || static::checkCookie($owner->getRequest());
     }
 
     /**
