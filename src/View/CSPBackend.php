@@ -54,7 +54,7 @@ class CSPBackend extends Requirements_Backend
      */
     public static function isJsSRI(): bool
     {
-        return self::$jsSRI;
+        return static::config()->get('jsSRI') || self::$jsSRI;
     }
 
     /**
@@ -70,7 +70,7 @@ class CSPBackend extends Requirements_Backend
      */
     public static function isCssSRI(): bool
     {
-        return self::$cssSRI;
+        return static::config()->get('cssSRI') || self::$cssSRI;
     }
 
     /**
@@ -86,7 +86,7 @@ class CSPBackend extends Requirements_Backend
      */
     public static function isUsesNonce(): bool
     {
-        return static::config()->get('useNonce');
+        return static::config()->get('useNonce') || self::$usesNonce;
     }
 
     /**
@@ -217,7 +217,7 @@ class CSPBackend extends Requirements_Backend
      * @throws ValidationException
      * @throws GuzzleException
      */
-    public function includeInHTML($content)
+    public function includeInHTML($content): string
     {
         if (func_num_args() > 1) {
             Deprecation::notice(
@@ -274,7 +274,7 @@ class CSPBackend extends Requirements_Backend
      * @throws GuzzleException
      * @throws ValidationException
      */
-    protected function buildJSTag($attributes, $file, $jsRequirements)
+    protected function buildJSTag($attributes, $file, $jsRequirements): string
     {
         // Build html attributes
         $htmlAttributes = array_merge([
@@ -283,11 +283,11 @@ class CSPBackend extends Requirements_Backend
         ], $attributes);
 
         // Build SRI if it's enabled
-        if (static::config()->get('jsSRI')) {
+        if (static::isJsSRI()) {
             $htmlAttributes = $this->buildSRI($file, $htmlAttributes);
         }
         // Use nonces for inlines if requested
-        if (static::config()->get('useNonce')) {
+        if (static::isUsesNonce()) {
             $htmlAttributes['nonce'] = base64_encode(Controller::curr()->getNonce());
         }
 
@@ -325,7 +325,7 @@ class CSPBackend extends Requirements_Backend
         $sri = SRI::get()->filter(['File' => $file])->first();
         // Create on first time it's run, or if it's been deleted because the file has changed, known to the admin
         if (!$sri || !$sri->isInDB()) {
-            $sri = SRI::create();
+            $sri = SRI::create(['File' => $file]);
         }
         if (!$sri->isInDB() ||
             (Controller::curr()->getRequest()->getVar('updatesri') && $this->canUpdateSRI())
@@ -341,20 +341,21 @@ class CSPBackend extends Requirements_Backend
             } else {
                 $body = file_get_contents(Director::baseFolder() . '/' . $location);
             }
-            $sri->update([
-                'File' => $file,
-                'SRI'  => base64_encode(hash(static::SHA384, $body, true))
+            $hash = hash(static::SHA384, $body, true);
 
+            $sri->update([
+                'SRI'  => base64_encode($hash)
             ]);
 
-            $sri->write();
         }
+
+        $sri->write();
 
         $request = Controller::curr()->getRequest();
         $cookieSet = ControllerCSPExtension::checkCookie($request);
 
         // Don't write integrity in dev, it's breaking build scripts
-        if ($sri->isInDB() && (Director::isLive() || $cookieSet)) {
+        if ($sri->SRI && (Director::isLive() || $cookieSet)) {
             $htmlAttributes['integrity'] = sprintf('%s-%s', static::SHA384, $sri->SRI);
             if (!Director::is_site_url($file)) {
                 $htmlAttributes['crossorigin'] = 'anonymous';
@@ -396,7 +397,7 @@ class CSPBackend extends Requirements_Backend
             'href' => $this->pathForFile($file),
         ], $params);
 
-        if (static::config()->get('cssSRI')) {
+        if (static::isCssSRI()) {
             $htmlAttributes = $this->buildSRI($file, $htmlAttributes);
         }
 
@@ -426,7 +427,7 @@ class CSPBackend extends Requirements_Backend
     {
         foreach (static::$headCSS as $css) {
             $options = ['type' => 'text/css'];
-            if (static::config()->get('useNonce')) {
+            if (static::isUsesNonce()) {
                 $options['nonce'] = Controller::curr()->getNonce();
             }
             $requirements .= HTML::createTag(
@@ -438,7 +439,7 @@ class CSPBackend extends Requirements_Backend
         }
         foreach (static::$headJS as $script) {
             $options = ['type' => 'application/javascript'];
-            if (static::config()->get('useNonce')) {
+            if (static::isUsesNonce()) {
                 $options['nonce'] = Controller::curr()->getNonce();
             }
             $requirements .= HTML::createTag(
