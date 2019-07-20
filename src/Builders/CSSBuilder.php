@@ -28,7 +28,7 @@ class CSSBuilder
     public function __construct($backend)
     {
         $this->owner = $backend;
-        $this->sriBuilder = Injector::inst()->get(SRIBuilder::class);
+        $this->setSriBuilder(Injector::inst()->get(SRIBuilder::class));
     }
 
     /**

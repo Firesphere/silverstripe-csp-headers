@@ -29,6 +29,10 @@ class SRI extends DataObject implements PermissionProvider
         'File'
     ];
 
+    private static $indexes = [
+        'File' => true
+    ];
+
     /**
      * Created on request
      * @param null|Member $member

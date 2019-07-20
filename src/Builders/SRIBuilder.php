@@ -23,7 +23,7 @@ class SRIBuilder
 
     public function __construct()
     {
-        $this->client = new Client();
+        $this->setClient(new Client());
     }
 
     /**
@@ -44,13 +44,12 @@ class SRIBuilder
         }
         if (!$sri->SRI || $this->canUpdateSRI()) {
             // Since this is the CSP Backend, an SRI for external files is automatically created
-            $location = $file;
 
             if (!Director::is_site_url($file)) {
-                $result = $this->getClient()->request('GET', $location);
+                $result = $this->getClient()->request('GET', $file);
                 $body = $result->getBody()->getContents();
             } else {
-                $body = file_get_contents(Director::baseFolder() . '/' . $location);
+                $body = file_get_contents(Director::baseFolder() . '/' . $file);
             }
             $hash = hash(CSPBackend::SHA384, $body, true);
 
