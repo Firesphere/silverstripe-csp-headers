@@ -246,18 +246,7 @@ class CSPBackend extends Requirements_Backend
         }
 
         $requirements = $this->createHeadTags($requirements);
-
-        // Inject CSS into body
-        $content = $this->insertTagsIntoHead($requirements, $content);
-
-        // Inject scripts
-        if ($this->getForceJSToBottom()) {
-            $content = $this->insertScriptsAtBottom($jsRequirements, $content);
-        } elseif ($this->getWriteJavascriptToBody()) {
-            $content = $this->insertScriptsIntoBody($jsRequirements, $content);
-        } else {
-            $content = $this->insertTagsIntoHead($jsRequirements, $content);
-        }
+        $content = $this->insertContent($content, $requirements, $jsRequirements);
 
         return $content;
     }
@@ -330,5 +319,28 @@ class CSPBackend extends Requirements_Backend
             count($this->customHeadTags);
 
         return $tagsAvailable && $hasFiles;
+    }
+
+    /**
+     * @param $content
+     * @param string $requirements
+     * @param string $jsRequirements
+     * @return string
+     */
+    protected function insertContent($content, string $requirements, string $jsRequirements): string
+    {
+        // Inject CSS into head
+        $content = $this->insertTagsIntoHead($requirements, $content);
+
+        // Inject scripts
+        if ($this->getForceJSToBottom()) {
+            $content = $this->insertScriptsAtBottom($jsRequirements, $content);
+        } elseif ($this->getWriteJavascriptToBody()) {
+            $content = $this->insertScriptsIntoBody($jsRequirements, $content);
+        } else {
+            $content = $this->insertTagsIntoHead($jsRequirements, $content);
+        }
+
+        return $content;
     }
 }
