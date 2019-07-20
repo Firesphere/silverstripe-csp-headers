@@ -346,7 +346,6 @@ class CSPBackend extends Requirements_Backend
             $sri->update([
                 'SRI'  => base64_encode($hash)
             ]);
-
         }
 
         $sri->write();
