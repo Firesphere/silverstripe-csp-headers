@@ -15,15 +15,6 @@ use Firesphere\CSPHeaders\View\CSPBackend;
 trait CSPBackendTrait
 {
     /**
-     * @var CSSBuilder
-     */
-    protected $cssBuilder;
-    /**
-     * @var JSBuilder
-     */
-    protected $jsBuilder;
-
-    /**
      * @var bool
      */
     protected static $jsSRI;
@@ -47,7 +38,14 @@ trait CSPBackendTrait
      * @var bool
      */
     protected static $usesNonce = false;
-
+    /**
+     * @var CSSBuilder
+     */
+    protected $cssBuilder;
+    /**
+     * @var JSBuilder
+     */
+    protected $jsBuilder;
 
     /**
      * @return bool

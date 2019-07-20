@@ -8,7 +8,6 @@ use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
 use Firesphere\CSPHeaders\Models\SRI;
 use Firesphere\CSPHeaders\View\CSPBackend;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\ORM\ValidationException;
@@ -30,7 +29,6 @@ class SRIBuilder
      * @param $file
      * @param array $htmlAttributes
      * @return array
-     * @throws GuzzleException
      * @throws ValidationException
      * @throws Exception
      */
@@ -41,24 +39,12 @@ class SRIBuilder
         // Create on first time it's run, or if it's been deleted because the file has changed, known to the admin
         if (!$sri || !$sri->isInDB()) {
             $sri = SRI::create(['File' => $file]);
+            $sri->write();
         }
-        if (!$sri->SRI || $this->canUpdateSRI()) {
-            // Since this is the CSP Backend, an SRI for external files is automatically created
-
-            if (!Director::is_site_url($file)) {
-                $result = $this->getClient()->request('GET', $file);
-                $body = $result->getBody()->getContents();
-            } else {
-                $body = file_get_contents(Director::baseFolder() . '/' . $file);
-            }
-            $hash = hash(CSPBackend::SHA384, $body, true);
-
-            $sri->update([
-                'SRI' => base64_encode($hash)
-            ]);
+        if ($this->shouldUpdateSRI()) {
+            $sri->forceChange();
+            $sri->write();
         }
-
-        $sri->write();
 
         $request = Controller::curr()->getRequest();
         $cookieSet = ControllerCSPExtension::checkCookie($request);
@@ -75,7 +61,7 @@ class SRIBuilder
     /**
      * @return bool
      */
-    private function canUpdateSRI(): bool
+    private function shouldUpdateSRI(): bool
     {
         // Is updateSRI requested?
         return (Controller::curr()->getRequest()->getVar('updatesri') &&

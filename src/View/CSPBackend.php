@@ -194,6 +194,42 @@ class CSPBackend extends Requirements_Backend
     }
 
     /**
+     * @param string $jsRequirements
+     * @return string
+     * @throws GuzzleException
+     * @throws ValidationException
+     */
+    protected function getJSRequirements(string $jsRequirements): string
+    {
+        // Script tags for js links
+        foreach ($this->getJavascript() as $file => $attributes) {
+            $path = $this->pathForFile($file);
+            $jsRequirements = $this->getJsBuilder()->buildTags($file, $attributes, $jsRequirements, $path);
+        }
+        $jsRequirements = $this->getJsBuilder()->getCustomTags($jsRequirements);
+
+        return $jsRequirements;
+    }
+
+    /**
+     * @param string $requirements
+     * @return string
+     * @throws GuzzleException
+     * @throws ValidationException
+     */
+    protected function getCSSRequirements(string $requirements): string
+    {
+        // CSS file links
+        foreach ($this->getCSS() as $file => $attributes) {
+            $path = $this->pathForFile($file);
+            $requirements = $this->getCssBuilder()->buildTags($file, $attributes, $requirements, $path);
+        }
+        $requirements = $this->getCssBuilder()->getCustomTags($requirements);
+
+        return $requirements;
+    }
+
+    /**
      * @param string $requirements
      * @return string
      */
@@ -230,41 +266,5 @@ class CSPBackend extends Requirements_Backend
         }
 
         return $content;
-    }
-
-    /**
-     * @param string $jsRequirements
-     * @return string
-     * @throws GuzzleException
-     * @throws ValidationException
-     */
-    protected function getJSRequirements(string $jsRequirements): string
-    {
-        // Script tags for js links
-        foreach ($this->getJavascript() as $file => $attributes) {
-            $path = $this->pathForFile($file);
-            $jsRequirements = $this->getJsBuilder()->buildTags($file, $attributes, $jsRequirements, $path);
-        }
-        $jsRequirements = $this->getJsBuilder()->getCustomTags($jsRequirements);
-
-        return $jsRequirements;
-    }
-
-    /**
-     * @param string $requirements
-     * @return string
-     * @throws GuzzleException
-     * @throws ValidationException
-     */
-    protected function getCSSRequirements(string $requirements): string
-    {
-        // CSS file links
-        foreach ($this->getCSS() as $file => $attributes) {
-            $path = $this->pathForFile($file);
-            $requirements = $this->getCssBuilder()->buildTags($file, $attributes, $requirements, $path);
-        }
-        $requirements = $this->getCssBuilder()->getCustomTags($requirements);
-
-        return $requirements;
     }
 }
