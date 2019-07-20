@@ -390,14 +390,12 @@ class CSPBackend extends Requirements_Backend
      */
     protected function buildCSSTags($file, $params, string $requirements): string
     {
-        $htmlAttributes = [
+        $htmlAttributes = array_merge([
             'rel'  => 'stylesheet',
             'type' => 'text/css',
             'href' => $this->pathForFile($file),
-        ];
-        if (!empty($params['media'])) {
-            $htmlAttributes['media'] = $params['media'];
-        }
+        ], $params);
+
         if (static::config()->get('cssSRI')) {
             $htmlAttributes = $this->buildSRI($file, $htmlAttributes);
         }
