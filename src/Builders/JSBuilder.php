@@ -78,22 +78,6 @@ class JSBuilder
     }
 
     /**
-     * @return CSPBackend
-     */
-    public function getOwner(): CSPBackend
-    {
-        return $this->owner;
-    }
-
-    /**
-     * @param CSPBackend $owner
-     */
-    public function setOwner(CSPBackend $owner): void
-    {
-        $this->owner = $owner;
-    }
-
-    /**
      * @return SRIBuilder
      */
     public function getSriBuilder(): SRIBuilder
@@ -107,5 +91,21 @@ class JSBuilder
     public function setSriBuilder(SRIBuilder $sriBuilder): void
     {
         $this->sriBuilder = $sriBuilder;
+    }
+
+    /**
+     * @return CSPBackend
+     */
+    public function getOwner(): CSPBackend
+    {
+        return $this->owner;
+    }
+
+    /**
+     * @param CSPBackend $owner
+     */
+    public function setOwner(CSPBackend $owner): void
+    {
+        $this->owner = $owner;
     }
 }

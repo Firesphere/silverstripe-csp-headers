@@ -47,7 +47,7 @@ class SRIBuilder
             $location = $file;
 
             if (!Director::is_site_url($file)) {
-                $result = $this->client->request('GET', $location);
+                $result = $this->getClient()->request('GET', $location);
                 $body = $result->getBody()->getContents();
             } else {
                 $body = file_get_contents(Director::baseFolder() . '/' . $location);
@@ -78,18 +78,27 @@ class SRIBuilder
      */
     private function canUpdateSRI(): bool
     {
-        return (
-            // Is updateSRI requested?
-            Controller::curr()->getRequest()->getVar('updatesri') &&
+        // Is updateSRI requested?
+        return (Controller::curr()->getRequest()->getVar('updatesri') &&
             // Does the user have the powers
-            (
-                (
-                    Security::getCurrentUser() &&
-                    Security::getCurrentUser()->inGroup('administrators')
-                ) ||
+            ((Security::getCurrentUser() && Security::getCurrentUser()->inGroup('administrators')) ||
                 // OR the site is in dev mode
-                Director::isDev()
-            )
-        );
+                Director::isDev()));
+    }
+
+    /**
+     * @return Client
+     */
+    public function getClient(): Client
+    {
+        return $this->client;
+    }
+
+    /**
+     * @param Client $client
+     */
+    public function setClient(Client $client): void
+    {
+        $this->client = $client;
     }
 }

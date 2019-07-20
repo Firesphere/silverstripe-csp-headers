@@ -31,18 +31,6 @@ use function hash;
 class ControllerCSPExtension extends Extension
 {
     /**
-     * @var bool
-     */
-    protected $generatePolicies;
-    /**
-     * @var string randomised sha512 nonce for enabling scripts if you don't want to use validating of the full script
-     */
-    protected $nonce;
-    /**
-     * @var array
-     */
-    protected $headTags = [];
-    /**
      * Base CSP configuration
      * @var array
      */
@@ -55,6 +43,18 @@ class ControllerCSPExtension extends Extension
      * @var array
      */
     protected static $inlineCSS = [];
+    /**
+     * @var bool
+     */
+    protected $generatePolicies;
+    /**
+     * @var string randomised sha512 nonce for enabling scripts if you don't want to use validating of the full script
+     */
+    protected $nonce;
+    /**
+     * @var array
+     */
+    protected $headTags = [];
 
     /**
      * @param string $js
@@ -99,6 +99,19 @@ class ControllerCSPExtension extends Extension
     }
 
     /**
+     * @param HTTPRequest $request
+     * @return bool
+     */
+    public static function checkCookie($request): bool
+    {
+        if ($request->getVar('build-headers')) {
+            Cookie::set('buildHeaders', $request->getVar('build-headers'));
+        }
+
+        return (Cookie::get('buildHeaders') === 'true');
+    }
+
+    /**
      * Add the needed headers from the database and config
      * @throws Exception
      */
@@ -129,19 +142,6 @@ class ControllerCSPExtension extends Extension
                 $owner->getResponse()->addHeader($name, $header);
             }
         }
-    }
-
-    /**
-     * @param HTTPRequest $request
-     * @return bool
-     */
-    public static function checkCookie($request): bool
-    {
-        if ($request->getVar('build-headers')) {
-            Cookie::set('buildHeaders', $request->getVar('build-headers'));
-        }
-
-        return (Cookie::get('buildHeaders') === 'true');
     }
 
     /**

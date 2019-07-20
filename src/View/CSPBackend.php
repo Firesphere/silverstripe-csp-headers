@@ -252,6 +252,22 @@ class CSPBackend extends Requirements_Backend
     }
 
     /**
+     * @param $content
+     * @return bool
+     */
+    protected function shouldContinue($content): bool
+    {
+        $tagsAvailable = preg_match('#</head\b#', $content);
+        $hasFiles = count($this->css) ||
+            count($this->javascript) ||
+            count($this->customCSS) ||
+            count($this->customScript) ||
+            count($this->customHeadTags);
+
+        return $tagsAvailable && $hasFiles;
+    }
+
+    /**
      * @param string $requirements
      * @return string
      */
@@ -303,22 +319,6 @@ class CSPBackend extends Requirements_Backend
     public static function setUsesNonce(bool $usesNonce): void
     {
         self::$usesNonce = $usesNonce;
-    }
-
-    /**
-     * @param $content
-     * @return bool
-     */
-    protected function shouldContinue($content): bool
-    {
-        $tagsAvailable = preg_match('#</head\b#', $content);
-        $hasFiles = count($this->css) ||
-            count($this->javascript) ||
-            count($this->customCSS) ||
-            count($this->customScript) ||
-            count($this->customHeadTags);
-
-        return $tagsAvailable && $hasFiles;
     }
 
     /**

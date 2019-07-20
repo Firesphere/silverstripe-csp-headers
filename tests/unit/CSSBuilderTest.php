@@ -3,7 +3,6 @@
 
 namespace Firesphere\CSPHeaders\Tests;
 
-
 use Firesphere\CSPHeaders\Builders\CSSBuilder;
 use Firesphere\CSPHeaders\Builders\SRIBuilder;
 use Firesphere\CSPHeaders\View\CSPBackend;
@@ -11,7 +10,6 @@ use SilverStripe\Dev\SapphireTest;
 
 class CSSBuilderTest extends SapphireTest
 {
-
     public function testConstruct()
     {
         $owner = new CSPBackend();
