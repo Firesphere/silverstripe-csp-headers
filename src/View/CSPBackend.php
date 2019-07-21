@@ -106,17 +106,8 @@ class CSPBackend extends Requirements_Backend
 
         // Get type
         $type = $options['type'] ?? $this->javascript[$file]['type'] ?? null;
-
-        // make sure that async/defer is set if it is set once even if file is included multiple times
-        $async = (
-            (isset($options['async']) && isset($options['async']) === true)
-            || (isset($this->javascript[$file]['async']) && $this->javascript[$file]['async'] === true)
-        );
-        $defer = (
-            (isset($options['defer']) && isset($options['defer']) === true)
-            || (isset($this->javascript[$file]['defer']) && $this->javascript[$file]['defer'] === true)
-        );
-
+        $async = $this->isAsync($file, $options);
+        $defer = $this->isDefer($file, $options);
         $fallback = $options['fallback'] ?? false;
 
         $this->javascript[$file] = [
@@ -196,7 +187,6 @@ class CSPBackend extends Requirements_Backend
     /**
      * @param string $jsRequirements
      * @return string
-     * @throws GuzzleException
      * @throws ValidationException
      */
     protected function getJSRequirements(string $jsRequirements): string
@@ -266,5 +256,32 @@ class CSPBackend extends Requirements_Backend
         }
 
         return $content;
+    }
+
+    /**
+     * @param $file
+     * @param $options
+     * @return bool
+     */
+    protected function isAsync($file, $options): bool
+    {
+        // make sure that async/defer is set if it is set once even if file is included multiple times
+        return (
+            (isset($options['async']) && isset($options['async']) === true)
+            || (isset($this->javascript[$file]['async']) && $this->javascript[$file]['async'] === true)
+        );
+    }
+
+    /**
+     * @param $file
+     * @param $options
+     * @return bool
+     */
+    protected function isDefer($file, $options): bool
+    {
+        return (
+            (isset($options['defer']) && isset($options['defer']) === true)
+            || (isset($this->javascript[$file]['defer']) && $this->javascript[$file]['defer'] === true)
+        );
     }
 }
