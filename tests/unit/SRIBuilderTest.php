@@ -25,5 +25,7 @@ class SRIBuilderTest extends SapphireTest
         $base = base64_encode(hash(CSPBackend::SHA384, $contents, true));
         $this->assertInstanceOf(SRI::class, $sri);
         $this->assertEquals($base, $sri->SRI);
+        $sriCheck = SRI::findOrCreate('composer.json');
+        $this->assertEquals($sriCheck, $sri);
     }
 }
