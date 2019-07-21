@@ -105,14 +105,12 @@ class CSPBackend extends Requirements_Backend
         $file = ModuleResourceLoader::singleton()->resolvePath($file);
 
         // Get type
-        $type = $options['type'] ?? $this->javascript[$file]['type'] ?? null;
-        $async = $this->isAsync($file, $options);
-        $defer = $this->isDefer($file, $options);
+        $type = $options['type'] ?? $this->javascript[$file]['type'] ?? 'text/javascript';
         $fallback = $options['fallback'] ?? false;
 
         $this->javascript[$file] = [
-            'async'    => $async,
-            'defer'    => $defer,
+            'async'    => $this->isAsync($file, $options),
+            'defer'    => $this->isDefer($file, $options),
             'type'     => $type,
             'fallback' => $fallback
         ];
