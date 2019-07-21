@@ -5,7 +5,10 @@ namespace Firesphere\CSPHeaders\Tests;
 
 use Firesphere\CSPHeaders\Builders\SRIBuilder;
 use Firesphere\CSPHeaders\Models\SRI;
+use Firesphere\CSPHeaders\View\CSPBackend;
 use GuzzleHttp\Client;
+use SilverStripe\Control\Director;
+use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\SapphireTest;
 
 class SRIBuilderTest extends SapphireTest
@@ -16,7 +19,11 @@ class SRIBuilderTest extends SapphireTest
 
         $builder->buildSRI('composer.json', []);
 
-        $sri = SRI::get()->filter(['File' => 'composer.json']);
+        /** @var SRI $sri */
+        $sri = SRI::get()->filter(['File' => 'composer.json'])->first();
+        $contents = file_get_contents(Director::baseFolder() . '/composer.json');
+        $base = base64_encode(hash(CSPBackend::SHA384, $contents));
         $this->assertInstanceOf(SRI::class, $sri);
+        $this->assertEquals($base, $sri->SRI);
     }
 }
