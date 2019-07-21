@@ -2,6 +2,8 @@
 
 namespace Firesphere\CSPHeaders\View;
 
+use DOMDocument;
+use DOMElement;
 use Firesphere\CSPHeaders\Builders\CSSBuilder;
 use Firesphere\CSPHeaders\Builders\JSBuilder;
 use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
@@ -9,6 +11,7 @@ use Firesphere\CSPHeaders\Traits\CSPBackendTrait;
 use GuzzleHttp\Exception\GuzzleException;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Manifest\ModuleResourceLoader;
+use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\Deprecation;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\View\Requirements_Backend;
@@ -53,7 +56,7 @@ class CSPBackend extends Requirements_Backend
 
     /**
      * Add the following custom HTML code to the `<head>` section of the page
-     *
+     * @todo include given options in opening tag
      * @param string $html Custom HTML code
      * @param string|null $uniquenessID A unique ID that ensures a piece of code is only added once
      */
@@ -62,9 +65,19 @@ class CSPBackend extends Requirements_Backend
         $uniquenessID = $uniquenessID ?: uniqid('tag', false);
         $type = $this->getTagType($html);
         if ($type === 'javascript') {
-            static::$headJS[$uniquenessID] = strip_tags($html);
+            $doc = simplexml_load_string($html); // SimpleXML does it's job here, we see the outcome
+            $option = [];
+            foreach ($doc->attributes() as $key => $attribute) {
+                $option[$key] = (string)$attribute; // Add each option as a string
+            }
+            static::$headJS[$uniquenessID] = [strip_tags($html) => $option];
             ControllerCSPExtension::addJS(strip_tags($html));
         } elseif ($type === 'css') {
+            $doc = simplexml_load_string($html); // SimpleXML does it's job here, we see the outcome
+            $option = [];
+            foreach ($doc->attributes() as $key => $attribute) {
+                $option[$key] = (string)$attribute; // Add each option as a string
+            }
             static::$headCSS[$uniquenessID] = strip_tags($html);
             ControllerCSPExtension::addCSS(strip_tags($html));
         } else {

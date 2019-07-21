@@ -85,15 +85,18 @@ class JSBuilder implements BuilderInterface
      */
     public function getHeadTags(string $requirements): string
     {
-        $options = ['type' => 'application/javascript'];
-        foreach (CSPBackend::getHeadJS() as $script) {
+        $js = CSPBackend::getHeadJS();
+        foreach ($js as $tag => $script) {
+            $item = $js[$tag];
+            $content = array_keys($item)[0];
+            $options = $item[$content] ?? [];
             if (CSPBackend::isUsesNonce()) {
                 $options['nonce'] = Controller::curr()->getNonce();
             }
             $requirements .= HTML::createTag(
                 'script',
                 $options,
-                "//<![CDATA[\n{$script}\n//]]>"
+                "//<![CDATA[\n{$content}\n//]]>"
             );
             $requirements .= "\n";
         }

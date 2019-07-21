@@ -79,21 +79,25 @@ class CSSBuilder implements BuilderInterface
      */
     public function getHeadTags(string $requirements): string
     {
-        $options = ['type' => 'text/css'];
-        foreach (CSPBackend::getHeadCSS() as $css) {
+        $js = CSPBackend::getHeadCSS();
+        foreach ($js as $tag => $script) {
+            $item = $js[$tag];
+            $content = array_keys($item)[0];
+            $options = $item[$content] ?? [];
             if (CSPBackend::isUsesNonce()) {
                 $options['nonce'] = Controller::curr()->getNonce();
             }
             $requirements .= HTML::createTag(
-                'style',
+                'script',
                 $options,
-                "\n{$css}\n"
+                "//<![CDATA[\n{$content}\n//]]>"
             );
             $requirements .= "\n";
         }
 
         return $requirements;
     }
+
 
     /**
      * @param string $requirements
