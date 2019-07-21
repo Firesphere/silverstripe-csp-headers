@@ -11,7 +11,6 @@ use PageController;
 use ParagonIE\ConstantTime\Base64;
 use ParagonIE\CSPBuilder\CSPBuilder;
 use SilverStripe\CMS\Controllers\ContentController;
-use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Cookie;
 use SilverStripe\Control\Director;

@@ -40,6 +40,24 @@ class SRI extends DataObject implements PermissionProvider
     ];
 
     /**
+     * @param $file
+     * @return SRI
+     * @throws ValidationException
+     */
+    public static function findOrCreate($file): SRI
+    {
+        /** @var SRI|null $sri */
+        $sri = self::get()->filter(['File' => $file])->first();
+        // Create on first time it's run, or if it's been deleted because the file has changed, known to the admin
+        if (!$sri || !$sri->isInDB()) {
+            $sri = self::create(['File' => $file]);
+            $sri->write();
+        }
+
+        return $sri;
+    }
+
+    /**
      * Created on request
      * @param null|Member $member
      * @param array $context
@@ -89,24 +107,6 @@ class SRI extends DataObject implements PermissionProvider
         $this->SRI = base64_encode($hash);
 
         parent::onBeforeWrite();
-    }
-
-    /**
-     * @param $file
-     * @return SRI
-     * @throws ValidationException
-     */
-    public static function findOrCreate($file): SRI
-    {
-        /** @var SRI|null $sri */
-        $sri = self::get()->filter(['File' => $file])->first();
-        // Create on first time it's run, or if it's been deleted because the file has changed, known to the admin
-        if (!$sri || !$sri->isInDB()) {
-            $sri = self::create(['File' => $file]);
-            $sri->write();
-        }
-
-        return $sri;
     }
 
     /**

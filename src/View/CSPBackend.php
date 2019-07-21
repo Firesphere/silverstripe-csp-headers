@@ -2,8 +2,6 @@
 
 namespace Firesphere\CSPHeaders\View;
 
-use DOMDocument;
-use DOMElement;
 use Firesphere\CSPHeaders\Builders\CSSBuilder;
 use Firesphere\CSPHeaders\Builders\JSBuilder;
 use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
@@ -11,7 +9,6 @@ use Firesphere\CSPHeaders\Traits\CSPBackendTrait;
 use GuzzleHttp\Exception\GuzzleException;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Manifest\ModuleResourceLoader;
-use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\Deprecation;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\View\Requirements_Backend;
@@ -56,28 +53,20 @@ class CSPBackend extends Requirements_Backend
 
     /**
      * Add the following custom HTML code to the `<head>` section of the page
-     * @todo include given options in opening tag
      * @param string $html Custom HTML code
      * @param string|null $uniquenessID A unique ID that ensures a piece of code is only added once
+     * @todo include given options in opening tag
      */
     public function insertHeadTags($html, $uniquenessID = null): void
     {
         $uniquenessID = $uniquenessID ?: uniqid('tag', false);
         $type = $this->getTagType($html);
         if ($type === 'javascript') {
-            $doc = simplexml_load_string($html); // SimpleXML does it's job here, we see the outcome
-            $option = [];
-            foreach ($doc->attributes() as $key => $attribute) {
-                $option[$key] = (string)$attribute; // Add each option as a string
-            }
+            $option = $this->getOptions($html);
             static::$headJS[$uniquenessID] = [strip_tags($html) => $option];
             ControllerCSPExtension::addJS(strip_tags($html));
         } elseif ($type === 'css') {
-            $doc = simplexml_load_string($html); // SimpleXML does it's job here, we see the outcome
-            $option = [];
-            foreach ($doc->attributes() as $key => $attribute) {
-                $option[$key] = (string)$attribute; // Add each option as a string
-            }
+            $option = $this->getOptions($html); // SimpleXML does it's job here, we see the outcome
             static::$headCSS[$uniquenessID] = strip_tags($html);
             ControllerCSPExtension::addCSS(strip_tags($html));
         } else {
@@ -101,6 +90,21 @@ class CSPBackend extends Requirements_Backend
         }
 
         return null;
+    }
+
+    /**
+     * @param $html
+     * @return array
+     */
+    protected function getOptions($html): array
+    {
+        $doc = simplexml_load_string($html); // SimpleXML does it's job here, we see the outcome
+        $option = [];
+        foreach ($doc->attributes() as $key => $attribute) {
+            $option[$key] = (string)$attribute; // Add each option as a string
+        }
+
+        return $option;
     }
 
     /**
@@ -132,6 +136,33 @@ class CSPBackend extends Requirements_Backend
         if (isset($options['provides'])) {
             $this->providedJavascript[$file] = array_values($options['provides']);
         }
+    }
+
+    /**
+     * @param $file
+     * @param $options
+     * @return bool
+     */
+    protected function isAsync($file, $options): bool
+    {
+        // make sure that async/defer is set if it is set once even if file is included multiple times
+        return (
+            (isset($options['async']) && isset($options['async']) === true)
+            || (isset($this->javascript[$file]['async']) && $this->javascript[$file]['async'] === true)
+        );
+    }
+
+    /**
+     * @param $file
+     * @param $options
+     * @return bool
+     */
+    protected function isDefer($file, $options): bool
+    {
+        return (
+            (isset($options['defer']) && isset($options['defer']) === true)
+            || (isset($this->javascript[$file]['defer']) && $this->javascript[$file]['defer'] === true)
+        );
     }
 
     /**
@@ -267,32 +298,5 @@ class CSPBackend extends Requirements_Backend
         }
 
         return $content;
-    }
-
-    /**
-     * @param $file
-     * @param $options
-     * @return bool
-     */
-    protected function isAsync($file, $options): bool
-    {
-        // make sure that async/defer is set if it is set once even if file is included multiple times
-        return (
-            (isset($options['async']) && isset($options['async']) === true)
-            || (isset($this->javascript[$file]['async']) && $this->javascript[$file]['async'] === true)
-        );
-    }
-
-    /**
-     * @param $file
-     * @param $options
-     * @return bool
-     */
-    protected function isDefer($file, $options): bool
-    {
-        return (
-            (isset($options['defer']) && isset($options['defer']) === true)
-            || (isset($this->javascript[$file]['defer']) && $this->javascript[$file]['defer'] === true)
-        );
     }
 }
