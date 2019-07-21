@@ -128,14 +128,13 @@ class ControllerCSPExtension extends Extension
                 $this->nonce = Base64::encode(hash('sha512', uniqid('nonce', true) . time()));
             }
 
-            $this->addCSP($policy);
+            $this->addCSP($policy, $owner);
             $this->addInlineJSPolicy($policy, $config);
             $this->addInlineCSSPolicy($policy, $config);
             // When in dev, add the debugbar nonce
             if (Director::isDev() && class_exists(DebugBar::class)) {
                 $policy->nonce('script-src', 'debugbar');
             }
-            $policy->setReportUri($config['report-uri']);
 
             $headers = $policy->getHeaderArray($legacy);
             foreach ($headers as $name => $header) {
@@ -146,11 +145,10 @@ class ControllerCSPExtension extends Extension
 
     /**
      * @param CSPBuilder $policy
+     * @param Controller $owner
      */
-    protected function addCSP($policy): void
+    protected function addCSP($policy, $owner): void
     {
-        /** @var SiteTree $owner */
-        $owner = $this->owner;
         /** @var DataList|CSPDomain[] $cspDomains */
         $cspDomains = CSPDomain::get()->filterAny(['Pages.ID' => [null, $owner->ID]]);
 
