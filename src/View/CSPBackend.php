@@ -67,7 +67,7 @@ class CSPBackend extends Requirements_Backend
             ControllerCSPExtension::addJS(strip_tags($html));
         } elseif ($type === 'css') {
             $option = $this->getOptions($html); // SimpleXML does it's job here, we see the outcome
-            static::$headCSS[$uniquenessID] = strip_tags($html);
+            static::$headCSS[$uniquenessID] = [strip_tags($html) => $option];
             ControllerCSPExtension::addCSS(strip_tags($html));
         } else {
             $this->customHeadTags[$uniquenessID] = $html;
