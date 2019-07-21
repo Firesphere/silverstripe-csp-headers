@@ -57,10 +57,10 @@ class JSBuilder implements BuilderInterface
             $htmlAttributes['nonce'] = base64_encode(Controller::curr()->getNonce());
         }
 
-        $jsRequirements .= HTML::createTag('script', $htmlAttributes);
-        $jsRequirements .= "\n";
+        $requirements .= HTML::createTag('script', $htmlAttributes);
+        $requirements .= "\n";
 
-        return $jsRequirements;
+        return $requirements;
     }
 
     /**
