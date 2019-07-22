@@ -57,8 +57,17 @@ jobs:
       - run:
           name: Code coverage reports
           command: |
+            echo "---"
+            echo "Scrutinizer:"
+            echo "---"
             php ocular.phar code-coverage:upload --format=php-clover clover.xml
+            echo "---"
+            echo "CodeCov:"
+            echo "---"
             bash <(curl -s https://codecov.io/bash) -f clover.xml
+            echo "---"
+            echo "CodeClimate:"
+            echo "---"
             ./cc-test-reporter after-build --coverage-input-type clover --exit-code $?
       - run: vendor/bin/phpcs --standard=phpcs.xml.dist src tests/unit
       - store_test_results:
