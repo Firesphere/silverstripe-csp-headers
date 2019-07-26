@@ -136,7 +136,7 @@ class CSPBackendTest extends SapphireTest
             ]
         ];
         $this->assertEquals($expected, $backend->getJavascript());
-        $backend->javascript('test/my/script.js', ['provided' => 'test/some/script.js']);
+        $backend->javascript('test/my/script.js', ['provides' => ['test/some/script.js']]);
         $expected = [
             'test/my/script.js' => [
                 'async' => true, // Should not change from the loading above
