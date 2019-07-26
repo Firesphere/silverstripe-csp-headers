@@ -62,12 +62,12 @@ class CSPBackend extends Requirements_Backend
         $uniquenessID = $uniquenessID ?: hash(static::SHA256, $html);
         $type = $this->getTagType($html);
         if ($type === 'javascript') {
-            $option = $this->getOptions($html);
-            static::$headJS[$uniquenessID] = [strip_tags($html) => $option];
+            $options = $this->getOptions($html);
+            static::$headJS[$uniquenessID] = [strip_tags($html) => $options];
             ControllerCSPExtension::addJS(strip_tags($html));
         } elseif ($type === 'css') {
-            $option = $this->getOptions($html); // SimpleXML does it's job here, we see the outcome
-            static::$headCSS[$uniquenessID] = [strip_tags($html) => $option];
+            $options = $this->getOptions($html); // SimpleXML does it's job here, we see the outcome
+            static::$headCSS[$uniquenessID] = [strip_tags($html) => $options];
             ControllerCSPExtension::addCSS(strip_tags($html));
         } else {
             $this->customHeadTags[$uniquenessID] = $html;

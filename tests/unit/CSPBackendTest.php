@@ -7,7 +7,6 @@ use Firesphere\CSPHeaders\Builders\JSBuilder;
 use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
 use Firesphere\CSPHeaders\View\CSPBackend;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\SapphireTest;
 
 class CSPBackendTest extends SapphireTest
@@ -67,7 +66,7 @@ class CSPBackendTest extends SapphireTest
         $scriptHash = hash('sha256', $script);
         $cssHash = hash('sha256', $css);
         $otherHash = hash('sha256', $other);
-        
+
         $this->assertArrayHasKey($scriptHash, CSPBackend::getHeadJS());
         $this->assertArrayHasKey($cssHash, CSPBackend::getHeadCSS());
         $headJS = CSPBackend::getHeadJS();
