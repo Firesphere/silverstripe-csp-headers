@@ -7,6 +7,7 @@ use Firesphere\CSPHeaders\Builders\JSBuilder;
 use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
 use Firesphere\CSPHeaders\View\CSPBackend;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\SapphireTest;
 
 class CSPBackendTest extends SapphireTest
@@ -100,5 +101,50 @@ class CSPBackendTest extends SapphireTest
         CSPBackend::setUsesNonce(true);
         $this->assertTrue(CSPBackend::isUsesNonce());
         CSPBackend::setUsesNonce(false);
+    }
+
+    public function testJavascript()
+    {
+        $backend = new CSPBackend();
+        $backend->javascript('test/my/script.js');
+        $expected = [
+            'test/my/script.js' => [
+                'async' => false,
+                'defer' => false,
+                'type' => 'text/javascript',
+                'fallback' => false
+            ]
+        ];
+        $this->assertEquals($expected, $backend->getJavascript());
+        $backend->javascript('test/my/script.js', ['async' => true, 'defer' => true]);
+        $expected = [
+            'test/my/script.js' => [
+                'async' => true,
+                'defer' => true,
+                'type' => 'text/javascript',
+                'fallback' => false
+            ]
+        ];
+        $this->assertEquals($expected, $backend->getJavascript());
+        $backend->javascript('test/my/script.js', ['async' => true, 'defer' => true, 'fallback' => '1234567890987654321']);
+        $expected = [
+            'test/my/script.js' => [
+                'async' => true,
+                'defer' => true,
+                'type' => 'text/javascript',
+                'fallback' => '1234567890987654321'
+            ]
+        ];
+        $this->assertEquals($expected, $backend->getJavascript());
+        $backend->javascript('test/my/script.js', ['provided' => 'test/some/script.js']);
+        $expected = [
+            'test/my/script.js' => [
+                'async' => true, // Should not change from the loading above
+                'defer' => true, // Should not change from the loading above
+                'type' => 'text/javascript',
+                'fallback' => true, // Should not change from the loading above
+            ]
+        ];
+        $this->assertEquals($expected, $backend->getJavascript());
     }
 }

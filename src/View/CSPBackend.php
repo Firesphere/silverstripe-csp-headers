@@ -123,7 +123,7 @@ class CSPBackend extends Requirements_Backend
 
         // Get type
         $type = $options['type'] ?? $this->javascript[$file]['type'] ?? 'text/javascript';
-        $fallback = $options['fallback'] ?? false;
+        $fallback = $options['fallback'] ?? $this->javascript[$file]['fallback'] ?? false;
 
         $this->javascript[$file] = [
             'async'    => $this->isAsync($file, $options),
