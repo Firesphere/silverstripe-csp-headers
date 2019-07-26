@@ -201,9 +201,9 @@ class ControllerCSPExtension extends Extension
     }
 
     /**
-     * @return string
+     * @return null|string
      */
-    public function getNonce(): string
+    public function getNonce()
     {
         return $this->nonce;
     }
