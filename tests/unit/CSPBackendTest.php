@@ -142,7 +142,7 @@ class CSPBackendTest extends SapphireTest
                 'async' => true, // Should not change from the loading above
                 'defer' => true, // Should not change from the loading above
                 'type' => 'text/javascript',
-                'fallback' => true, // Should not change from the loading above
+                'fallback' => '1234567890987654321', // Should not change from the loading above
             ]
         ];
         $this->assertEquals($expected, $backend->getJavascript());
