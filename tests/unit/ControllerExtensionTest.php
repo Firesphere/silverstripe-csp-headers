@@ -9,12 +9,14 @@ use Page;
 use PageController;
 use SilverStripe\Control\Cookie;
 use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Control\NullHTTPRequest;
 use SilverStripe\Dev\SapphireTest;
 
 class ControllerExtensionTest extends SapphireTest
 {
     public function testInit()
     {
+        $this->assertFalse(ControllerCSPExtension::checkCookie(new NullHTTPRequest()));
         $page = new Page();
         $controller = new PageController($page);
         $extension = new ControllerCSPExtension();
@@ -32,5 +34,6 @@ class ControllerExtensionTest extends SapphireTest
         CSPBackend::setUsesNonce(true);
         $extension->onBeforeInit();
         $this->assertNotNull($extension->getNonce());
+        Cookie::force_expiry('buildHeaders');
     }
 }
