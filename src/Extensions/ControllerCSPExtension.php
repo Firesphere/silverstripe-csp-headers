@@ -11,6 +11,7 @@ use PageController;
 use ParagonIE\ConstantTime\Base64;
 use ParagonIE\CSPBuilder\CSPBuilder;
 use SilverStripe\CMS\Controllers\ContentController;
+use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Cookie;
 use SilverStripe\Control\Director;
@@ -43,9 +44,10 @@ class ControllerCSPExtension extends Extension
      */
     protected static $inlineCSS = [];
     /**
+     * Should we generate the policy headers or not
      * @var bool
      */
-    protected $generatePolicies;
+    protected $addPolicyHeaders;
     /**
      * @var string randomised sha512 nonce for enabling scripts if you don't want to use validating of the full script
      */
@@ -94,7 +96,10 @@ class ControllerCSPExtension extends Extension
     {
         /** @var ContentController $owner */
         $owner = $this->owner;
-        $this->generatePolicies = Director::isLive() || static::checkCookie($owner->getRequest());
+        $this->addPolicyHeaders = Director::isLive() || static::checkCookie($owner->getRequest());
+        if (!$this->getNonce() && CSPBackend::isUsesNonce()) {
+            $this->nonce = Base64::encode(hash('sha512', uniqid('nonce', true) . time()));
+        }
     }
 
     /**
@@ -118,19 +123,16 @@ class ControllerCSPExtension extends Extension
     {
         /** @var Controller $owner */
         $owner = $this->owner;
-        if ($this->generatePolicies) {
+        if ($this->addPolicyHeaders) {
             $config = CSPBackend::config()->get('csp_config');
             $legacy = $config['legacy'] ?? true;
             /** @var CSPBuilder $policy */
             $policy = CSPBuilder::fromArray($config);
-            if (!$this->nonce && CSPBackend::isUsesNonce()) {
-                $this->nonce = Base64::encode(hash('sha512', uniqid('nonce', true) . time()));
-            }
 
             $this->addCSP($policy, $owner);
             $this->addInlineJSPolicy($policy, $config);
             $this->addInlineCSSPolicy($policy, $config);
-            // When in dev, add the debugbar nonce
+            // When in dev, add the debugbar nonce, requires a change to the lib
             if (Director::isDev() && class_exists(DebugBar::class)) {
                 $policy->nonce('script-src', 'debugbar');
             }
@@ -144,7 +146,7 @@ class ControllerCSPExtension extends Extension
 
     /**
      * @param CSPBuilder $policy
-     * @param Controller $owner
+     * @param SiteTree|Controller $owner
      */
     protected function addCSP($policy, $owner): void
     {
@@ -168,7 +170,7 @@ class ControllerCSPExtension extends Extension
         }
 
         if (CSPBackend::config()->get('useNonce')) {
-            $policy->nonce('script-src', $this->nonce);
+            $policy->nonce('script-src', $this->getNonce());
         }
 
         $inline = static::$inlineJS;
@@ -189,7 +191,7 @@ class ControllerCSPExtension extends Extension
         }
 
         if (CSPBackend::config()->get('useNonce')) {
-            $policy->nonce('style-src', $this->nonce);
+            $policy->nonce('style-src', $this->getNonce());
         }
 
         $inline = static::$inlineCSS;
