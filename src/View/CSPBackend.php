@@ -59,7 +59,7 @@ class CSPBackend extends Requirements_Backend
      */
     public function insertHeadTags($html, $uniquenessID = null): void
     {
-        $uniquenessID = $uniquenessID ?: uniqid('tag', false);
+        $uniquenessID = $uniquenessID ?: hash(static::SHA256, $html);
         $type = $this->getTagType($html);
         if ($type === 'javascript') {
             $option = $this->getOptions($html);
