@@ -6,9 +6,7 @@ namespace Firesphere\CSPHeaders\Tests;
 use Firesphere\CSPHeaders\Builders\SRIBuilder;
 use Firesphere\CSPHeaders\Models\SRI;
 use Firesphere\CSPHeaders\View\CSPBackend;
-use GuzzleHttp\Client;
 use SilverStripe\Control\Director;
-use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\SapphireTest;
 
 class SRIBuilderTest extends SapphireTest

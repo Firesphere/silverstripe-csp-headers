@@ -116,6 +116,14 @@ class ControllerCSPExtension extends Extension
     }
 
     /**
+     * @return null|string
+     */
+    public function getNonce()
+    {
+        return $this->nonce;
+    }
+
+    /**
      * Add the needed headers from the database and config
      * @throws Exception
      */
@@ -201,10 +209,10 @@ class ControllerCSPExtension extends Extension
     }
 
     /**
-     * @return null|string
+     * @return bool
      */
-    public function getNonce()
+    public function isAddPolicyHeaders(): bool
     {
-        return $this->nonce;
+        return $this->addPolicyHeaders;
     }
 }

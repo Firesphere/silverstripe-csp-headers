@@ -74,7 +74,10 @@ class CSPBackendTest extends SapphireTest
         $this->assertEquals([$otherHash => $other], $backend->getCustomHeadTags());
 
         $this->assertEquals(['alert("hello world");', "alert('hello');"], ControllerCSPExtension::getInlineJS());
-        $this->assertEquals(['body { color: red; }', 'body {background-color: red;}'], ControllerCSPExtension::getInlineCSS());
+        $this->assertEquals(
+            ['body { color: red; }', 'body {background-color: red;}'],
+            ControllerCSPExtension::getInlineCSS()
+        );
     }
 
     public function testGetTagType()
@@ -89,5 +92,13 @@ class CSPBackendTest extends SapphireTest
         $this->assertEquals('javascript', $backend->getTagType($script));
         $this->assertEquals('css', $backend->getTagType($css));
         $this->assertNull($backend->getTagType($other));
+    }
+
+    public function testNonce()
+    {
+        $this->assertFalse(CSPBackend::isUsesNonce());
+        CSPBackend::setUsesNonce(true);
+        $this->assertTrue(CSPBackend::isUsesNonce());
+        CSPBackend::setUsesNonce(false);
     }
 }
