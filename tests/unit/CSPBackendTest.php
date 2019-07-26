@@ -74,7 +74,7 @@ class CSPBackendTest extends SapphireTest
         $this->assertEquals([$otherHash => $other], $backend->getCustomHeadTags());
 
         $this->assertEquals(['alert("hello world");', "alert('hello');"], ControllerCSPExtension::getInlineJS());
-        $this->assertEquals(['body {background-color: red;}'], ControllerCSPExtension::getInlineCSS());
+        $this->assertEquals(['body { color: red; }', 'body {background-color: red;}'], ControllerCSPExtension::getInlineCSS());
     }
 
     public function testGetTagType()
