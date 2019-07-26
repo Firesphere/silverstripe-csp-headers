@@ -27,7 +27,7 @@ class PageExtension extends DataExtension
     public function updateSettingsFields(FieldList $fields)
     {
         $fields->addFieldToTab('Root', Tab::create(
-            'CSPDomains',
+            'CSP',
             _t(SiteTree::class . '.CSP', 'Content Security Policies')
         ));
 
