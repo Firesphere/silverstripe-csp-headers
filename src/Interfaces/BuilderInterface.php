@@ -25,7 +25,7 @@ interface BuilderInterface
 
     /**
      * @param string $requirements
-     * @return string
+     * @return void
      */
-    public function getHeadTags(string $requirements): string;
+    public function getHeadTags(string &$requirements): void;
 }

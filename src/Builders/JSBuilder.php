@@ -80,9 +80,9 @@ class JSBuilder implements BuilderInterface
 
     /**
      * @param string $requirements
-     * @return string
+     * @return void
      */
-    public function getHeadTags(string $requirements): string
+    public function getHeadTags(string &$requirements): void
     {
         $js = CSPBackend::getHeadJS();
         foreach ($js as $tag => $script) {
@@ -99,8 +99,6 @@ class JSBuilder implements BuilderInterface
             );
             $requirements .= "\n";
         }
-
-        return $requirements;
     }
 
     /**

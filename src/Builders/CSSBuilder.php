@@ -75,9 +75,9 @@ class CSSBuilder implements BuilderInterface
 
     /**
      * @param string $requirements
-     * @return string
+     * @return void
      */
-    public function getHeadTags(string $requirements): string
+    public function getHeadTags(string &$requirements): void
     {
         $js = CSPBackend::getHeadCSS();
         foreach ($js as $tag => $script) {
@@ -94,8 +94,6 @@ class CSSBuilder implements BuilderInterface
             );
             $requirements .= "\n";
         }
-
-        return $requirements;
     }
 
 

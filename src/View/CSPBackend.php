@@ -204,7 +204,7 @@ class CSPBackend extends Requirements_Backend
         $jsRequirements = $this->getJSRequirements($jsRequirements);
         $requirements = $this->getCSSRequirements($requirements);
 
-        $requirements = $this->createHeadTags($requirements);
+        $requirements = $this->getHeadTags($requirements);
         $content = $this->insertContent($content, $requirements, $jsRequirements);
 
         return $content;
@@ -265,10 +265,10 @@ class CSPBackend extends Requirements_Backend
      * @param string $requirements
      * @return string
      */
-    protected function createHeadTags(string $requirements): string
+    protected function getHeadTags(string $requirements): string
     {
-        $requirements = $this->getCssBuilder()->getHeadTags($requirements);
-        $requirements = $this->getJsBuilder()->getHeadTags($requirements);
+        $this->getCssBuilder()->getHeadTags($requirements);
+        $this->getJsBuilder()->getHeadTags($requirements);
 
         foreach ($this->getCustomHeadTags() as $customHeadTag) {
             $requirements .= "{$customHeadTag}\n";
