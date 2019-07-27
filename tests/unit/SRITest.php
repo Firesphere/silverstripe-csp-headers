@@ -34,6 +34,6 @@ class SRITest extends SapphireTest
 
     public function testPermissions()
     {
-        $this->assertEquals(static::$expected, (new SRI())->providePermissions());
+        $this->assertEquals(self::$expected, (new SRI())->providePermissions());
     }
 }
