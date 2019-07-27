@@ -3,7 +3,6 @@
 
 namespace Firesphere\CSPHeaders\Tests;
 
-
 use Firesphere\CSPHeaders\Models\CSPDomain;
 use SilverStripe\Dev\SapphireTest;
 
@@ -57,5 +56,4 @@ class CSPDomainTest extends SapphireTest
         $domains = new CSPDomain();
         $this->assertEquals(self::$permissions, $domains->providePermissions());
     }
-
 }
