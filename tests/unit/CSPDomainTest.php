@@ -36,6 +36,13 @@ class CSPDomainTest extends SapphireTest
                 ],
         ];
 
+    public function testTitle()
+    {
+        $cspDomain = CSPDomain::create(['Domain' => 'example.com']);
+        $this->assertEquals('example.com', $cspDomain->getTitle());
+        $this->assertNotEquals('something.com', $cspDomain->getTitle());
+    }
+
     public function testGetCMSFields()
     {
         $fields = (new CSPDomain())->getCMSFields();
