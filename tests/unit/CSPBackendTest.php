@@ -7,11 +7,25 @@ use Firesphere\CSPHeaders\Builders\JSBuilder;
 use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
 use Firesphere\CSPHeaders\View\CSPBackend;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\SapphireTest;
 
 class CSPBackendTest extends SapphireTest
 {
+    public function testSet()
+    {
+        $origJS = CSPBackend::getHeadJS();
+        $origCSS = CSPBackend::getHeadCSS();
+        CSPBackend::setHeadJS([]);
+        $this->assertEmpty(CSPBackend::getHeadJS());
+        CSPBackend::setHeadCSS([]);
+        $this->assertEmpty(CSPBackend::getHeadCSS());
+        CSPBackend::setHeadJS($origJS);
+        CSPBackend::setHeadCSS($origCSS);
+        $this->assertEquals($origJS, CSPBackend::getHeadJS());
+        $this->assertEquals($origCSS, CSPBackend::getHeadCSS());
+
+    }
+
     public function testConstruct()
     {
         /** @var CSPBackend $backend */
@@ -109,9 +123,9 @@ class CSPBackendTest extends SapphireTest
         $backend->javascript('test/my/script.js');
         $expected = [
             'test/my/script.js' => [
-                'async' => false,
-                'defer' => false,
-                'type' => 'text/javascript',
+                'async'    => false,
+                'defer'    => false,
+                'type'     => 'text/javascript',
                 'fallback' => false
             ]
         ];
@@ -119,19 +133,20 @@ class CSPBackendTest extends SapphireTest
         $backend->javascript('test/my/script.js', ['async' => true, 'defer' => true]);
         $expected = [
             'test/my/script.js' => [
-                'async' => true,
-                'defer' => true,
-                'type' => 'text/javascript',
+                'async'    => true,
+                'defer'    => true,
+                'type'     => 'text/javascript',
                 'fallback' => false
             ]
         ];
         $this->assertEquals($expected, $backend->getJavascript());
-        $backend->javascript('test/my/script.js', ['async' => true, 'defer' => true, 'fallback' => '1234567890987654321']);
+        $backend->javascript('test/my/script.js',
+            ['async' => true, 'defer' => true, 'fallback' => '1234567890987654321']);
         $expected = [
             'test/my/script.js' => [
-                'async' => true,
-                'defer' => true,
-                'type' => 'text/javascript',
+                'async'    => true,
+                'defer'    => true,
+                'type'     => 'text/javascript',
                 'fallback' => '1234567890987654321'
             ]
         ];
@@ -139,9 +154,9 @@ class CSPBackendTest extends SapphireTest
         $backend->javascript('test/my/script.js', ['provides' => ['test/some/script.js']]);
         $expected = [
             'test/my/script.js' => [
-                'async' => true, // Should not change from the loading above
-                'defer' => true, // Should not change from the loading above
-                'type' => 'text/javascript',
+                'async'    => true, // Should not change from the loading above
+                'defer'    => true, // Should not change from the loading above
+                'type'     => 'text/javascript',
                 'fallback' => '1234567890987654321', // Should not change from the loading above
             ]
         ];
