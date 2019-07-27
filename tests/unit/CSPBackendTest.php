@@ -115,7 +115,7 @@ body {background-color: red;}
 
         $this->assertEquals(['alert("hello world");', "alert('hello');"], ControllerCSPExtension::getInlineJS());
         $this->assertEquals(
-            ['body { color: red; }', 'body {background-color: red;}'],
+            ['body { color: red; }', 'body {background-color: red;}', 'body {background-color: red;}'],
             ControllerCSPExtension::getInlineCSS()
         );
     }
