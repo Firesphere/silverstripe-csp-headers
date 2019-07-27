@@ -54,7 +54,6 @@ class CSPBackend extends Requirements_Backend
      * Add the following custom HTML code to the `<head>` section of the page
      * @param string $html Custom HTML code
      * @param string|null $uniquenessID A unique ID that ensures a piece of code is only added once
-     * @todo include given options in opening tag
      */
     public function insertHeadTags($html, $uniquenessID = null): void
     {

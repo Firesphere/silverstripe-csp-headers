@@ -88,9 +88,9 @@ class CSSBuilder implements BuilderInterface
                 $options['nonce'] = Controller::curr()->getNonce();
             }
             $requirements .= HTML::createTag(
-                'script',
+                'style',
                 $options,
-                "//<![CDATA[\n{$content}\n//]]>"
+                "\n{$content}\n"
             );
             $requirements .= "\n";
         }
