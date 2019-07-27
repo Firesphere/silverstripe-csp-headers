@@ -84,6 +84,10 @@ class SRI extends DataObject implements PermissionProvider
      */
     public function canDelete($member = null)
     {
+        if (!$member) {
+            return false;
+        }
+
         return Permission::checkMember($member, 'DELETE_SRI');
     }
 
