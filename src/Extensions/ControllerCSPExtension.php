@@ -146,9 +146,7 @@ class ControllerCSPExtension extends Extension
             }
 
             $headers = $policy->getHeaderArray($legacy);
-            foreach ($headers as $name => $header) {
-                $owner->getResponse()->addHeader($name, $header);
-            }
+            $this->addResponseHeaders($headers, $owner);
         }
     }
 
@@ -214,5 +212,17 @@ class ControllerCSPExtension extends Extension
     public function isAddPolicyHeaders(): bool
     {
         return $this->addPolicyHeaders;
+    }
+
+    /**
+     * @param array $headers
+     * @param Controller $owner
+     */
+    protected function addResponseHeaders(array $headers, Controller $owner): void
+    {
+        $response = $owner->getResponse();
+        foreach ($headers as $name => $header) {
+            $response->addHeader($name, $header);
+        }
     }
 }
