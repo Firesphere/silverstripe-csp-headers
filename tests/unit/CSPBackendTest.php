@@ -7,7 +7,6 @@ use Firesphere\CSPHeaders\Builders\JSBuilder;
 use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
 use Firesphere\CSPHeaders\View\CSPBackend;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\SapphireTest;
 
 class CSPBackendTest extends SapphireTest
@@ -61,7 +60,7 @@ class CSPBackendTest extends SapphireTest
 
         $this->assertEquals($content, $result);
 
-        $content2= '<html><head></head><body></body></html>';
+        $content2 = '<html><head></head><body></body></html>';
 
         $this->assertEquals($content2, $backend->includeInHTML($content2));
 
@@ -113,9 +112,14 @@ body {background-color: red;}
         $this->assertEquals(['type' => 'text/javascript'], $headJS[$scriptHash]['alert(\'hello\');']);
         $this->assertEquals([$otherHash => $other], $backend->getCustomHeadTags());
 
+        $expected = [
+            'body {background-color: red;}',
+            'body { color: red; }',
+            'body {background-color: red;}',
+        ];
         $this->assertEquals(['alert("hello world");', "alert('hello');"], ControllerCSPExtension::getInlineJS());
         $this->assertEquals(
-            ['body { color: red; }', 'body {background-color: red;}', 'body {background-color: red;}'],
+            $expected,
             ControllerCSPExtension::getInlineCSS()
         );
     }
