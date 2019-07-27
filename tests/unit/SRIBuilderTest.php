@@ -6,7 +6,9 @@ namespace Firesphere\CSPHeaders\Tests;
 use Firesphere\CSPHeaders\Builders\SRIBuilder;
 use Firesphere\CSPHeaders\Models\SRI;
 use Firesphere\CSPHeaders\View\CSPBackend;
+use SilverStripe\Control\Cookie;
 use SilverStripe\Control\Director;
+use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\SapphireTest;
 
 class SRIBuilderTest extends SapphireTest
@@ -25,5 +27,10 @@ class SRIBuilderTest extends SapphireTest
         $this->assertEquals($base, $sri->SRI);
         $sriCheck = SRI::findOrCreate('composer.json');
         $this->assertEquals($sriCheck, $sri);
+
+        Cookie::set('buildHeaders', 'true');
+
+        $expected = sprintf('%s-%s', CSPBackend::SHA384, base64_encode(hash(CSPBackend::SHA384, $contents, true)));
+        $this->assertEquals($expected, $builder->buildSRI('composer.json', []));
     }
 }
