@@ -23,7 +23,6 @@ class CSPBackendTest extends SapphireTest
         CSPBackend::setHeadCSS($origCSS);
         $this->assertEquals($origJS, CSPBackend::getHeadJS());
         $this->assertEquals($origCSS, CSPBackend::getHeadCSS());
-
     }
 
     public function testConstruct()
@@ -140,8 +139,10 @@ class CSPBackendTest extends SapphireTest
             ]
         ];
         $this->assertEquals($expected, $backend->getJavascript());
-        $backend->javascript('test/my/script.js',
-            ['async' => true, 'defer' => true, 'fallback' => '1234567890987654321']);
+        $backend->javascript(
+            'test/my/script.js',
+            ['async' => true, 'defer' => true, 'fallback' => '1234567890987654321']
+        );
         $expected = [
             'test/my/script.js' => [
                 'async'    => true,
