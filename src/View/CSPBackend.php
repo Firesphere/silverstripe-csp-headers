@@ -214,9 +214,6 @@ class CSPBackend extends Requirements_Backend
     protected function shouldContinue($content): bool
     {
         $tagsAvailable = preg_match('#</head\b#', $content);
-        if ($tagsAvailable === false) {
-            return false;
-        }
         $hasFiles = count($this->css) ||
             count($this->javascript) ||
             count($this->customCSS) ||
