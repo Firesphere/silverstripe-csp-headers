@@ -13,7 +13,7 @@ class SRITest extends SapphireTest
 
     public function testCan()
     {
-        $this->assertFalse((new SRI())->canView(null));
+        $this->assertTrue((new SRI())->canView(null)); // You can view in any state
         $this->assertFalse((new SRI())->canEdit(null));
         $this->assertFalse((new SRI())->canDelete(null));
         $this->assertFalse((new SRI())->canCreate(null));
