@@ -8,7 +8,6 @@ use Firesphere\CSPHeaders\Models\SRI;
 use Firesphere\CSPHeaders\View\CSPBackend;
 use SilverStripe\Control\Cookie;
 use SilverStripe\Control\Director;
-use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\SapphireTest;
 
 class SRIBuilderTest extends SapphireTest

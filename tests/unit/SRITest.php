@@ -4,6 +4,7 @@
 namespace Firesphere\CSPHeaders\Tests;
 
 use Firesphere\CSPHeaders\Models\SRI;
+use Firesphere\CSPHeaders\View\CSPBackend;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Security\DefaultAdminService;
 
@@ -12,9 +13,9 @@ class SRITest extends SapphireTest
     private static $expected = [
         'DELETE_SRI' =>
             [
-                'name' => 'Delete SRI',
+                'name'     => 'Delete SRI',
                 'category' => 'SRI permissions',
-                'help' => 'Permission required to delete existing SRI\'s.',
+                'help'     => 'Permission required to delete existing SRI\'s.',
             ],
     ];
 
@@ -35,5 +36,24 @@ class SRITest extends SapphireTest
     public function testPermissions()
     {
         $this->assertEquals(self::$expected, (new SRI())->providePermissions());
+    }
+
+    public function testOnBeforeWrite()
+    {
+        /** @var SRI $sri */
+        $sri = SRI::create();
+        $sri->File = 'http://localhost/composer.json';
+        $sri->onBeforeWrite();
+        $this->assertEquals('http://localhost/composer.json', $sri->File);
+    }
+
+    public function testFindOrCreate()
+    {
+        /** @var SRI $sri */
+        $sri = SRI::findOrCreate('/readme.md');
+        $hash = hash(CSPBackend::SHA384, file_get_contents('/readme.md'), true);
+
+        $this->assertEquals(base64_encode($hash), $sri->SRI);
+        $this->assertGreaterThan(0, $sri->ID);
     }
 }
