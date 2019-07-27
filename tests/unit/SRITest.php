@@ -42,16 +42,16 @@ class SRITest extends SapphireTest
     {
         /** @var SRI $sri */
         $sri = SRI::create();
-        $sri->File = 'http://localhost/composer.json';
+        $sri->File = 'http://127.0.0.1/composer.json';
         $sri->onBeforeWrite();
-        $this->assertEquals('http://localhost/composer.json', $sri->File);
+        $this->assertEquals('http://127.0.0.1/composer.json', $sri->File);
     }
 
     public function testFindOrCreate()
     {
         /** @var SRI $sri */
         $sri = SRI::findOrCreate('/readme.md');
-        $hash = hash(CSPBackend::SHA384, file_get_contents('/readme.md'), true);
+        $hash = hash(CSPBackend::SHA384, file_get_contents('readme.md'), true);
 
         $this->assertEquals(base64_encode($hash), $sri->SRI);
         $this->assertGreaterThan(0, $sri->ID);
