@@ -147,4 +147,24 @@ class CSPBackendTest extends SapphireTest
         ];
         $this->assertEquals($expected, $backend->getJavascript());
     }
+
+    public function testJSSRI()
+    {
+        $isSRI = CSPBackend::config()->get('jsSRI');
+        $this->assertEquals($isSRI, CSPBackend::isJsSRI());
+        $isSRI = CSPBackend::config()->get('cssSRI');
+        $this->assertEquals($isSRI, CSPBackend::isCssSRI());
+        CSPBackend::setJsSRI(true);
+        $this->assertEquals(true, CSPBackend::isJsSRI());
+        CSPBackend::setJsSRI(false);
+        $this->assertEquals($isSRI, CSPBackend::isJsSRI());
+        $isSRI = CSPBackend::config()->get('cssSRI');
+        $this->assertEquals($isSRI, CSPBackend::isJsSRI());
+        $isSRI = CSPBackend::config()->get('cssSRI');
+        $this->assertEquals($isSRI, CSPBackend::isCssSRI());
+        CSPBackend::setCssSri(true);
+        $this->assertEquals(true, CSPBackend::isCssSRI());
+        CSPBackend::setCssSri(false);
+        $this->assertEquals($isSRI, CSPBackend::isCssSRI());
+    }
 }

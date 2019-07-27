@@ -246,7 +246,6 @@ class CSPBackend extends Requirements_Backend
     /**
      * @param string $requirements
      * @return string
-     * @throws GuzzleException
      * @throws ValidationException
      */
     protected function getCSSRequirements(string $requirements): string

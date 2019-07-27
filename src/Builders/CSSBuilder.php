@@ -104,7 +104,7 @@ class CSSBuilder implements BuilderInterface
     public function getCustomTags(string $requirements): string
     {
         // Literal custom CSS content
-        foreach ($this->owner->getCustomCSS() as $css) {
+        foreach ($this->getOwner()->getCustomCSS() as $css) {
             $options = ['type' => 'text/css'];
             // Use nonces for inlines if requested
             if (CSPBackend::isUsesNonce()) {

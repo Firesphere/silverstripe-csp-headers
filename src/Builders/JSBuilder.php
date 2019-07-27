@@ -108,7 +108,7 @@ class JSBuilder implements BuilderInterface
     public function getCustomTags(string $requirements): string
     {
         // Add all inline JavaScript *after* including external files they might rely on
-        foreach ($this->owner->getCustomScripts() as $script) {
+        foreach ($this->getOwner()->getCustomScripts() as $script) {
             $options = ['type' => 'application/javascript'];
             if (CSPBackend::isUsesNonce()) {
                 $options['nonce'] = Controller::curr()->getNonce();
