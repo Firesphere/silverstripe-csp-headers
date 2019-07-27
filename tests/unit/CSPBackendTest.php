@@ -7,6 +7,7 @@ use Firesphere\CSPHeaders\Builders\JSBuilder;
 use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
 use Firesphere\CSPHeaders\View\CSPBackend;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\SapphireTest;
 
 class CSPBackendTest extends SapphireTest
@@ -47,6 +48,31 @@ class CSPBackendTest extends SapphireTest
 
         $this->assertContains('alert("hello world");', $tags[0]);
         $this->assertContains($js, ControllerCSPExtension::getInlineJS());
+    }
+
+    public function testIncludeInHTML()
+    {
+        /** @var CSPBackend $backend */
+        $backend = Injector::inst()->get(CSPBackend::class, false);
+
+        $content = '<html><body></body></html>';
+
+        $result = $backend->includeInHTML($content);
+
+        $this->assertEquals($content, $result);
+
+        $content2= '<html><head></head><body></body></html>';
+
+        $this->assertEquals($content2, $backend->includeInHTML($content2));
+
+        $backend->customCSS('body {background-color: red;}');
+
+        $expected = '<html><head><style type="text/css">
+body {background-color: red;}
+</style>
+</head><body></body></html>';
+
+        $this->assertEquals($expected, $backend->includeInHTML($content2));
     }
 
     public function testInsertCSSTag()

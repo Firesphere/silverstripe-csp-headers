@@ -6,7 +6,6 @@ use Firesphere\CSPHeaders\Builders\CSSBuilder;
 use Firesphere\CSPHeaders\Builders\JSBuilder;
 use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
 use Firesphere\CSPHeaders\Traits\CSPBackendTrait;
-use GuzzleHttp\Exception\GuzzleException;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Manifest\ModuleResourceLoader;
 use SilverStripe\Dev\Deprecation;
@@ -178,7 +177,6 @@ class CSPBackend extends Requirements_Backend
      *                             through {@link SSViewer}
      * @return string HTML content augmented with the requirements tags
      * @throws ValidationException
-     * @throws GuzzleException
      */
     public function includeInHTML($content): string
     {
@@ -191,11 +189,10 @@ class CSPBackend extends Requirements_Backend
         }
 
         // Skip if content isn't injectable, or there is nothing to inject
-        $shouldContinue = $this->shouldContinue($content);
-
-        if (!$shouldContinue) {
+        if (!$this->shouldContinue($content)) {
             return $content;
         }
+
         $requirements = '';
         $jsRequirements = '';
 
@@ -217,6 +214,9 @@ class CSPBackend extends Requirements_Backend
     protected function shouldContinue($content): bool
     {
         $tagsAvailable = preg_match('#</head\b#', $content);
+        if ($tagsAvailable === false) {
+            return false;
+        }
         $hasFiles = count($this->css) ||
             count($this->javascript) ||
             count($this->customCSS) ||
