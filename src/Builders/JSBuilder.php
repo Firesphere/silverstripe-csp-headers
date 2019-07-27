@@ -53,7 +53,7 @@ class JSBuilder implements BuilderInterface
         }
         // Use nonces for inlines if requested
         if (CSPBackend::isUsesNonce()) {
-            $htmlAttributes['nonce'] = base64_encode(Controller::curr()->getNonce());
+            $htmlAttributes['nonce'] = Controller::curr()->getNonce();
         }
 
         $requirements .= HTML::createTag('script', $htmlAttributes);

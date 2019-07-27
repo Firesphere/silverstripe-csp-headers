@@ -108,10 +108,14 @@ class CSSBuilder implements BuilderInterface
             $options = ['type' => 'text/css'];
             // Use nonces for inlines if requested
             if (CSPBackend::isUsesNonce()) {
-                $options['nonce'] = base64_encode(Controller::curr()->getNonce());
+                $options['nonce'] = Controller::curr()->getNonce();
             }
 
-            $requirements .= HTML::createTag('style', $options, "\n{$css}\n");
+            $requirements .= HTML::createTag(
+                'style',
+                $options,
+                "\n{$css}\n"
+            );
             $requirements .= "\n";
         }
 
