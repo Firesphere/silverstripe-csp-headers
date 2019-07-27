@@ -10,7 +10,6 @@ use PageController;
 use SilverStripe\Control\Cookie;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\NullHTTPRequest;
-use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\SapphireTest;
 
 class ControllerExtensionTest extends SapphireTest
@@ -22,6 +21,13 @@ class ControllerExtensionTest extends SapphireTest
         $controller = new PageController($page);
         $extension = new ControllerCSPExtension();
         $extension->setOwner($controller);
+
+        $this->assertFalse($extension->isAddPolicyHeaders());
+
+        $extension->onBeforeInit();
+        $this->assertNull($extension->getNonce());
+        $extension->onAfterInit();
+        $this->assertArrayNotHasKey('content-security-policy-report-only', $controller->getResponse()->getHeaders());
 
         $request = new HTTPRequest('GET', '/', ['build-headers' => 'true']);
         $controller->setRequest($request);
@@ -41,5 +47,6 @@ class ControllerExtensionTest extends SapphireTest
         $extension->onAfterInit();
 
         $this->assertArrayHasKey('content-security-policy-report-only', $controller->getResponse()->getHeaders());
+        $this->assertContains('self', $controller->getResponse()->getHeader('content-security-policy-report-only'));
     }
 }

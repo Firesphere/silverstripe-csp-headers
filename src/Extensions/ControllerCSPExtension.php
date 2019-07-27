@@ -211,7 +211,7 @@ class ControllerCSPExtension extends Extension
      */
     public function isAddPolicyHeaders(): bool
     {
-        return $this->addPolicyHeaders;
+        return $this->addPolicyHeaders ?? false;
     }
 
     /**
