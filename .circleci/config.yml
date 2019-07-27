@@ -21,7 +21,7 @@ jobs:
           - MYSQL_DATABASE=circle_test
           - MYSQL_HOST=127.0.0.1
 
-    working_directory: ~/var/www
+    working_directory: /var/www/html
 
     steps:
       - run: apt-get update && apt-get install -y apt-transport-https lsb-release netcat wget
@@ -72,4 +72,4 @@ jobs:
             ./cc-test-reporter after-build --coverage-input-type clover --exit-code $?
       - run: vendor/bin/phpcs --standard=phpcs.xml.dist src tests/unit
       - store_test_results:
-          path: ~/var/www/coverage
+          path: /var/www/html/coverage
