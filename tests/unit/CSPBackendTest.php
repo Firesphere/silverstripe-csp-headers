@@ -33,22 +33,7 @@ class CSPBackendTest extends SapphireTest
         $this->assertInstanceOf(CSSBuilder::class, $backend->getCssBuilder());
         $this->assertInstanceOf(JSBuilder::class, $backend->getJsBuilder());
     }
-
-    public function testInsertJSTag()
-    {
-        $js = 'alert("hello world");';
-
-        /** @var CSPBackend $backend */
-        $backend = Injector::inst()->get(CSPBackend::class);
-
-        $backend->customScript($js);
-
-        $tags = $backend->getCustomScripts();
-
-        $this->assertContains('alert("hello world");', $tags[0]);
-        $this->assertContains($js, ControllerCSPExtension::getInlineJS());
-    }
-
+    
     public function testIncludeInHTML()
     {
         /** @var CSPBackend $backend */
@@ -72,6 +57,21 @@ body {background-color: red;}
 </head><body></body></html>';
 
         $this->assertEquals($expected, $backend->includeInHTML($content2));
+    }
+
+    public function testInsertJSTag()
+    {
+        $js = 'alert("hello world");';
+
+        /** @var CSPBackend $backend */
+        $backend = Injector::inst()->get(CSPBackend::class);
+
+        $backend->customScript($js);
+
+        $tags = $backend->getCustomScripts();
+
+        $this->assertContains('alert("hello world");', $tags[0]);
+        $this->assertContains($js, ControllerCSPExtension::getInlineJS());
     }
 
     public function testInsertCSSTag()
