@@ -79,9 +79,9 @@ class CSSBuilder implements BuilderInterface
      */
     public function getHeadTags(string &$requirements): void
     {
-        $js = CSPBackend::getHeadCSS();
-        foreach ($js as $tag => $script) {
-            $item = $js[$tag];
+        $css = CSPBackend::getHeadCSS();
+        foreach ($css as $tag => $script) {
+            $item = $css[$tag];
             $content = array_keys($item)[0];
             $options = $item[$content] ?? [];
             if (CSPBackend::isUsesNonce()) {

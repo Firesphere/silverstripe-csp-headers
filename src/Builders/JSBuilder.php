@@ -84,9 +84,9 @@ class JSBuilder implements BuilderInterface
      */
     public function getHeadTags(string &$requirements): void
     {
-        $js = CSPBackend::getHeadJS();
-        foreach ($js as $tag => $script) {
-            $item = $js[$tag];
+        $javascript = CSPBackend::getHeadJS();
+        foreach ($javascript as $tag => $script) {
+            $item = $javascript[$tag];
             $content = array_keys($item)[0];
             $options = $item[$content] ?? [];
             if (CSPBackend::isUsesNonce()) {
