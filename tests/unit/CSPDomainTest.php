@@ -5,6 +5,7 @@ namespace Firesphere\CSPHeaders\Tests;
 
 use Firesphere\CSPHeaders\Models\CSPDomain;
 use SilverStripe\Dev\SapphireTest;
+use SilverStripe\Security\DefaultAdminService;
 
 class CSPDomainTest extends SapphireTest
 {
@@ -56,6 +57,12 @@ class CSPDomainTest extends SapphireTest
         $this->assertFalse((new CSPDomain())->canEdit(null));
         $this->assertFalse((new CSPDomain())->canDelete(null));
         $this->assertFalse((new CSPDomain())->canCreate(null));
+        $admin = DefaultAdminService::create()->findOrCreateAdmin('test', 'test');
+        $this->logInAs($admin);
+        $this->assertTrue((new CSPDomain())->canView($admin));
+        $this->assertTrue((new CSPDomain())->canEdit($admin));
+        $this->assertTrue((new CSPDomain())->canDelete($admin));
+        $this->assertTrue((new CSPDomain())->canCreate($admin));
     }
 
     public function testPermissionList()
