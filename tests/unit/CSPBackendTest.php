@@ -7,6 +7,7 @@ use Firesphere\CSPHeaders\Builders\JSBuilder;
 use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
 use Firesphere\CSPHeaders\View\CSPBackend;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\SapphireTest;
 
 class CSPBackendTest extends SapphireTest
@@ -33,7 +34,7 @@ class CSPBackendTest extends SapphireTest
         $this->assertInstanceOf(CSSBuilder::class, $backend->getCssBuilder());
         $this->assertInstanceOf(JSBuilder::class, $backend->getJsBuilder());
     }
-    
+
     public function testIncludeInHTML()
     {
         /** @var CSPBackend $backend */
@@ -54,6 +55,16 @@ class CSPBackendTest extends SapphireTest
         $expected = '<html><head><style type="text/css">
 body {background-color: red;}
 </style>
+</head><body></body></html>';
+
+        $this->assertEquals($expected, $backend->includeInHTML($content2));
+
+        $backend->insertHeadTags('<meta name="test" />');
+
+        $expected = '<html><head><style type="text/css">
+body {background-color: red;}
+</style>
+<meta name="test" />
 </head><body></body></html>';
 
         $this->assertEquals($expected, $backend->includeInHTML($content2));
