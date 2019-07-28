@@ -4,7 +4,7 @@ Name: CSPHeaders
 Firesphere\CSPHeaders\View\CSPBackend:
   csp_config:
     report-only: false
-    report-uri: "https://report-uri.com/r/d/csp/enforce"
+    report-uri: "https://127.0.0.1/r/d/csp/enforce"
     base-uri:
       allow: []
       self: true

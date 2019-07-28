@@ -47,6 +47,9 @@ class ControllerExtensionTest extends SapphireTest
         $extension->onAfterInit();
 
         $this->assertArrayHasKey('content-security-policy-report-only', $controller->getResponse()->getHeaders());
-        $this->assertContains('self', $controller->getResponse()->getHeader('content-security-policy-report-only'));
+        $header = $controller->getResponse()->getHeader('content-security-policy-report-only');
+        $this->assertContains('self', $header);
+        $this->assertContains('style-src \'self\' \'unsafe-inline\'', $header);
+        
     }
 }
