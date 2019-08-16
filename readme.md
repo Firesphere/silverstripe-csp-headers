@@ -29,7 +29,7 @@ To enable or disable inline javascripts or css, set the appropriate flag (`allow
 
 Same goes for javascripts. Javascripts specifically should live either in a separate file, or be added using `Requirementns::customScripts()`
 
-Default for css is therefore `false`, javascript however defaults to `true` for security reasongs.
+Default for css is therefore `false`, javascript however defaults to `true` for security reasons.
 
 # Configuration
 
