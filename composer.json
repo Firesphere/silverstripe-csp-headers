@@ -17,7 +17,7 @@
     }
   ],
   "require": {
-    "silverstripe/recipe-cms": "^4",
+    "silverstripe/cms": "^4",
     "paragonie/csp-builder": "^2",
     "guzzlehttp/guzzle": "^6"
   },
