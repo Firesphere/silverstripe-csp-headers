@@ -42,9 +42,11 @@ class SRITest extends SapphireTest
     {
         /** @var SRI $sri */
         $sri = SRI::create();
-        $sri->File = 'http://127.0.0.1/install-frameworkmissing.html';
+        $sri->File = 'http://127.0.0.1/codecov.yml';
         $sri->onBeforeWrite();
-        $this->assertEquals('http://127.0.0.1/install-frameworkmissing.html', $sri->File);
+        $hash = hash(CSPBackend::SHA384, file_get_contents('codecov.yml'), true);
+        $this->assertEquals('http://127.0.0.1/codecov.yml', $sri->File);
+        $this->assertEquals(base64_encode($hash), $sri->SRI);
     }
 
     public function testFindOrCreate()
