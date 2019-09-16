@@ -42,9 +42,9 @@ class SRITest extends SapphireTest
     {
         /** @var SRI $sri */
         $sri = SRI::create();
-        $sri->File = 'http://127.0.0.1/composer.json';
+        $sri->File = 'http://127.0.0.1/install-frameworkmissing.html';
         $sri->onBeforeWrite();
-        $this->assertEquals('http://127.0.0.1/composer.json', $sri->File);
+        $this->assertEquals('http://127.0.0.1/install-frameworkmissing.html', $sri->File);
     }
 
     public function testFindOrCreate()
