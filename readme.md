@@ -44,7 +44,8 @@ Firesphere\CSPHeaders\View\CSPBackend:
       self: true
     default-src: []
     frame-src:
-      allow: []
+      allow: 
+        - youtube.com
       self: false
     connect-src:
       allow: []
@@ -60,7 +61,10 @@ Firesphere\CSPHeaders\View\CSPBackend:
       blob: true
       self: true
       data: true
-    media-src: []
+    media-src: 
+      allow:
+        - youtube.com
+        - vimeo.com
     object-src: []
     plugin-types: []
     script-src:
@@ -115,6 +119,13 @@ If you want to submit forms to a different domain, you can add the allowed domai
 ## inline scripts or custom scripts
 
 If you use the default methods provided by the `Requirements` class, the needed SHA's and SRI's are automatically calculated for you.
+
+# Refreshing calculated values
+
+To force-refresh the SRI calculations, add the URL Parameter `?updatesri=true`. You need to be admin to use this.
+
+To force the headers to be set in dev-mode, for testing purposes, add the URL parameter `?build-headers=true`.
+To disable this again, change the `true` to `false`
 
 # .htaccess
 
