@@ -18,6 +18,7 @@ use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Extension;
 use SilverStripe\ORM\DataList;
+use SilverStripe\Core\Injector\Injector;
 use function hash;
 
 /**
@@ -132,7 +133,8 @@ class ControllerCSPExtension extends Extension
         /** @var Controller $owner */
         $owner = $this->owner;
         if ($this->addPolicyHeaders) {
-            $config = CSPBackend::config()->get('csp_config');
+            $ymlConfig = CSPBackend::config()->get('csp_config');
+            $config = Injector::inst()->convertServiceProperty($ymlConfig);
             $legacy = $config['legacy'] ?? true;
             /** @var CSPBuilder $policy */
             $policy = CSPBuilder::fromArray($config);
