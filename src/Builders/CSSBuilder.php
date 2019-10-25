@@ -84,8 +84,11 @@ class CSSBuilder implements BuilderInterface
             $item = $css[$tag];
             $content = array_keys($item)[0];
             $options = $item[$content] ?? [];
-            if (CSPBackend::isUsesNonce()) {
-                $options['nonce'] = Controller::curr()->getNonce();
+            if (CSPBackend::isUsesNonce() && Controller::has_curr()) {
+                $ctrl = Controller::curr();
+                if($ctrl && method_exists($ctrl, 'getNonce')) {
+                    $options['nonce'] = $ctrl->getNonce();
+                }
             }
             $requirements .= HTML::createTag(
                 'style',
@@ -107,8 +110,11 @@ class CSSBuilder implements BuilderInterface
         foreach ($this->getOwner()->getCustomCSS() as $css) {
             $options = ['type' => 'text/css'];
             // Use nonces for inlines if requested
-            if (CSPBackend::isUsesNonce()) {
-                $options['nonce'] = Controller::curr()->getNonce();
+            if (CSPBackend::isUsesNonce() && Controller::has_curr()) {
+                $ctrl = Controller::curr();
+                if($ctrl && method_exists($ctrl, 'getNonce')) {
+                    $options['nonce'] = $ctrl->getNonce();
+                }
             }
 
             $requirements .= HTML::createTag(

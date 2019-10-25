@@ -52,8 +52,11 @@ class JSBuilder implements BuilderInterface
             $htmlAttributes = $this->getSriBuilder()->buildSRI($file, $htmlAttributes);
         }
         // Use nonces for inlines if requested
-        if (CSPBackend::isUsesNonce()) {
-            $htmlAttributes['nonce'] = Controller::curr()->getNonce();
+        if (CSPBackend::isUsesNonce() && Controller::has_curr()) {
+            $ctrl = Controller::curr();
+            if($ctrl && method_exists($ctrl, 'getNonce')) {
+                $htmlAttributes['nonce'] = $ctrl->getNonce();
+            }
         }
 
         $requirements .= HTML::createTag('script', $htmlAttributes);
@@ -90,7 +93,10 @@ class JSBuilder implements BuilderInterface
             $content = array_keys($item)[0];
             $options = $item[$content] ?? [];
             if (CSPBackend::isUsesNonce()) {
-                $options['nonce'] = Controller::curr()->getNonce();
+                $ctrl = Controller::curr();
+                if($ctrl && method_exists($ctrl, 'getNonce')) {
+                    $options['nonce'] = $ctrl->getNonce();
+                }
             }
             $requirements .= HTML::createTag(
                 'script',
@@ -111,7 +117,10 @@ class JSBuilder implements BuilderInterface
         foreach ($this->getOwner()->getCustomScripts() as $script) {
             $options = ['type' => 'application/javascript'];
             if (CSPBackend::isUsesNonce()) {
-                $options['nonce'] = Controller::curr()->getNonce();
+                $ctrl = Controller::curr();
+                if($ctrl && method_exists($ctrl, 'getNonce')) {
+                    $options['nonce'] = $ctrl->getNonce();
+                }
             }
             $requirements .= HTML::createTag(
                 'script',
