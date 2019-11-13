@@ -97,6 +97,7 @@ class SRI extends DataObject implements PermissionProvider
      */
     public function onBeforeWrite()
     {
+        $body = null;
         // Since this is called from CSP Backend, an SRI for external files is automatically created
         if (!Director::is_site_url($this->File)) {
             /** @var Client $client */
@@ -104,11 +105,24 @@ class SRI extends DataObject implements PermissionProvider
             $result = $client->request('GET', $this->File);
             $body = $result->getBody()->getContents();
         } else {
-            $body = file_get_contents(Director::baseFolder() . '/' . $this->File);
-        }
-        $hash = hash(CSPBackend::SHA384, $body, true);
+            $filename = Director::baseFolder() . '/' . $this->File;
+            if(file_exists($filename)) {
+                $body = file_get_contents($filename);
+            }
 
-        $this->SRI = base64_encode($hash);
+            //also check the public folder, the CMS dumps tinymce config here
+            $publicFilename = Director::publicFolder(). '/' . $this->File;
+            if(file_exists($publicFilename)) {
+                $body = file_get_contents($publicFilename);
+            }
+
+        }
+
+        //unlikely, but possible, that $body is empty
+        if($body) {
+            $hash = hash(CSPBackend::SHA384, $body, true);
+            $this->SRI = base64_encode($hash);
+        }
 
         parent::onBeforeWrite();
     }
