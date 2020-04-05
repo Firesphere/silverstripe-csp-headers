@@ -26,7 +26,7 @@ class CSPDomain extends DataObject implements PermissionProvider
 
     private static $db = [
         'Domain' => 'Varchar(255)',
-        'Source' => 'Enum("default,script,style,img,media,font,form,frame")'
+        'Source' => 'Enum("default,script,style,img,media,font,form,frame,ancestor")'
     ];
 
     private static $belongs_many_many = [
