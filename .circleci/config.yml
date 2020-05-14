@@ -43,6 +43,7 @@ jobs:
             - app
             - public
       - run: cp .circleci/circleci.env .env
+      - run: cp .circleci/test.html ./test.html
       - run:
           name: Setup Code Climate and Scrutinizer test-reporter
           command: |
