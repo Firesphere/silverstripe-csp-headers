@@ -7,11 +7,15 @@ use Firesphere\CSPHeaders\Builders\JSBuilder;
 use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
 use Firesphere\CSPHeaders\View\CSPBackend;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Dev\Debug;
 use SilverStripe\Dev\SapphireTest;
 
 class CSPBackendTest extends SapphireTest
 {
+    public function setUp()
+    {
+        parent::setUp();
+        CSPBackend::config()->update('useNonce', false);
+    }
     public function testSet()
     {
         $origJS = CSPBackend::getHeadJS();
