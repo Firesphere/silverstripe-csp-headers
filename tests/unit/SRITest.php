@@ -42,10 +42,10 @@ class SRITest extends SapphireTest
     {
         /** @var SRI $sri */
         $sri = SRI::create();
-        $sri->File = 'http://127.0.0.1/assets/jstest.js';
+        $sri->File = 'http://127.0.0.1/jstest.js';
         $sri->onBeforeWrite();
-        $hash = hash(CSPBackend::SHA384, file_get_contents('public/assets/jstest.js'), true);
-        $this->assertEquals('http://127.0.0.1/assets/jstest.js', $sri->File);
+        $hash = hash(CSPBackend::SHA384, file_get_contents('jstest.js'), true);
+        $this->assertEquals('http://127.0.0.1/jstest.js', $sri->File);
         $this->assertEquals(base64_encode($hash), $sri->SRI);
     }
 
