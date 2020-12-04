@@ -43,6 +43,7 @@ jobs:
             - app
             - public
       - run: cp .circleci/circleci.env .env
+      - run: cp .circleci/jstest.js.circleci public/assets/jstest.js
       - run:
           name: Setup Code Climate and Scrutinizer test-reporter
           command: |
