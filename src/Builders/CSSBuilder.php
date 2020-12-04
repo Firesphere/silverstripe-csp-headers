@@ -86,7 +86,7 @@ class CSSBuilder implements BuilderInterface
             $options = $item[$content] ?? [];
             if (CSPBackend::isUsesNonce() && Controller::has_curr()) {
                 $ctrl = Controller::curr();
-                if($ctrl && method_exists($ctrl, 'getNonce')) {
+                if ($ctrl && method_exists($ctrl, 'getNonce')) {
                     $options['nonce'] = $ctrl->getNonce();
                 }
             }
@@ -112,7 +112,7 @@ class CSSBuilder implements BuilderInterface
             // Use nonces for inlines if requested
             if (CSPBackend::isUsesNonce() && Controller::has_curr()) {
                 $ctrl = Controller::curr();
-                if($ctrl && method_exists($ctrl, 'getNonce')) {
+                if ($ctrl && method_exists($ctrl, 'getNonce')) {
                     $options['nonce'] = $ctrl->getNonce();
                 }
             }

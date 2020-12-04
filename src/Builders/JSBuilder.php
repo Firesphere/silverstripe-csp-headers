@@ -54,7 +54,7 @@ class JSBuilder implements BuilderInterface
         // Use nonces for inlines if requested
         if (CSPBackend::isUsesNonce() && Controller::has_curr()) {
             $ctrl = Controller::curr();
-            if($ctrl && method_exists($ctrl, 'getNonce')) {
+            if ($ctrl && method_exists($ctrl, 'getNonce')) {
                 $htmlAttributes['nonce'] = $ctrl->getNonce();
             }
         }
@@ -94,7 +94,7 @@ class JSBuilder implements BuilderInterface
             $options = $item[$content] ?? [];
             if (CSPBackend::isUsesNonce()) {
                 $ctrl = Controller::curr();
-                if($ctrl && method_exists($ctrl, 'getNonce')) {
+                if ($ctrl && method_exists($ctrl, 'getNonce')) {
                     $options['nonce'] = $ctrl->getNonce();
                 }
             }
@@ -118,7 +118,7 @@ class JSBuilder implements BuilderInterface
             $options = ['type' => 'application/javascript'];
             if (CSPBackend::isUsesNonce()) {
                 $ctrl = Controller::curr();
-                if($ctrl && method_exists($ctrl, 'getNonce')) {
+                if ($ctrl && method_exists($ctrl, 'getNonce')) {
                     $options['nonce'] = $ctrl->getNonce();
                 }
             }

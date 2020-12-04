@@ -90,6 +90,5 @@ class ControllerExtensionTest extends SapphireTest
         $extension3 = new ControllerCSPExtension();
         $extension3->setOwner($cmsController);
         $this->assertNotNull($cmsController->getNonce());
-
     }
 }
