@@ -17,8 +17,8 @@ use SilverStripe\Control\Cookie;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Extension;
-use SilverStripe\ORM\DataList;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\ORM\DataList;
 use function hash;
 
 /**
@@ -91,19 +91,6 @@ class ControllerCSPExtension extends Extension
     }
 
     /**
-     * Check and set if we need to generate the CSP and SRI
-     */
-    public function onBeforeInit()
-    {
-        /** @var ContentController $owner */
-        $owner = $this->owner;
-        $this->addPolicyHeaders = Director::isLive() || static::checkCookie($owner->getRequest());
-        if (!$this->getNonce() && CSPBackend::isUsesNonce()) {
-            $this->nonce = Base64::encode(hash('sha512', uniqid('nonce', true) . time()));
-        }
-    }
-
-    /**
      * @param HTTPRequest $request
      * @return bool
      */
@@ -128,15 +115,21 @@ class ControllerCSPExtension extends Extension
      * Add the needed headers from the database and config
      * @throws Exception
      */
-    public function onAfterInit()
+    public function onBeforeInit()
     {
+        /** @var ContentController $owner */
+        $owner = $this->owner;
+        $this->addPolicyHeaders = Director::isLive() || static::checkCookie($owner->getRequest());
         /** @var Controller $owner */
         $owner = $this->owner;
         if ($this->addPolicyHeaders) {
+            if (!$this->getNonce() && CSPBackend::isUsesNonce()) {
+                $this->nonce = Base64::encode(hash('sha512', uniqid('nonce', true) . time()));
+            }
             $ymlConfig = CSPBackend::config()->get('csp_config');
             $config = Injector::inst()->convertServiceProperty($ymlConfig);
             $legacy = $config['legacy'] ?? true;
-            /** @var CSPBuilder $policy */
+
             $policy = CSPBuilder::fromArray($config);
 
             $this->addCSP($policy, $owner);
@@ -224,7 +217,9 @@ class ControllerCSPExtension extends Extension
     {
         $response = $owner->getResponse();
         foreach ($headers as $name => $header) {
-            $response->addHeader($name, $header);
+            if (!$response->getHeader($header)) {
+                $response->addHeader($name, $header);
+            }
         }
     }
 }
