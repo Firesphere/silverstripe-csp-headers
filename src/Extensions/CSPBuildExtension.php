@@ -3,7 +3,6 @@
 
 namespace Firesphere\CSPHeaders\Extensions;
 
-
 use Firesphere\CSPHeaders\View\CSPBackend;
 use SilverStripe\Core\Extension;
 use SilverStripe\Dev\DevBuildController;
@@ -17,7 +16,6 @@ use SilverStripe\Dev\DevBuildController;
  */
 class CSPBuildExtension extends Extension
 {
-
     public function afterCallActionHandler()
     {
         $config = CSPBackend::config()->get('clear');
