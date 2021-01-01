@@ -105,19 +105,23 @@ class SRI extends DataObject implements PermissionProvider
             $result = $client->request('GET', $this->File);
             $body = $result->getBody()->getContents();
         } else {
-            $filename = Director::baseFolder() . '/' . $this->File;
-            if (file_exists($filename)) {
-                $body = file_get_contents($filename);
-            }
+            $folders = [
+                Director::baseFolder(),
+                Director::publicFolder(),
+                Director::publicFolder() . '/resources',
+                Director::publicFolder() . '/_resources'
+            ];
 
-            //also check the public folder, the CMS dumps tinymce config here
-            $publicFilename = Director::publicFolder(). '/' . $this->File;
-            if (file_exists($publicFilename)) {
-                $body = file_get_contents($publicFilename);
+            foreach ($folders as $folder) {
+                $filename = sprintf('%s/%s', $folder, $this->File);
+                if (file_exists($filename)) {
+                    $body = file_get_contents($filename);
+                    break;
+                }
             }
         }
 
-        //unlikely, but possible, that $body is empty
+        // Unlikely, but possible, that $body is empty
         if ($body) {
             $hash = hash(CSPBackend::SHA384, $body, true);
             $this->SRI = base64_encode($hash);
