@@ -34,7 +34,7 @@ class ControllerExtensionTest extends SapphireTest
 
         $extension->onBeforeInit();
         $this->assertNull($extension->getNonce());
-        $extension->onAfterInit();
+//        $extension->onAfterInit();
         $this->assertArrayNotHasKey('content-security-policy-report-only', $controller->getResponse()->getHeaders());
 
         $request = new HTTPRequest('GET', '/', ['build-headers' => 'true']);
@@ -53,7 +53,7 @@ class ControllerExtensionTest extends SapphireTest
 
         Cookie::force_expiry('buildHeaders');
 
-        $extension->onAfterInit();
+//        $extension->onAfterInit();
 
         $this->assertArrayHasKey('content-security-policy-report-only', $controller->getResponse()->getHeaders());
         $header = $controller->getResponse()->getHeader('content-security-policy-report-only');
@@ -74,12 +74,12 @@ class ControllerExtensionTest extends SapphireTest
         //useNonce is set but only applies on the PageController.
         //let's check Security controller for logins: it should be absent
         $secController = new Security();
-        $this->setExpectedException('BadMethodCallException');
+        $this->expectException('BadMethodCallException');
         $this->assertNull($secController->getNonce());
 
         //also check CMS-level controllers
         $cmsController = new LeftAndMain();
-        $this->setExpectedException('BadMethodCallException');
+        $this->expectException('BadMethodCallException');
         $this->assertNull($secController->getNonce());
 
         //now apply the extension, getNonce should not be null
