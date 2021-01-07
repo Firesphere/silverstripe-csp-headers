@@ -10,6 +10,7 @@ use Firesphere\CSPHeaders\View\CSPBackend;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\Config\Configurable;
+use SilverStripe\ORM\DB;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\Security\Security;
 
@@ -40,12 +41,11 @@ class SRIBuilder
                 return $htmlAttributes;
             }
         }
-        $sri = SRI::findOrCreate($file);
+        // Remove all existing SRI's, if an update is needed
         if ($this->shouldUpdateSRI()) {
-            $sri->SRI = null;
-            $sri->forceChange();
-            $sri->write();
+            DB::query('TRUNCATE `SRI`');
         }
+        $sri = SRI::findOrCreate($file);
 
         $request = Controller::curr()->getRequest();
         $cookieSet = ControllerCSPExtension::checkCookie($request);

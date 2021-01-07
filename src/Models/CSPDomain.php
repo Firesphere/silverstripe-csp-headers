@@ -38,6 +38,10 @@ class CSPDomain extends DataObject implements PermissionProvider
         'Source'
     ];
 
+    private static $indexes = [
+        'Domain' => true
+    ];
+
     /**
      * @todo make translatable
      * @var array

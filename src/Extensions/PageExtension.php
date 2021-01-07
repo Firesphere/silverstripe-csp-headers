@@ -38,6 +38,6 @@ class PageExtension extends DataExtension
             $this->owner->CSPDomains(),
             $config
         );
-        $fields->addFieldToTab('Root.CSPDomains', $gridfield);
+        $fields->addFieldToTab('Root.CSP', $gridfield);
     }
 }
