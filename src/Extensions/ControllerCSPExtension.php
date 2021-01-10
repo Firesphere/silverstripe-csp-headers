@@ -125,7 +125,6 @@ class ControllerCSPExtension extends Extension
         /** @var Controller $owner */
         $owner = $this->owner;
         if ($this->addPolicyHeaders) {
-            $this->SRIs = ArrayList::create(SRI::get()->toArray());
             if (!$this->getNonce() && CSPBackend::isUsesNonce()) {
                 $this->nonce = Base64::encode(hash('sha512', uniqid('nonce', true) . time()));
             }
