@@ -137,6 +137,16 @@ To force-refresh the SRI calculations, add the URL Parameter `?updatesri=true`. 
 To force the headers to be set in dev-mode, for testing purposes, add the URL parameter `?build-headers=true`.
 To disable this again, change the `true` to `false`
 
+To have these automatically clear out on a dev/build (useful for updating integrity hashes on production when new assets are deployed) you can apply the SRIRefreshExtension by adding the following to your yaml config
+
+```yaml
+Firesphere\CSPHeaders\Models\SRI:
+  extensions:
+    - Firesphere\CSPHeaders\Extensions\SRIRefreshExtension
+```
+
+This will simply delete all of the hashes and they will be recalculated the first time they are required on a page.
+
 # .htaccess
 
 Any header set in the `.htaccess`, Apache `site.conf` or `nginx.conf` files will override the headers
