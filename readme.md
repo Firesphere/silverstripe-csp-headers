@@ -37,6 +37,7 @@ Default for css is therefore `false`, javascript however defaults to `true` for 
 
 Firesphere\CSPHeaders\View\CSPBackend:
   csp_config:
+    enabled: true
     report-only: false
     report-uri: "https://mydomain.report-uri.com"
     base-uri:
@@ -99,7 +100,19 @@ When you enable the Reporting API you will receive deprecation, intervention and
 
 ## csp_config
 
-Configure the allowed domains. If domains change, they need to be added programmatically.
+Configure the allowed domains. If domains change, they need to be added programmatically. You can disable CSP output entirely for target environments via yaml e.g. to only output the headers in production you could use
+
+```yaml
+---
+Except:
+  environment: 'live'
+---
+Firesphere\CSPHeaders\View\CSPBackend:
+  csp_config:
+    enabled: false
+```
+
+You can also use this to skip generating SRI for JS or CSS within target environments.
 
 ### Using a nonce
 
