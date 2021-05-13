@@ -4,14 +4,14 @@
 namespace Firesphere\CSPHeaders\Builders;
 
 use Exception;
-use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
 use Firesphere\CSPHeaders\Models\SRI;
 use Firesphere\CSPHeaders\View\CSPBackend;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\ORM\ValidationException;
-use SilverStripe\Security\Security;
+use SilverStripe\View\ArrayData;
+use SilverStripe\Security\Permission;
 
 class SRIBuilder
 {
@@ -74,7 +74,7 @@ class SRIBuilder
         // Is updateSRI requested?
         return (Controller::curr()->getRequest()->getVar('updatesri') &&
             // Does the user have the powers
-            ((Security::getCurrentUser() && Security::getCurrentUser()->inGroup('administrators')) ||
+            (Permission::check('ADMIN', 'any') ||
                 // OR the site is in dev mode
                 Director::isDev()));
     }
