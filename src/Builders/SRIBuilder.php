@@ -9,11 +9,21 @@ use Firesphere\CSPHeaders\Models\SRI;
 use Firesphere\CSPHeaders\View\CSPBackend;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
+use SilverStripe\Core\Config\Configurable;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\Security\Security;
 
 class SRIBuilder
 {
+    use Configurable;
+
+    /**
+     * An array of javascript or css files to skip applying SRI to.
+     * Files only need to start with the configured value, e.g. if this array contains
+     * 'https://example.com' then all scripts from that site will be skipped.
+     * @var array
+     */
+    private static $files_to_skip_sri = [];
 
     /**
      * @param $file
@@ -24,6 +34,12 @@ class SRIBuilder
      */
     public function buildSRI($file, array $htmlAttributes): array
     {
+        $skipFiles = $this->config()->get('files_to_skip_sri');
+        foreach ($skipFiles as $filename) {
+            if (strpos($file, $filename) === 0) {
+                return $htmlAttributes;
+            }
+        }
         $sri = SRI::findOrCreate($file);
         if ($this->shouldUpdateSRI()) {
             $sri->SRI = null;
