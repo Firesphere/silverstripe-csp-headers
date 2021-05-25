@@ -37,7 +37,7 @@ trait CSPBackendTrait
     /**
      * @var bool
      */
-    protected static $usesNonce = false;
+    protected static $useNonce = false;
     /**
      * @var CSSBuilder
      */
@@ -116,15 +116,15 @@ trait CSPBackendTrait
      */
     public static function isUsesNonce(): bool
     {
-        return CSPBackend::config()->get('useNonce') || self::$usesNonce;
+        return CSPBackend::config()->get('useNonce') || self::$useNonce;
     }
 
     /**
      * @param bool static::isUseNonce()
      */
-    public static function setUsesNonce(bool $usesNonce): void
+    public static function setUsesNonce(bool $useNonce): void
     {
-        self::$usesNonce = $usesNonce;
+        self::$useNonce = $useNonce;
     }
 
 
