@@ -27,8 +27,6 @@ class SRIBuilderTest extends SapphireTest
         $sriCheck = SRI::findOrCreate('composer.json');
         $this->assertEquals($sriCheck, $sri);
 
-        Cookie::set('buildHeaders', 'true');
-
         $expected = sprintf('%s-%s', CSPBackend::SHA384, base64_encode(hash(CSPBackend::SHA384, $contents, true)));
         $this->assertEquals(['integrity' => $expected, 'crossorigin' => ''], $builder->buildSRI('composer.json', []));
     }

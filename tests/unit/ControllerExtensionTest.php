@@ -27,22 +27,24 @@ class ControllerExtensionTest extends SapphireTest
         $this->assertFalse(ControllerCSPExtension::checkCookie(new NullHTTPRequest()));
         $page = new Page();
         $controller = new PageController($page);
+
+        // Shouldn't add CSP if not enabled
         $extension = new ControllerCSPExtension();
         $extension->setOwner($controller);
-
+        $config = CSPBackend::config()->get('csp_config');
+        $config['enabled'] = false;
+        CSPBackend::config()->update('csp_config', $config);
         $this->assertFalse($extension->isAddPolicyHeaders());
-
         $extension->onBeforeInit();
         $this->assertNull($extension->getNonce());
-//        $extension->onAfterInit();
         $this->assertArrayNotHasKey('content-security-policy-report-only', $controller->getResponse()->getHeaders());
 
+        // Should add CSP if build headers is requested
         $request = new HTTPRequest('GET', '/', ['build-headers' => 'true']);
         $controller->setRequest($request);
+        $extension = new ControllerCSPExtension();
         $extension->setOwner($controller);
-
         $extension->onBeforeInit();
-
         $this->assertEquals('true', Cookie::get('buildHeaders'));
         $this->assertTrue(ControllerCSPExtension::checkCookie($request));
         $this->assertTrue($extension->isAddPolicyHeaders());
@@ -50,15 +52,24 @@ class ControllerExtensionTest extends SapphireTest
         CSPBackend::setUsesNonce(true);
         $extension->onBeforeInit();
         $this->assertNotNull($extension->getNonce());
-
         Cookie::force_expiry('buildHeaders');
-
-//        $extension->onAfterInit();
-
         $this->assertArrayHasKey('content-security-policy-report-only', $controller->getResponse()->getHeaders());
         $header = $controller->getResponse()->getHeader('content-security-policy-report-only');
         $this->assertContains('self', $header);
         $this->assertContains('style-src \'self\' \'unsafe-inline\'', $header);
+
+        // Should add CSP if enabled (and build headers not requested)
+        $config['enabled'] = true;
+        CSPBackend::config()->update('csp_config', $config);
+        $request = new HTTPRequest('GET', '/');
+        $controller->setRequest($request);
+        $extension = new ControllerCSPExtension();
+        $extension->setOwner($controller);
+        $this->assertFalse(ControllerCSPExtension::checkCookie($request));
+        $this->assertFalse($extension->isAddPolicyHeaders());
+        $extension->onBeforeInit();
+        $this->assertNotNull($extension->getNonce());
+        $this->assertArrayHasKey('content-security-policy-report-only', $controller->getResponse()->getHeaders());
     }
 
     public function testNonceOnExcludedControllers()
