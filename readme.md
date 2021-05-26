@@ -122,11 +122,11 @@ If you use the default methods provided by the `Requirements` class, the needed 
 
 ## Skipping SRI for some files
 
-You can specify files or domains to skip outputting (JS or CSS) SRI for using the `files_to_skip_sri` array. If the file URI starts with or matches a value in this array then it will be skipped. In the example below, any files fetched from https://maps.googleapis.com/ would be skipped.
+You can specify files or domains to skip outputting (JS or CSS) SRI for by using the `skip_domains` array. If the file URI starts with or matches a value in this array then it will be skipped. In the example below, any files fetched from https://maps.googleapis.com/ would be skipped.
 
 ```yaml
 Firesphere\CSPHeaders\Builders\SRIBuilder:
-  files_to_skip_sri:
+  skip_domains:
     - 'https://maps.googleapis.com/'
 ```
 

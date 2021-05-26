@@ -23,7 +23,7 @@ class SRIBuilder
      * 'https://example.com' then all scripts from that site will be skipped.
      * @var array
      */
-    private static $files_to_skip_sri = [];
+    private static $skip_domains = [];
 
     /**
      * @param $file
@@ -34,7 +34,7 @@ class SRIBuilder
      */
     public function buildSRI($file, array $htmlAttributes): array
     {
-        $skipFiles = $this->config()->get('files_to_skip_sri');
+        $skipFiles = $this->config()->get('skip_domains');
         foreach ($skipFiles as $filename) {
             if (strpos($file, $filename) === 0) {
                 return $htmlAttributes;
