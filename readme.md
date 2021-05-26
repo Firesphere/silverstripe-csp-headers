@@ -137,12 +137,12 @@ To force-refresh the SRI calculations, add the URL Parameter `?updatesri=true`. 
 To force the headers to be set in dev-mode, for testing purposes, add the URL parameter `?build-headers=true`.
 To disable this again, change the `true` to `false`
 
-To have these automatically clear out on a dev/build (useful for updating integrity hashes on production when new assets are deployed) you can apply the SRIRefreshExtension by adding the following to your yaml config
+To have these automatically clear out on a dev/build (useful for updating integrity hashes on production when new assets are deployed) you can enable this via the yaml below - though note this only works on Silverstripe framework 4.7+
+There is also an SRI Refresh dev task which can be manually run by visiting `/dev/tasks/SRIRefreshTask` in the browser or via sake on cli.
 
 ```yaml
 Firesphere\CSPHeaders\Models\SRI:
-  extensions:
-    - Firesphere\CSPHeaders\Extensions\SRIRefreshExtension
+  clear_sri_on_build: true
 ```
 
 This will simply delete all of the hashes and they will be recalculated the first time they are required on a page.

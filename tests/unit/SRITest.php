@@ -58,4 +58,16 @@ class SRITest extends SapphireTest
         $this->assertEquals(base64_encode($hash), $sri->SRI);
         $this->assertGreaterThan(0, $sri->ID);
     }
+
+    public function testOnAfterBuild()
+    {
+        $sri = SRI::create();
+        $sri->File = 'http://127.0.0.1/jstest.js';
+        $sri->write();
+        $this->assertEquals(1, SRI::get()->count());
+        $sriSingleton = singleton(SRI::class);
+        $sriSingleton->config()->set('clear_sri_on_build', true);
+        $sriSingleton->onAfterBuild();
+        $this->assertEquals(0, SRI::get()->count());
+    }
 }
