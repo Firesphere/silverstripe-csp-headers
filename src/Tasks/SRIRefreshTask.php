@@ -3,7 +3,9 @@
 namespace Firesphere\CSPHeaders\Tasks;
 
 use Firesphere\CSPHeaders\Models\SRI;
+use SilverStripe\Control\Director;
 use SilverStripe\Dev\BuildTask;
+use SilverStripe\Dev\DebugView;
 
 class SRIRefreshTask extends BuildTask
 {
@@ -17,10 +19,21 @@ class SRIRefreshTask extends BuildTask
      */
     public function run($request)
     {
-        echo "Removing SRI values...\n";
+        $renderer = Director::is_cli() ? null : DebugView::create();
+        if ($renderer) {
+            echo $renderer->renderHeader();
+            echo $renderer->renderInfo('Refresh SRI Task', 'Removing SRI values...');
+        } else {
+            echo "Removing SRI values...\n";
+        }
         foreach (SRI::get() as $item) {
             $item->delete();
         }
-        echo "done\n";
+        if ($renderer) {
+            echo $renderer->renderMessage('Done', null, false);
+            echo $renderer->renderFooter();
+        } else {
+            echo "Done\n";
+        }
     }
 }
