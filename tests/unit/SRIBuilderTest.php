@@ -32,4 +32,15 @@ class SRIBuilderTest extends SapphireTest
         $expected = sprintf('%s-%s', CSPBackend::SHA384, base64_encode(hash(CSPBackend::SHA384, $contents, true)));
         $this->assertEquals(['integrity' => $expected, 'crossorigin' => ''], $builder->buildSRI('composer.json', []));
     }
+
+    public function testSkipDomains()
+    {
+        $builder = new SRIBuilder();
+        $builder->buildSRI('composer.json', []);
+        // skip files starting with composer
+        $builder->config()->set('skip_domains', ['composer']);
+        Cookie::set('buildHeaders', 'true');
+        // Should not have added integrity to the array
+        $this->assertEquals([], $builder->buildSRI('composer.json', []));
+    }
 }

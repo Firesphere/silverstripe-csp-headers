@@ -44,7 +44,7 @@ Firesphere\CSPHeaders\View\CSPBackend:
       self: true
     default-src: []
     frame-src:
-      allow: 
+      allow:
         - youtube.com
       self: false
     connect-src:
@@ -61,7 +61,7 @@ Firesphere\CSPHeaders\View\CSPBackend:
       blob: true
       self: true
       data: true
-    media-src: 
+    media-src:
       allow:
         - youtube.com
         - vimeo.com
@@ -119,6 +119,16 @@ If you want to submit forms to a different domain, you can add the allowed domai
 ## inline scripts or custom scripts
 
 If you use the default methods provided by the `Requirements` class, the needed SHA's and SRI's are automatically calculated for you.
+
+## Skipping SRI for some files
+
+You can specify files or domains to skip outputting (JS or CSS) SRI for by using the `skip_domains` array. If the file URI starts with or matches a value in this array then it will be skipped. In the example below, any files fetched from https://maps.googleapis.com/ would be skipped.
+
+```yaml
+Firesphere\CSPHeaders\Builders\SRIBuilder:
+  skip_domains:
+    - 'https://maps.googleapis.com/'
+```
 
 # Refreshing calculated values
 
