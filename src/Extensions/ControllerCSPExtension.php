@@ -5,7 +5,6 @@ namespace Firesphere\CSPHeaders\Extensions;
 
 use Exception;
 use Firesphere\CSPHeaders\Models\CSPDomain;
-use Firesphere\CSPHeaders\Models\SRI;
 use Firesphere\CSPHeaders\View\CSPBackend;
 use LeKoala\DebugBar\DebugBar;
 use PageController;
@@ -19,7 +18,6 @@ use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Extension;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataList;
 use function hash;
 

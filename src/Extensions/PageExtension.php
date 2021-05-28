@@ -34,7 +34,7 @@ class PageExtension extends DataExtension
         $config = GridFieldConfig_RelationEditor::create();
         $gridfield = GridField::create(
             'CSPDomains',
-            _t(SiteTree::class . '.CSP', 'Content Security Policies'),
+            _t(SiteTree::class . '.CSP', 'Content Security Policy Domains'),
             $this->owner->CSPDomains(),
             $config
         );
