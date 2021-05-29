@@ -81,9 +81,8 @@ class CSSBuilder implements BuilderInterface
     {
         $css = CSPBackend::getHeadCSS();
         foreach ($css as $tag => $script) {
-            $item = $css[$tag];
-            $content = array_keys($item)[0];
-            $options = $item[$content] ?? [];
+            $content = array_keys($script)[0];
+            $options = $script[$content] ?? [];
             if (CSPBackend::isUsesNonce() && Controller::has_curr()) {
                 $ctrl = Controller::curr();
                 if ($ctrl && $ctrl->hasMethod('getNonce')) {

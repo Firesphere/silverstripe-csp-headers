@@ -32,10 +32,10 @@ class JSBuilder implements BuilderInterface
     }
 
     /**
-     * @param $attributes
      * @param $file
-     * @param $requirements
-     * @param $path
+     * @param $attributes
+     * @param string $requirements
+     * @param string $path
      * @return string
      * @throws ValidationException
      */
@@ -90,9 +90,8 @@ class JSBuilder implements BuilderInterface
     {
         $javascript = CSPBackend::getHeadJS();
         foreach ($javascript as $tag => $script) {
-            $item = $javascript[$tag];
-            $content = array_keys($item)[0];
-            $options = $item[$content] ?? [];
+            $content = array_keys($script)[0];
+            $options = $script[$content] ?? [];
             if (CSPBackend::isUsesNonce()) {
                 $ctrl = Controller::curr();
                 if ($ctrl && $ctrl->hasMethod('getNonce')) {

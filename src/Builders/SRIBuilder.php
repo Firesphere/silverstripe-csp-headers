@@ -32,6 +32,12 @@ class SRIBuilder
      */
     protected static $sri;
 
+    public function __construct()
+    {
+        if (!self::$sri) {
+            self::$sri = ArrayList::create(SRI::get()->toArray());
+        }
+    }
     /**
      * @param $file
      * @param array $htmlAttributes
@@ -41,7 +47,7 @@ class SRIBuilder
      */
     public function buildSRI($file, array $htmlAttributes): array
     {
-        $skipFiles = $this->config()->get('skip_domains');
+        $skipFiles = $this->config()->get('skip_domains') ?? [];
         foreach ($skipFiles as $filename) {
             if (strpos($file, $filename) === 0) {
                 return $htmlAttributes;
@@ -51,12 +57,11 @@ class SRIBuilder
         if ($this->shouldUpdateSRI()) {
             DB::query('TRUNCATE `SRI`');
         }
-        if (!self::$sri) {
-            self::$sri = ArrayList::create(SRI::get()->toArray());
-        }
+
         $sri = self::$sri->find('File', $file);
         if (!$sri) {
             $sri = SRI::findOrCreate($file);
+            self::$sri->push($sri);
         }
 
         $request = Controller::curr()->getRequest();
