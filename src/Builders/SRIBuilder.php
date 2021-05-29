@@ -32,12 +32,6 @@ class SRIBuilder
      */
     protected static $sri;
 
-    public function __construct()
-    {
-        if (!self::$sri) {
-            self::$sri = ArrayList::create(SRI::get()->toArray());
-        }
-    }
     /**
      * @param $file
      * @param array $htmlAttributes
@@ -58,6 +52,9 @@ class SRIBuilder
             DB::query('TRUNCATE `SRI`');
         }
 
+        if (!self::$sri) {
+            self::$sri = ArrayList::create(SRI::get()->toArray());
+        }
         $sri = self::$sri->find('File', $file);
         if (!$sri) {
             $sri = SRI::findOrCreate($file);
