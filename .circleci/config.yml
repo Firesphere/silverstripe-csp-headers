@@ -16,7 +16,7 @@ jobs:
           - SS_DEFAULT_ADMIN_PASSWORD=password
       - image: circleci/mysql:5.7
         environment:
-          - MYSQL_USER=root
+          - MYSQL_USER=user
           - MYSQL_ROOT_PASSWORD=ubuntu
           - MYSQL_DATABASE=circle_test
           - MYSQL_HOST=127.0.0.1

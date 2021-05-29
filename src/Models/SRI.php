@@ -7,6 +7,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Core\Path;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\Security\Member;
@@ -32,7 +33,8 @@ class SRI extends DataObject implements PermissionProvider
     ];
 
     private static $summary_fields = [
-        'File'
+        'File',
+        'LastEdited'
     ];
 
     private static $indexes = [
@@ -113,7 +115,7 @@ class SRI extends DataObject implements PermissionProvider
             ];
 
             foreach ($folders as $folder) {
-                $filename = sprintf('%s/%s', $folder, $this->File);
+                $filename = Path::join($folder, $this->File);
                 if (file_exists($filename)) {
                     $body = file_get_contents($filename);
                     break;
