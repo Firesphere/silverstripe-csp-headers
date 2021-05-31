@@ -4,7 +4,6 @@
 namespace Firesphere\CSPHeaders\Builders;
 
 use Exception;
-use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
 use Firesphere\CSPHeaders\Models\SRI;
 use Firesphere\CSPHeaders\View\CSPBackend;
 use SilverStripe\Control\Controller;
@@ -13,8 +12,8 @@ use SilverStripe\Core\Config\Configurable;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DB;
 use SilverStripe\ORM\ValidationException;
-use SilverStripe\Security\Security;
 use SilverStripe\View\ArrayData;
+use SilverStripe\Security\Permission;
 
 class SRIBuilder
 {
@@ -61,11 +60,8 @@ class SRIBuilder
             self::$sri->push($sri);
         }
 
-        $request = Controller::curr()->getRequest();
-        $cookieSet = ControllerCSPExtension::checkCookie($request);
-
-        // Don't write integrity in dev, it's breaking build scripts
-        if ($sri->SRI && (Director::isLive() || $cookieSet)) {
+        // To skip applying SRI for an environment use yml to disable jsSRI or cssSRI within chosen envs
+        if ($sri->SRI) {
             $htmlAttributes['integrity'] = sprintf('%s-%s', CSPBackend::SHA384, $sri->SRI);
             $htmlAttributes['crossorigin'] = Director::is_site_url($file) ? '' : 'anonymous';
         }
@@ -81,7 +77,7 @@ class SRIBuilder
         // Is updateSRI requested?
         return (Controller::curr()->getRequest()->getVar('updatesri') &&
             // Does the user have the powers
-            ((Security::getCurrentUser() && Security::getCurrentUser()->inGroup('administrators')) ||
+            (Permission::check('ADMIN', 'any') ||
                 // OR the site is in dev mode
                 Director::isDev()));
     }
