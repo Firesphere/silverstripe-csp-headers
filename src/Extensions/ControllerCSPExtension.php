@@ -18,6 +18,7 @@ use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Extension;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\ORM\DatabaseAdmin;
 use SilverStripe\ORM\DataList;
 use function hash;
 
@@ -117,6 +118,10 @@ class ControllerCSPExtension extends Extension
      */
     public function onBeforeInit()
     {
+        if (!DatabaseAdmin::lastBuilt() || Director::is_cli()) {
+            // Skip if we've not built the database yet or on CLI requests (e.g. first dev/build)
+            return;
+        }
         /** @var ContentController $owner */
         $owner = $this->owner;
         $this->addPolicyHeaders = Director::isLive() || static::checkCookie($owner->getRequest());
