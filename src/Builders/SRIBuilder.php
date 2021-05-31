@@ -28,9 +28,14 @@ class SRIBuilder
      */
     private static $skip_domains = [];
     /**
-     * @var ArrayData
+     * @var array
      */
-    protected static $sri;
+    protected $skipFiles = [];
+
+    public function __construct()
+    {
+        $skipFiles = $this->config()->get('skip_domains') ?? [];
+    }
 
     /**
      * @param $file
@@ -41,26 +46,19 @@ class SRIBuilder
      */
     public function buildSRI($file, array $htmlAttributes): array
     {
-        $skipFiles = $this->config()->get('skip_domains') ?? [];
-        foreach ($skipFiles as $filename) {
-            if (strpos($file, $filename) === 0) {
-                return $htmlAttributes;
-            }
+        $pattern = '/^' . str_replace('.', '\.', $file) . '\\S+/i';
+        // If the domain is in the list of domains to skip. Skip it.
+        $inList = preg_grep($pattern, $this->skipFiles);
+        if (count($inList)) {
+            return $htmlAttributes;
         }
-        // Remove all existing SRI's, if an update is needed
+        // If an update is needed, set the SRI to null
+        $sri = SRI::findOrCreate($file);
         if ($this->shouldUpdateSRI()) {
-            DB::query('TRUNCATE `SRI`');
+            $sri->SRI = null;
+            $sri->forceChange();
+            $sri->write();
         }
-
-        if (!self::$sri) {
-            self::$sri = ArrayList::create(SRI::get()->toArray());
-        }
-        $sri = self::$sri->find('File', $file);
-        if (!$sri) {
-            $sri = SRI::findOrCreate($file);
-            self::$sri->push($sri);
-        }
-
         $request = Controller::curr()->getRequest();
         $cookieSet = ControllerCSPExtension::checkCookie($request);
 
