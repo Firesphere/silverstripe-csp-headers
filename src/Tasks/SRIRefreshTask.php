@@ -26,9 +26,7 @@ class SRIRefreshTask extends BuildTask
         } else {
             echo "Removing SRI values...\n";
         }
-        foreach (SRI::get() as $item) {
-            $item->delete();
-        }
+        SRI::get()->removeAll();
         if ($renderer) {
             echo $renderer->renderMessage('Done', null, false);
             echo $renderer->renderFooter();

@@ -168,9 +168,7 @@ class SRI extends DataObject implements PermissionProvider
     public function onAfterBuild()
     {
         if ($this->config()->get('clear_sri_on_build')) {
-            foreach (SRI::get() as $item) {
-                $item->delete();
-            }
+            SRI::get()->removeAll();
         }
     }
 }
