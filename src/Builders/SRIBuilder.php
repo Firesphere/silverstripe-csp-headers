@@ -34,7 +34,7 @@ class SRIBuilder
 
     public function __construct()
     {
-        $skipFiles = $this->config()->get('skip_domains') ?? [];
+        $this->skipFiles = $this->config()->get('skip_domains') ?? [];
     }
 
     /**
@@ -82,5 +82,21 @@ class SRIBuilder
             ((Security::getCurrentUser() && Security::getCurrentUser()->inGroup('administrators')) ||
                 // OR the site is in dev mode
                 Director::isDev()));
+    }
+
+    /**
+     * @return array
+     */
+    public function getSkipFiles()
+    {
+        return $this->skipFiles;
+    }
+
+    /**
+     * @param array $skipFiles
+     */
+    public function setSkipFiles($skipFiles): void
+    {
+        $this->skipFiles = $skipFiles;
     }
 }
