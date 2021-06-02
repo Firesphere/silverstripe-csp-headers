@@ -74,20 +74,4 @@ class SRIBuilder
                 // OR the site is in dev mode
                 Director::isDev()));
     }
-
-    /**
-     * @return array
-     */
-    public function getSkipFiles()
-    {
-        return $this->skipFiles;
-    }
-
-    /**
-     * @param array $skipFiles
-     */
-    public function setSkipFiles($skipFiles): void
-    {
-        $this->skipFiles = $skipFiles;
-    }
 }
