@@ -27,10 +27,6 @@ class SRIBuilder
      * @var array
      */
     private static $skip_domains = [];
-    /**
-     * @var ArrayData
-     */
-    protected static $sri;
 
     /**
      * @param $file
@@ -47,20 +43,13 @@ class SRIBuilder
                 return $htmlAttributes;
             }
         }
-        // Remove all existing SRI's, if an update is needed
+        // If an update is needed, set the SRI to null
+        $sri = SRI::findOrCreate($file);
         if ($this->shouldUpdateSRI()) {
-            DB::query('TRUNCATE `SRI`');
+            $sri->SRI = null;
+            $sri->forceChange();
+            $sri->write();
         }
-
-        if (!self::$sri) {
-            self::$sri = ArrayList::create(SRI::get()->toArray());
-        }
-        $sri = self::$sri->find('File', $file);
-        if (!$sri) {
-            $sri = SRI::findOrCreate($file);
-            self::$sri->push($sri);
-        }
-
         $request = Controller::curr()->getRequest();
         $cookieSet = ControllerCSPExtension::checkCookie($request);
 
