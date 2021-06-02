@@ -27,15 +27,6 @@ class SRIBuilder
      * @var array
      */
     private static $skip_domains = [];
-    /**
-     * @var array
-     */
-    protected $skipFiles = [];
-
-    public function __construct()
-    {
-        $this->skipFiles = $this->config()->get('skip_domains') ?? [];
-    }
 
     /**
      * @param $file
@@ -46,7 +37,8 @@ class SRIBuilder
      */
     public function buildSRI($file, array $htmlAttributes): array
     {
-        foreach ($this->skipFiles as $filename) {
+        $skipFiles = $this->config()->get('skip_domains') ?? [];
+        foreach ($skipFiles as $filename) {
             if (strpos($file, $filename) === 0) {
                 return $htmlAttributes;
             }
