@@ -46,11 +46,10 @@ class SRIBuilder
      */
     public function buildSRI($file, array $htmlAttributes): array
     {
-        $pattern = '/^' . preg_quote($file) . '\S+?/i';
-        // If the domain is in the list of domains to skip. Skip it.
-        $inList = preg_grep($pattern, $this->skipFiles);
-        if (count($inList)) {
-            return $htmlAttributes;
+        foreach ($this->skipFiles as $filename) {
+            if (strpos($file, $filename) === 0) {
+                return $htmlAttributes;
+            }
         }
         // If an update is needed, set the SRI to null
         $sri = SRI::findOrCreate($file);
