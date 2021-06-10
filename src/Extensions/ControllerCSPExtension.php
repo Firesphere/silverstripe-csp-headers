@@ -118,8 +118,8 @@ class ControllerCSPExtension extends Extension
      */
     public function onBeforeInit()
     {
-        if (!DatabaseAdmin::lastBuilt() || Director::is_cli()) {
-            // Skip if we've not built the database yet or on CLI requests (e.g. first dev/build)
+        if (!DatabaseAdmin::lastBuilt() || !Controller::has_curr() || get_class(Controller::curr()) === DatabaseAdmin::class) {
+            // Skip if we've not built the database yet or on dev/build requests
             return;
         }
         /** @var ContentController $owner */
