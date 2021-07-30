@@ -5,12 +5,11 @@ namespace Firesphere\CSPHeaders\Builders;
 
 use Firesphere\CSPHeaders\Interfaces\BuilderInterface;
 use Firesphere\CSPHeaders\View\CSPBackend;
-use SilverStripe\Control\Controller;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\View\HTML;
 
-class JSBuilder implements BuilderInterface
+class JSBuilder extends BaseBuilder implements BuilderInterface
 {
     /**
      * @var CSPBackend
@@ -25,7 +24,7 @@ class JSBuilder implements BuilderInterface
      * JSBuilder constructor.
      * @param CSPBackend $backend
      */
-    public function __construct($backend)
+    public function __construct(CSPBackend $backend)
     {
         $this->owner = $backend;
         $this->setSriBuilder(Injector::inst()->get(SRIBuilder::class));
@@ -34,12 +33,12 @@ class JSBuilder implements BuilderInterface
     /**
      * @param $file
      * @param $attributes
-     * @param string $requirements
+     * @param array $requirements
      * @param string $path
-     * @return string
+     * @return array
      * @throws ValidationException
      */
-    public function buildTags($file, $attributes, string $requirements, string $path): string
+    public function buildTags($file, $attributes, array $requirements, string $path): array
     {
         // Build html attributes
         $htmlAttributes = array_merge([
@@ -52,16 +51,8 @@ class JSBuilder implements BuilderInterface
             $htmlAttributes = $this->getSriBuilder()->buildSRI($file, $htmlAttributes);
         }
         // Use nonces for inlines if requested
-        if (CSPBackend::isUsesNonce() && Controller::has_curr()) {
-            $ctrl = Controller::curr();
-
-            if ($ctrl && $ctrl->hasMethod('getNonce')) {
-                $htmlAttributes['nonce'] = $ctrl->getNonce();
-            }
-        }
-
-        $requirements .= HTML::createTag('script', $htmlAttributes);
-        $requirements .= "\n";
+        BaseBuilder::getNonce($htmlAttributes);
+        $requirements[] = HTML::createTag('script', $htmlAttributes);
 
         return $requirements;
     }
@@ -83,52 +74,23 @@ class JSBuilder implements BuilderInterface
     }
 
     /**
-     * @param string $requirements
+     * @param array $requirements
      * @return void
      */
-    public function getHeadTags(string &$requirements): void
+    public function getHeadTags(array &$requirements): void
     {
         $javascript = CSPBackend::getHeadJS();
-        foreach ($javascript as $tag => $script) {
-            $content = array_keys($script)[0];
-            $options = $script[$content] ?? [];
-            if (CSPBackend::isUsesNonce()) {
-                $ctrl = Controller::curr();
-                if ($ctrl && $ctrl->hasMethod('getNonce')) {
-                    $options['nonce'] = $ctrl->getNonce();
-                }
-            }
-            $requirements .= HTML::createTag(
-                'script',
-                $options,
-                "//<![CDATA[\n{$content}\n//]]>"
-            );
-            $requirements .= "\n";
-        }
+        $this->getBaseHeadTags($requirements, $javascript, 'script');
     }
 
     /**
-     * @param string $requirements
-     * @return string
+     * @param array $requirements
+     * @return array
      */
-    public function getCustomTags(string $requirements): string
+    public function getCustomTags($requirements = []): array
     {
-        // Add all inline JavaScript *after* including external files they might rely on
-        foreach ($this->getOwner()->getCustomScripts() as $script) {
-            $options = ['type' => 'application/javascript'];
-            if (CSPBackend::isUsesNonce()) {
-                $ctrl = Controller::curr();
-                if ($ctrl && $ctrl->hasMethod('getNonce')) {
-                    $options['nonce'] = $ctrl->getNonce();
-                }
-            }
-            $requirements .= HTML::createTag(
-                'script',
-                $options,
-                "//<![CDATA[\n{$script}\n//]]>"
-            );
-            $requirements .= "\n";
-        }
+        $scripts = $this->getOwner()->getCustomScripts();
+        $this->getBaseCustomTags($requirements, $scripts, 'script');
 
         return $requirements;
     }

@@ -17,6 +17,7 @@
     }
   ],
   "require": {
+    "ext-simplexml": "*",
     "silverstripe/cms": "^4",
     "paragonie/csp-builder": "^2",
     "guzzlehttp/guzzle": "^6"

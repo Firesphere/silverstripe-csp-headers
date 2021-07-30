@@ -59,7 +59,8 @@ class CSPBackendTest extends SapphireTest
         $expected = '<html><head><style type="text/css">
 body {background-color: red;}
 </style>
-</head><body></body></html>';
+</head><body>
+</body></html>';
 
         $this->assertEquals($expected, $backend->includeInHTML($content2));
 
@@ -69,7 +70,8 @@ body {background-color: red;}
 body {background-color: red;}
 </style>
 <meta name="test" />
-</head><body></body></html>';
+</head><body>
+</body></html>';
 
         $this->assertEquals($expected, $backend->includeInHTML($content2));
     }

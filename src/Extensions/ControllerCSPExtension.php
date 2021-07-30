@@ -92,27 +92,6 @@ class ControllerCSPExtension extends Extension
     }
 
     /**
-     * @param HTTPRequest $request
-     * @return bool
-     */
-    public static function checkCookie($request): bool
-    {
-        if ($request->getVar('build-headers')) {
-            Cookie::set('buildHeaders', $request->getVar('build-headers'));
-        }
-
-        return (Cookie::get('buildHeaders') === 'true');
-    }
-
-    /**
-     * @return null|string
-     */
-    public function getNonce()
-    {
-        return $this->nonce;
-    }
-
-    /**
      * Add the needed headers from the database and config
      * @throws Exception
      */
@@ -148,6 +127,27 @@ class ControllerCSPExtension extends Extension
             $headers = $policy->getHeaderArray($legacy);
             $this->addResponseHeaders($headers, $owner);
         }
+    }
+
+    /**
+     * @param HTTPRequest $request
+     * @return bool
+     */
+    public static function checkCookie($request): bool
+    {
+        if ($request->getVar('build-headers')) {
+            Cookie::set('buildHeaders', $request->getVar('build-headers'));
+        }
+
+        return (Cookie::get('buildHeaders') === 'true');
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getNonce()
+    {
+        return $this->nonce;
     }
 
     /**
@@ -207,14 +207,6 @@ class ControllerCSPExtension extends Extension
     }
 
     /**
-     * @return bool
-     */
-    public function isAddPolicyHeaders(): bool
-    {
-        return $this->addPolicyHeaders ?? false;
-    }
-
-    /**
      * @param array $headers
      * @param Controller $owner
      */
@@ -226,5 +218,13 @@ class ControllerCSPExtension extends Extension
                 $response->addHeader($name, $header);
             }
         }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAddPolicyHeaders(): bool
+    {
+        return $this->addPolicyHeaders ?? false;
     }
 }

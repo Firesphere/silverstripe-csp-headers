@@ -24,14 +24,14 @@ class SRIRefreshTask extends BuildTask
             echo $renderer->renderHeader();
             echo $renderer->renderInfo('Refresh SRI Task', 'Removing SRI values...');
         } else {
-            echo "Removing SRI values...\n";
+            echo "Removing SRI values..." . PHP_EOL;
         }
         SRI::get()->removeAll();
         if ($renderer) {
             echo $renderer->renderMessage('Done', null, false);
             echo $renderer->renderFooter();
         } else {
-            echo "Done\n";
+            echo "Done" . PHP_EOL;
         }
     }
 }

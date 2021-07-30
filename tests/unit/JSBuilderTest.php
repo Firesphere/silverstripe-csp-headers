@@ -59,14 +59,14 @@ class JSBuilderTest extends SapphireTest
         $owner = Requirements::backend();
         $builder = $owner->getJsBuilder();
 
-        $tag = $builder->buildTags('file', [], '', '');
-        $this->assertContains('nonce=', $tag);
+        $tag = $builder->buildTags('file', [], [], '');
+        $this->assertContains('nonce=', $tag[0]);
 
         CSPBackend::config()->set('useNonce', false);
         $controller->onBeforeInit();
 
-        $tag = $builder->buildTags('file', [], '', '');
-        $this->assertNotContains('nonce=', $tag);
+        $tag = $builder->buildTags('file', [], [], '');
+        $this->assertNotContains('nonce=', $tag[0]);
     }
 
     public function testGetHeadTagsUseNonce()
@@ -77,16 +77,16 @@ class JSBuilderTest extends SapphireTest
         $owner = Requirements::backend();
         $builder = $owner->getJsBuilder();
         Requirements::insertHeadTags('<script type="application/javascript">test</script>');
-        $req = '';
+        $req = [];
         $tag = $builder->getHeadTags($req);
-        $this->assertContains('nonce=', $req);
+        $this->assertContains('nonce=', $req[0]);
 
         CSPBackend::config()->set('useNonce', false);
         $controller->onBeforeInit();
 
-        $req = '';
+        $req = [];
         $tag = $builder->getHeadTags($req);
-        $this->assertNotContains('nonce=', $req);
+        $this->assertNotContains('nonce=', $req[0]);
     }
 
     public function testGetCustomTagsUseNonce()
@@ -98,13 +98,13 @@ class JSBuilderTest extends SapphireTest
         $builder = $owner->getJsBuilder();
         Requirements::customScript('test');
 
-        $tag = $builder->getCustomTags('');
-        $this->assertContains('nonce=', $tag);
+        $tag = $builder->getCustomTags([]);
+        $this->assertContains('nonce=', $tag[0]);
 
         CSPBackend::config()->set('useNonce', false);
         $controller->onBeforeInit();
 
-        $tag = $builder->getCustomTags('');
-        $this->assertNotContains('nonce=', $tag);
+        $tag = $builder->getCustomTags([]);
+        $this->assertNotContains('nonce=', $tag[0]);
     }
 }

@@ -10,22 +10,22 @@ interface BuilderInterface
     /**
      * @param string $file
      * @param array $attributes
-     * @param string $requirements
+     * @param array $requirements
      * @param string $path
-     * @return string
+     * @return array
      * @throws ValidationException
      */
-    public function buildTags($file, $attributes, string $requirements, string $path): string;
+    public function buildTags($file, $attributes, array $requirements, string $path): array;
 
     /**
      * @param $requirements
-     * @return string
+     * @return array
      */
-    public function getCustomTags(string $requirements): string;
+    public function getCustomTags($requirements): array;
 
     /**
-     * @param string $requirements
+     * @param array $requirements
      * @return void
      */
-    public function getHeadTags(string &$requirements): void;
+    public function getHeadTags(array &$requirements): void;
 }

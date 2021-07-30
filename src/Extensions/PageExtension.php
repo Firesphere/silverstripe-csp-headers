@@ -4,6 +4,7 @@
 namespace Firesphere\CSPHeaders\Extensions;
 
 use Firesphere\CSPHeaders\Models\CSPDomain;
+use Page;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\GridField\GridField;
@@ -15,7 +16,7 @@ use SilverStripe\ORM\ManyManyList;
 /**
  * Class \Firesphere\CSPHeaders\Extensions\SiteTreeExtension
  *
- * @property PageExtension $owner
+ * @property Page|PageExtension $owner
  * @method ManyManyList|CSPDomain[] CSPDomains()
  */
 class PageExtension extends DataExtension

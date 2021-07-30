@@ -5,12 +5,11 @@ namespace Firesphere\CSPHeaders\Builders;
 
 use Firesphere\CSPHeaders\Interfaces\BuilderInterface;
 use Firesphere\CSPHeaders\View\CSPBackend;
-use SilverStripe\Control\Controller;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\View\HTML;
 
-class CSSBuilder implements BuilderInterface
+class CSSBuilder extends BaseBuilder implements BuilderInterface
 {
     /**
      * @var CSPBackend
@@ -25,7 +24,7 @@ class CSSBuilder implements BuilderInterface
      * CSSBuilder constructor.
      * @param CSPBackend $backend
      */
-    public function __construct($backend)
+    public function __construct(CSPBackend $backend)
     {
         $this->owner = $backend;
         $this->setSriBuilder(Injector::inst()->get(SRIBuilder::class));
@@ -34,12 +33,12 @@ class CSSBuilder implements BuilderInterface
     /**
      * @param $file
      * @param $attributes
-     * @param string $requirements
+     * @param array $requirements
      * @param string $path
-     * @return string
+     * @return array
      * @throws ValidationException
      */
-    public function buildTags($file, $attributes, string $requirements, string $path): string
+    public function buildTags($file, $attributes, array $requirements, string $path): array
     {
         $htmlAttributes = array_merge([
             'rel'  => 'stylesheet',
@@ -51,8 +50,7 @@ class CSSBuilder implements BuilderInterface
             $htmlAttributes = $this->getSriBuilder()->buildSRI($file, $htmlAttributes);
         }
 
-        $requirements .= HTML::createTag('link', $htmlAttributes);
-        $requirements .= "\n";
+        $requirements[] = HTML::createTag('link', $htmlAttributes);
 
         return $requirements;
     }
@@ -74,55 +72,24 @@ class CSSBuilder implements BuilderInterface
     }
 
     /**
-     * @param string $requirements
+     * @param array $requirements
      * @return void
      */
-    public function getHeadTags(string &$requirements): void
+    public function getHeadTags(array &$requirements): void
     {
         $css = CSPBackend::getHeadCSS();
-        foreach ($css as $tag => $script) {
-            $content = array_keys($script)[0];
-            $options = $script[$content] ?? [];
-            if (CSPBackend::isUsesNonce() && Controller::has_curr()) {
-                $ctrl = Controller::curr();
-                if ($ctrl && $ctrl->hasMethod('getNonce')) {
-                    $options['nonce'] = $ctrl->getNonce();
-                }
-            }
-            $requirements .= HTML::createTag(
-                'style',
-                $options,
-                "\n{$content}\n"
-            );
-            $requirements .= "\n";
-        }
+        $this->getBaseHeadTags($requirements, $css, 'style');
     }
 
 
     /**
-     * @param string $requirements
-     * @return string
+     * @param array $requirements
+     * @return array
      */
-    public function getCustomTags(string $requirements): string
+    public function getCustomTags($requirements = []): array
     {
-        // Literal custom CSS content
-        foreach ($this->getOwner()->getCustomCSS() as $css) {
-            $options = ['type' => 'text/css'];
-            // Use nonces for inlines if requested
-            if (CSPBackend::isUsesNonce() && Controller::has_curr()) {
-                $ctrl = Controller::curr();
-                if ($ctrl && $ctrl->hasMethod('getNonce')) {
-                    $options['nonce'] = $ctrl->getNonce();
-                }
-            }
-
-            $requirements .= HTML::createTag(
-                'style',
-                $options,
-                "\n{$css}\n"
-            );
-            $requirements .= "\n";
-        }
+        $scripts = $this->getOwner()->getCustomCSS();
+        $this->getBaseCustomTags($requirements, $scripts, 'style');
 
         return $requirements;
     }
