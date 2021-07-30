@@ -27,6 +27,14 @@ class SRI extends DataObject implements PermissionProvider
     private static $singular_name = 'Subresource Integrity';
     private static $plural_name = 'Subresource Integrities';
 
+    /**
+     * If enabled (and using framework 4.7+) then a dev/build will delete all
+     * generated SRI and they will be regenerated when next required.
+     * @var bool
+     * @config
+     */
+    private static $clear_sri_on_build = false;
+
     private static $db = [
         'File' => 'Varchar(255)',
         'SRI'  => 'Varchar(255)'
@@ -150,5 +158,17 @@ class SRI extends DataObject implements PermissionProvider
                 )
             ],
         ];
+    }
+
+    /**
+     * If configured, this deletes the Sub-resource integrity values on build of the database
+     * so they're regenerated next time that file is used.
+     * Note that this hook only exists in silverstripe-framework 4.7+
+     */
+    public function onAfterBuild()
+    {
+        if ($this->config()->get('clear_sri_on_build')) {
+            SRI::get()->removeAll();
+        }
     }
 }
