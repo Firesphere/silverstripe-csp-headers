@@ -104,8 +104,6 @@ class ControllerCSPExtension extends Extension
         /** @var ContentController $owner */
         $owner = $this->owner;
         $this->addPolicyHeaders = Director::isLive() || static::checkCookie($owner->getRequest());
-        /** @var Controller $owner */
-        $owner = $this->owner;
         if ($this->addPolicyHeaders) {
             if (!$this->getNonce() && CSPBackend::isUsesNonce()) {
                 $this->nonce = Base64::encode(hash('sha512', uniqid('nonce', true) . time()));
@@ -121,6 +119,7 @@ class ControllerCSPExtension extends Extension
             $this->addInlineCSSPolicy($policy, $config);
             // When in dev, add the debugbar nonce, requires a change to the lib
             if (Director::isDev() && class_exists(DebugBar::class)) {
+                DebugBar::getDebugBar()->getJavascriptRenderer()->setCspNonce('debugbar');
                 $policy->nonce('script-src', 'debugbar');
             }
 
