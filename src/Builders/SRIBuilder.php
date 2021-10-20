@@ -10,11 +10,8 @@ use Firesphere\CSPHeaders\View\CSPBackend;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\Config\Configurable;
-use SilverStripe\ORM\ArrayList;
-use SilverStripe\ORM\DB;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\Security\Security;
-use SilverStripe\View\ArrayData;
 
 class SRIBuilder
 {

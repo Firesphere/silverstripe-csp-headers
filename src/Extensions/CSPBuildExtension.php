@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Firesphere\CSPHeaders\Extensions;
 
 use Firesphere\CSPHeaders\View\CSPBackend;
@@ -11,12 +10,15 @@ use SilverStripe\ORM\DB;
 /**
  * Class \Firesphere\CSPHeaders\Extensions\CSPBuildExtension
  *
- * Experimental feature that's not yet complete
+ * Runs on dev/build to remove all known SRIs
  *
  * @property DevBuildController|CSPBuildExtension $owner
  */
 class CSPBuildExtension extends Extension
 {
+    /**
+     * Truncate the SRI table on build
+     */
     public function afterCallActionHandler()
     {
         $config = CSPBackend::config()->get('clear_on_build');

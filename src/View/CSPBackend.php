@@ -192,8 +192,8 @@ class CSPBackend extends Requirements_Backend
             return $content;
         }
 
-        $requirements = '';
-        $jsRequirements = '';
+        $requirements = [];
+        $jsRequirements = [];
 
         // Combine files - updates $this->javascript and $this->css
         $this->processCombinedFiles();
@@ -201,9 +201,8 @@ class CSPBackend extends Requirements_Backend
         $requirements = $this->getCSSRequirements($requirements);
 
         $requirements = $this->getHeadTags($requirements);
-        $content = $this->insertContent($content, $requirements, $jsRequirements);
 
-        return $content;
+        return $this->insertContent($content, $requirements, $jsRequirements);
     }
 
     /**
@@ -223,53 +222,51 @@ class CSPBackend extends Requirements_Backend
     }
 
     /**
-     * @param string $jsRequirements
+     * @param array $jsRequirements
      * @return string
      * @throws ValidationException
      */
-    protected function getJSRequirements(string $jsRequirements): string
+    protected function getJSRequirements(array $jsRequirements): string
     {
         // Script tags for js links
         foreach ($this->getJavascript() as $file => $attributes) {
             $path = $this->pathForFile($file);
             $jsRequirements = $this->getJsBuilder()->buildTags($file, $attributes, $jsRequirements, $path);
         }
-        $jsRequirements = $this->getJsBuilder()->getCustomTags($jsRequirements);
 
-        return $jsRequirements;
+        return implode(PHP_EOL, $this->getJsBuilder()->getCustomTags($jsRequirements));
     }
 
     /**
-     * @param string $requirements
-     * @return string
+     * @param array $requirements
+     * @return array
      * @throws ValidationException
      */
-    protected function getCSSRequirements(string $requirements): string
+    protected function getCSSRequirements(array $requirements): array
     {
         // CSS file links
         foreach ($this->getCSS() as $file => $attributes) {
             $path = $this->pathForFile($file);
             $requirements = $this->getCssBuilder()->buildTags($file, $attributes, $requirements, $path);
         }
-        $requirements = $this->getCssBuilder()->getCustomTags($requirements);
 
-        return $requirements;
+        return $this->getCssBuilder()->getCustomTags($requirements);
     }
 
     /**
-     * @param string $requirements
+     * @param array $requirements
      * @return string
      */
-    protected function getHeadTags(string $requirements): string
+    protected function getHeadTags(array $requirements = []): string
     {
         $this->getCssBuilder()->getHeadTags($requirements);
         $this->getJsBuilder()->getHeadTags($requirements);
 
         foreach ($this->getCustomHeadTags() as $customHeadTag) {
-            $requirements .= "{$customHeadTag}\n";
+            $requirements[] = $customHeadTag;
         }
 
-        return $requirements;
+        return implode(PHP_EOL, $requirements);
     }
 
     /**
@@ -280,6 +277,8 @@ class CSPBackend extends Requirements_Backend
      */
     protected function insertContent($content, string $requirements, string $jsRequirements): string
     {
+        $requirements .= PHP_EOL;
+        $jsRequirements .= PHP_EOL;
         // Inject CSS into head
         $content = $this->insertTagsIntoHead($requirements, $content);
 
