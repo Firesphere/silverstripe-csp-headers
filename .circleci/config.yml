@@ -124,12 +124,6 @@ jobs:
           command: |
             php phpdoc.phar -t csp-headers --ignore "*/tests/"
       - run:
-          name: Markdown to HTML
-          command: |
-            yarn docs
-            mv _docs solr-docs
-            rm -rf docs solr
-      - run:
           name: Commit and upload if it's the main branch
           command: |
             case $CIRCLE_BRANCH in "master") git add csp-headers ;; esac
