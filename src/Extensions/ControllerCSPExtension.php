@@ -6,7 +6,6 @@ namespace Firesphere\CSPHeaders\Extensions;
 use Exception;
 use Firesphere\CSPHeaders\Models\CSPDomain;
 use Firesphere\CSPHeaders\View\CSPBackend;
-use LeKoala\DebugBar\DebugBar;
 use PageController;
 use ParagonIE\ConstantTime\Base64;
 use ParagonIE\CSPBuilder\CSPBuilder;
@@ -118,8 +117,8 @@ class ControllerCSPExtension extends Extension
             $this->addInlineJSPolicy($policy, $config);
             $this->addInlineCSSPolicy($policy, $config);
             // When in dev, add the debugbar nonce, requires a change to the lib
-            if (Director::isDev() && class_exists(DebugBar::class)) {
-                DebugBar::getDebugBar()->getJavascriptRenderer()->setCspNonce('debugbar');
+            if (Director::isDev() && class_exists('LeKoala\DebugBar\DebugBar')) {
+                LeKoala\DebugBar\DebugBar::getDebugBar()->getJavascriptRenderer()->setCspNonce('debugbar');
                 $policy->nonce('script-src', 'debugbar');
             }
 
