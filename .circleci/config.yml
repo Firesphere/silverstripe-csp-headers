@@ -135,4 +135,9 @@ jobs:
             case $CIRCLE_BRANCH in "master") git add csp-headers ;; esac
             case $CIRCLE_BRANCH in "master") git commit -m "API update for CSP Headers from CircleCI update" ;; esac
             case $CIRCLE_BRANCH in "master") git push ;; esac
-
+workflows:
+  version: 2
+  dobuild:
+    jobs:
+      - build
+      - docs
