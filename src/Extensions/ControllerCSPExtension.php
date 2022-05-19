@@ -17,8 +17,10 @@ use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Extension;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Core\ClassInfo;
 use SilverStripe\ORM\DatabaseAdmin;
 use SilverStripe\ORM\DataList;
+use SilverStripe\ORM\DB;
 use function hash;
 
 /**
@@ -96,7 +98,7 @@ class ControllerCSPExtension extends Extension
      */
     public function onBeforeInit()
     {
-        if (!DatabaseAdmin::lastBuilt() || !Controller::has_curr() || get_class(Controller::curr()) === DatabaseAdmin::class) {
+        if (!DB::is_active() || !ClassInfo::hasTable('SiteTree') || Director::is_cli()) {
             // Skip if we've not built the database yet or on dev/build requests
             return;
         }
