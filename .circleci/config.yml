@@ -33,7 +33,7 @@ jobs:
             - v2-cache-{{ checksum "composer.json" }}
             # fallback to using the latest cache if no exact match is found
             - v2-cache-
-      - run: composer config --no-interaction allow-plugins.composer/installers true
+      - run: composer config --no-plugins --no-interaction allow-plugins.composer/installers true
       - run: composer config --no-interaction allow-plugins.silverstripe/vendor-plugin true
       - run: composer config --no-interaction allow-plugins.silverstripe/recipe-plugin true
       - run: composer require silverstripe/recipe-cms
