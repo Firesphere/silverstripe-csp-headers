@@ -118,7 +118,7 @@ class ControllerCSPExtension extends Extension
             $this->addInlineCSSPolicy($policy, $config);
             // When in dev, add the debugbar nonce, requires a change to the lib
             if (Director::isDev() && class_exists('LeKoala\DebugBar\DebugBar')) {
-                LeKoala\DebugBar\DebugBar::getDebugBar()->getJavascriptRenderer()->setCspNonce('debugbar');
+                \LeKoala\DebugBar\DebugBar::getDebugBar()->getJavascriptRenderer()->setCspNonce('debugbar');
                 $policy->nonce('script-src', 'debugbar');
             }
 
