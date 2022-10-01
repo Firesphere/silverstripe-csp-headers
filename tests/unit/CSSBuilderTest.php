@@ -117,7 +117,7 @@ class CSSBuilderTest extends SapphireTest
         // Should add integrity
         CSPBackend::config()->update('cssSRI', true);
         $this->assertTrue(CSPBackend::isCssSRI());
-        $requirements = $builder->buildTags('composer.json', [], '', '/');
+        $requirements = $builder->buildTags('composer.json', [], [], '/');
         $this->assertContains('integrity=', $requirements);
         // Shouldn't add integrity if not enabled
         CSPBackend::config()->update('cssSRI', false);
