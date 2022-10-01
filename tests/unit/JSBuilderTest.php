@@ -117,22 +117,22 @@ class JSBuilderTest extends SapphireTest
         // Should add integrity
         $this->assertTrue(CSPBackend::isJsSRI());
         $requirements = $builder->buildTags('composer.json', [], [], '/');
-        $this->assertContains('integrity=', $requirements);
+        $this->assertContains('integrity=', $requirements[0]);
 
         // Shouldn't add integrity if not enabled
         CSPBackend::config()->update('jsSRI', false);
         $this->assertFalse(CSPBackend::isJsSRI());
         $controller->onBeforeInit();
-        $requirements = $builder->buildTags('composer.json', [], '', '/');
-        $this->assertNotContains('integrity=', $requirements);
+        $requirements = $builder->buildTags('composer.json', [], [], '/');
+        $this->assertNotContains('integrity=', $requirements[0]);
 
         // Should add integrity if not enabled but forced by build headers in request
         $request = Controller::curr()->getRequest();
         $request->offsetSet('build-headers', 'true');
         $this->assertFalse(CSPBackend::isJsSRI());
         $controller->onBeforeInit();
-        $requirements = $builder->buildTags('composer.json', [], '', '/');
-        $this->assertContains('integrity=', $requirements);
+        $requirements = $builder->buildTags('composer.json', [], [], '/');
+        $this->assertContains('integrity=', $requirements[0]);
         CSPBackend::config()->update('jsSRI', true);
         $request->offsetUnset('build-headers');
         Cookie::force_expiry('buildHeaders');
