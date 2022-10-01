@@ -8,7 +8,6 @@ use Firesphere\CSPHeaders\Interfaces\BuilderInterface;
 use Firesphere\CSPHeaders\View\CSPBackend;
 use SilverStripe\Control\Controller;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\View\HTML;
 
