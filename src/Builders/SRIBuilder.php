@@ -26,6 +26,12 @@ class SRIBuilder
     private static $skip_domains = [];
 
     /**
+     * List of the SRI's
+     * @var ArrayList|SRI[]
+     */
+    private static $sri;
+
+    /**
      * @param $file
      * @param array $htmlAttributes
      * @return array

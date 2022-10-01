@@ -6,6 +6,7 @@ namespace Firesphere\CSPHeaders\Builders;
 use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
 use Firesphere\CSPHeaders\Interfaces\BuilderInterface;
 use Firesphere\CSPHeaders\View\CSPBackend;
+use SilverStripe\Control\Controller;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\View\HTML;
