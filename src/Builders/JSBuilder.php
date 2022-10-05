@@ -3,8 +3,10 @@
 
 namespace Firesphere\CSPHeaders\Builders;
 
+use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
 use Firesphere\CSPHeaders\Interfaces\BuilderInterface;
 use Firesphere\CSPHeaders\View\CSPBackend;
+use SilverStripe\Control\Controller;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\View\HTML;
@@ -47,7 +49,9 @@ class JSBuilder extends BaseBuilder implements BuilderInterface
         ], $attributes);
 
         // Build SRI if it's enabled
-        if (CSPBackend::isJsSRI()) {
+        $request = Controller::has_curr() ? Controller::curr()->getRequest() : null;
+        $cookieSet = $request ? ControllerCSPExtension::checkCookie($request) : false;
+        if (CSPBackend::isJsSRI() || $cookieSet) {
             $htmlAttributes = $this->getSriBuilder()->buildSRI($file, $htmlAttributes);
         }
         // Use nonces for inlines if requested

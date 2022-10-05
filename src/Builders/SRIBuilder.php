@@ -4,14 +4,15 @@
 namespace Firesphere\CSPHeaders\Builders;
 
 use Exception;
-use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
 use Firesphere\CSPHeaders\Models\SRI;
 use Firesphere\CSPHeaders\View\CSPBackend;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\Config\Configurable;
+use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\ValidationException;
-use SilverStripe\Security\Security;
+use SilverStripe\View\ArrayData;
+use SilverStripe\Security\Permission;
 
 class SRIBuilder
 {
@@ -24,6 +25,12 @@ class SRIBuilder
      * @var array
      */
     private static $skip_domains = [];
+
+    /**
+     * List of the SRI's
+     * @var ArrayList|SRI[]
+     */
+    private static $sri;
 
     /**
      * @param $file
@@ -47,11 +54,18 @@ class SRIBuilder
             $sri->forceChange();
             $sri->write();
         }
-        $request = Controller::curr()->getRequest();
-        $cookieSet = ControllerCSPExtension::checkCookie($request);
 
-        // Don't write integrity in dev, it's breaking build scripts
-        if ($sri->SRI && (Director::isLive() || $cookieSet)) {
+        if (!self::$sri) {
+            self::$sri = ArrayList::create(SRI::get()->toArray());
+        }
+        $sri = self::$sri->find('File', $file);
+        if (!$sri) {
+            $sri = SRI::findOrCreate($file);
+            self::$sri->push($sri);
+        }
+
+        // To skip applying SRI for an environment use yml to disable jsSRI or cssSRI within chosen envs
+        if ($sri->SRI) {
             $htmlAttributes['integrity'] = sprintf('%s-%s', CSPBackend::SHA384, $sri->SRI);
             $htmlAttributes['crossorigin'] = Director::is_site_url($file) ? '' : 'anonymous';
         }
@@ -67,7 +81,7 @@ class SRIBuilder
         // Is updateSRI requested?
         return (Controller::curr()->getRequest()->getVar('updatesri') &&
             // Does the user have the powers
-            ((Security::getCurrentUser() && Security::getCurrentUser()->inGroup('administrators')) ||
+            (Permission::check('ADMIN', 'any') ||
                 // OR the site is in dev mode
                 Director::isDev()));
     }

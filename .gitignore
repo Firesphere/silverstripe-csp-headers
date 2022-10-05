@@ -1,2 +1,7 @@
 .idea
 .php_cs.cache
+/vendor
+/app
+/composer.lock
+/resources
+/_resources

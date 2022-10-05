@@ -3,6 +3,7 @@ Name: CSPHeaders
 ---
 Firesphere\CSPHeaders\View\CSPBackend:
   csp_config:
+    enabled: true
     report-only: false
     report-uri: "https://127.0.0.1/r/d/csp/enforce"
     base-uri:

@@ -5,16 +5,17 @@ namespace Firesphere\CSPHeaders\Tests;
 
 use Firesphere\CSPHeaders\Builders\JSBuilder;
 use Firesphere\CSPHeaders\Builders\SRIBuilder;
-use Firesphere\CSPHeaders\View\CSPBackend;
-use SilverStripe\Dev\SapphireTest;
-use SilverStripe\Control\Controller;
-use SilverStripe\Control\Session;
-use SilverStripe\Control\HTTPRequest;
 use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
+use Firesphere\CSPHeaders\View\CSPBackend;
 use Page;
 use PageController;
-use SilverStripe\View\Requirements;
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\Cookie;
+use SilverStripe\Control\Session;
+use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Dev\SapphireTest;
+use SilverStripe\View\Requirements;
 
 class JSBuilderTest extends SapphireTest
 {
@@ -23,13 +24,13 @@ class JSBuilderTest extends SapphireTest
      */
     private function BuildController()
     {
-        CSPBackend::config()->set('jsSRI', false);
+        CSPBackend::config()->set('jsSRI', true);
         CSPBackend::setUsesNonce(false);
         $backend = Injector::inst()->get(CSPBackend::class);
         Requirements::set_backend($backend);
 
         $page = new Page();
-        $request = new HTTPRequest('GET', '/', ['build-headers' => 'true']);
+        $request = new HTTPRequest('GET', '/');
         $request->setSession(new Session('test'));
 
         PageController::add_extension(Controller::class, ControllerCSPExtension::class);
@@ -106,5 +107,34 @@ class JSBuilderTest extends SapphireTest
 
         $tag = $builder->getCustomTags([]);
         $this->assertNotContains('nonce=', $tag[0]);
+    }
+
+    public function testDisableBuildTags()
+    {
+        $controller = $this->buildController();
+        $owner = Requirements::backend();
+        $builder = $owner->getJsBuilder();
+        // Should add integrity
+        $this->assertTrue(CSPBackend::isJsSRI());
+        $requirements = $builder->buildTags('composer.json', [], [], '/');
+        $this->assertContains('integrity=', $requirements[0]);
+
+        // Shouldn't add integrity if not enabled
+        CSPBackend::config()->update('jsSRI', false);
+        $this->assertFalse(CSPBackend::isJsSRI());
+        $controller->onBeforeInit();
+        $requirements = $builder->buildTags('composer.json', [], [], '/');
+        $this->assertNotContains('integrity=', $requirements[0]);
+
+        // Should add integrity if not enabled but forced by build headers in request
+        $request = Controller::curr()->getRequest();
+        $request->offsetSet('build-headers', 'true');
+        $this->assertFalse(CSPBackend::isJsSRI());
+        $controller->onBeforeInit();
+        $requirements = $builder->buildTags('composer.json', [], [], '/');
+        $this->assertContains('integrity=', $requirements[0]);
+        CSPBackend::config()->update('jsSRI', true);
+        $request->offsetUnset('build-headers');
+        Cookie::force_expiry('buildHeaders');
     }
 }

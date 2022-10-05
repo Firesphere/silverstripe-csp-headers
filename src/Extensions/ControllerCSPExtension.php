@@ -96,18 +96,16 @@ class ControllerCSPExtension extends Extension
      */
     public function onBeforeInit()
     {
-        if (!DatabaseAdmin::lastBuilt() || !Controller::has_curr() || get_class(Controller::curr()) === DatabaseAdmin::class) {
-            // Skip if we've not built the database yet or on dev/build requests
-            return;
-        }
         /** @var ContentController $owner */
         $owner = $this->owner;
-        $this->addPolicyHeaders = Director::isLive() || static::checkCookie($owner->getRequest());
+        $ymlConfig = CSPBackend::config()->get('csp_config');
+        $this->addPolicyHeaders = ($ymlConfig['enabled'] ?? false) || static::checkCookie($owner->getRequest());
+        /** @var Controller $owner */
+        $owner = $this->owner;
         if ($this->addPolicyHeaders) {
             if (!$this->getNonce() && CSPBackend::isUsesNonce()) {
                 $this->nonce = Base64::encode(hash('sha512', uniqid('nonce', true) . time()));
             }
-            $ymlConfig = CSPBackend::config()->get('csp_config');
             $config = Injector::inst()->convertServiceProperty($ymlConfig);
             $legacy = $config['legacy'] ?? true;
 

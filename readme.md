@@ -37,6 +37,7 @@ Default for css is therefore `false`, javascript however defaults to `true` for 
 
 Firesphere\CSPHeaders\View\CSPBackend:
   csp_config:
+    enabled: true
     report-only: false
     report-uri: "https://mydomain.report-uri.com"
     base-uri:
@@ -99,11 +100,23 @@ When you enable the Reporting API you will receive deprecation, intervention and
 
 ## csp_config
 
-Configure the allowed domains. If domains change, they need to be added programmatically.
+Configure the allowed domains. If domains change, they need to be added programmatically. You can disable CSP output entirely for target environments via yaml e.g. to only output the headers in production you could use
+
+```yaml
+---
+Except:
+  environment: 'live'
+---
+Firesphere\CSPHeaders\View\CSPBackend:
+  csp_config:
+    enabled: false
+```
+
+You can also use this to skip generating SRI for JS or CSS within target environments.
 
 ### Using a nonce
 
-If you don't want to use the script tag, use the nonce. In the template, you can use `$Nonce` to get the current request nonce, e.g. if you are using <script> tags in your template
+In the template, you can use `$Nonce` to get the current request nonce, e.g. if you are using <script> tags in your template instead of using the Requirements API. Note that using <script> tags will not generate or output SRI.
 
 ## wizard
 
@@ -134,7 +147,7 @@ Firesphere\CSPHeaders\Builders\SRIBuilder:
 
 To force-refresh the SRI calculations, add the URL Parameter `?updatesri=true`. You need to be admin to use this.
 
-To force the headers to be set in dev-mode, for testing purposes, add the URL parameter `?build-headers=true`.
+To force the headers to be set, for testing purposes, add the URL parameter `?build-headers=true`.
 To disable this again, change the `true` to `false`
 
 To have these automatically clear out on a dev/build (useful for updating integrity hashes on production when new assets are deployed) you can enable this via the yaml below - though note this only works on Silverstripe framework 4.7+
