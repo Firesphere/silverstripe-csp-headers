@@ -6,6 +6,7 @@ namespace Firesphere\CSPHeaders\Extensions;
 use Exception;
 use Firesphere\CSPHeaders\Models\CSPDomain;
 use Firesphere\CSPHeaders\View\CSPBackend;
+use LeKoala\DebugBar\DebugBar;
 use PageController;
 use ParagonIE\ConstantTime\Base64;
 use ParagonIE\CSPBuilder\CSPBuilder;
@@ -15,10 +16,11 @@ use SilverStripe\Control\Controller;
 use SilverStripe\Control\Cookie;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Extension;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\ORM\DatabaseAdmin;
 use SilverStripe\ORM\DataList;
+use SilverStripe\ORM\DB;
 use function hash;
 
 /**
@@ -96,6 +98,9 @@ class ControllerCSPExtension extends Extension
      */
     public function onBeforeInit()
     {
+        if (!DB::is_active() || !ClassInfo::hasTable('Member') || Director::is_cli()) {
+            return;
+        }
         /** @var ContentController $owner */
         $owner = $this->owner;
         $ymlConfig = CSPBackend::config()->get('csp_config');
@@ -116,7 +121,7 @@ class ControllerCSPExtension extends Extension
             $this->addInlineCSSPolicy($policy, $config);
             // When in dev, add the debugbar nonce, requires a change to the lib
             if (Director::isDev() && class_exists('LeKoala\DebugBar\DebugBar')) {
-                \LeKoala\DebugBar\DebugBar::getDebugBar()->getJavascriptRenderer()->setCspNonce('debugbar');
+                DebugBar::getDebugBar()->getJavascriptRenderer()->setCspNonce('debugbar');
                 $policy->nonce('script-src', 'debugbar');
             }
 

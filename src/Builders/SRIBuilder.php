@@ -11,7 +11,6 @@ use SilverStripe\Control\Director;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\ValidationException;
-use SilverStripe\View\ArrayData;
 use SilverStripe\Security\Permission;
 
 class SRIBuilder
