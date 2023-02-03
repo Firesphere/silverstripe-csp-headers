@@ -24,7 +24,6 @@ jobs:
     working_directory: /var/www/html
 
     steps:
-      - run: DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --force-yes apt-transport-https lsb-release netcat wget
       # Install additional requirements
       - checkout
       - restore_cache:
