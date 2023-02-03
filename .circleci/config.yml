@@ -38,12 +38,6 @@ jobs:
             - public
       - run: cp .circleci/circleci.env .env
       - run: cp .circleci/jstest.js.circleci jstest.js
-      - run:
-          name: Setup Code Climate and Scrutinizer test-reporter
-          command: |
-            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-            chmod +x ./cc-test-reporter
-            ./cc-test-reporter before-build
 
       # run tests!
       - run: until nc -z -v -w30 127.0.0.1 3306; do sleep 1; done
@@ -56,9 +50,5 @@ jobs:
             echo "CodeCov:"
             echo "---"
             bash <(curl -s https://codecov.io/bash) -f clover.xml
-            echo "---"
-            echo "CodeClimate:"
-            echo "---"
-            ./cc-test-reporter after-build --coverage-input-type clover --exit-code $?
       - run: vendor/bin/phpcs --standard=phpcs.xml.dist src tests/unit
 
