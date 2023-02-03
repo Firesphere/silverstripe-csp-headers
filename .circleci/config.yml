@@ -4,7 +4,7 @@ jobs:
     environment:
       CC_TEST_REPORTER_ID: 8fc82e19673fd65485d0f66a05d94bad2d3da1df8a848349fcdabab0767f452b
     docker:
-      - image: brettt89/silverstripe-web:8.1-platform
+      - image: brettt89/silverstripe-web:8.1-cli-buster
         environment:
           - SS_DATABASE_CLASS=MySQLPDODatabase
           - SS_DATABASE_SERVER=127.0.0.1
