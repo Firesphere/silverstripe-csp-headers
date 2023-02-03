@@ -96,6 +96,9 @@ class ControllerCSPExtension extends Extension
      */
     public function onBeforeInit()
     {
+        if (!DB::is_active() || !ClassInfo::hasTable('Member') || Director::is_cli()) {
+            return;
+        }
         /** @var ContentController $owner */
         $owner = $this->owner;
         $ymlConfig = CSPBackend::config()->get('csp_config');
