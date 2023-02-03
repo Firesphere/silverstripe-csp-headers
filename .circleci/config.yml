@@ -24,7 +24,7 @@ jobs:
     working_directory: /var/www/html
 
     steps:
-      - run: apt-get update && apt-get install -y apt-transport-https lsb-release netcat wget
+      - run: DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --force-yes apt-transport-https lsb-release netcat wget
       # Install additional requirements
       - run: composer self-update
       - checkout
@@ -36,8 +36,8 @@ jobs:
       - run: composer config --no-plugins --no-interaction allow-plugins.composer/installers true
       - run: composer config --no-plugins --no-interaction allow-plugins.silverstripe/vendor-plugin true
       - run: composer config --no-plugins --no-interaction allow-plugins.silverstripe/recipe-plugin true
-      - run: composer require silverstripe/recipe-cms
-      - run: composer install
+      - run: composer require silverstripe/recipe-cms -n
+      - run: composer install -n
       # Save all dependencies to cache
       - save_cache:
           key: v2-cache-{{ checksum "composer.lock" }}
