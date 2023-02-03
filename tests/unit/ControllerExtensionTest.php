@@ -39,11 +39,6 @@ class ControllerExtensionTest extends SapphireTest
 
         $this->assertArrayNotHasKey('content-security-policy-report-only', $controller->getResponse()->getHeaders());
 
-        $this->assertArrayHasKey('content-security-policy-report-only', $controller->getResponse()->getHeaders());
-        $header = $controller->getResponse()->getHeader('content-security-policy-report-only');
-        $this->assertStringContainsString('self', $header);
-        $this->assertStringContainsString('style-src \'self\' \'unsafe-inline\'', $header);
-
         // Should add CSP if enabled (and build headers not requested)
         $config['enabled'] = true;
         CSPBackend::config()->merge('csp_config', $config);
