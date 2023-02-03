@@ -55,6 +55,7 @@ class CSSBuilder extends BaseBuilder implements BuilderInterface
             $htmlAttributes = $this->getSriBuilder()->buildSRI($file, $htmlAttributes);
         }
 
+        BaseBuilder::getNonce($htmlAttributes);
         $requirements[] = HTML::createTag('link', $htmlAttributes);
 
         return $requirements;
