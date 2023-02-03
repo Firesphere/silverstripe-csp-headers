@@ -61,7 +61,7 @@ class JSBuilderTest extends SapphireTest
         $builder = $owner->getJsBuilder();
 
         $tag = $builder->buildTags('file', [], [], '');
-        $this->assertContains('nonce=', $tag);
+        $this->assertStringContainsString('nonce=', $tag);
 
         CSPBackend::config()->set('useNonce', false);
         $controller->onBeforeInit();
@@ -80,7 +80,7 @@ class JSBuilderTest extends SapphireTest
         Requirements::insertHeadTags('<script type="application/javascript">test</script>');
         $req = [];
         $tag = $builder->getHeadTags($req);
-        $this->assertContains('nonce=', $req[0]);
+        $this->assertStringContainsString('nonce=', $req[0]);
 
         CSPBackend::config()->set('useNonce', false);
         $controller->onBeforeInit();
@@ -100,7 +100,7 @@ class JSBuilderTest extends SapphireTest
         Requirements::customScript('test');
 
         $tag = $builder->getCustomTags([]);
-        $this->assertContains('nonce=', $tag);
+        $this->assertStringContainsString('nonce=', $tag);
 
         CSPBackend::config()->set('useNonce', false);
         $controller->onBeforeInit();
@@ -117,7 +117,7 @@ class JSBuilderTest extends SapphireTest
         // Should add integrity
         $this->assertTrue(CSPBackend::isJsSRI());
         $requirements = $builder->buildTags('composer.json', [], [], '/');
-        $this->assertContains('integrity=', $requirements);
+        $this->assertStringContainsString('integrity=', $requirements);
 
         // Shouldn't add integrity if not enabled
         CSPBackend::config()->merge('jsSRI', false);
@@ -132,7 +132,7 @@ class JSBuilderTest extends SapphireTest
         $this->assertFalse(CSPBackend::isJsSRI());
         $controller->onBeforeInit();
         $requirements = $builder->buildTags('composer.json', [], [], '/');
-        $this->assertContains('integrity=', $requirements);
+        $this->assertStringContainsString('integrity=', $requirements);
         CSPBackend::config()->merge('jsSRI', true);
         $request->offsetUnset('build-headers');
         Cookie::force_expiry('buildHeaders');

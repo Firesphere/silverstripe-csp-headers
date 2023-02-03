@@ -55,8 +55,8 @@ class ControllerExtensionTest extends SapphireTest
         Cookie::force_expiry('buildHeaders');
         $this->assertArrayHasKey('content-security-policy-report-only', $controller->getResponse()->getHeaders());
         $header = $controller->getResponse()->getHeader('content-security-policy-report-only');
-        $this->assertContains('self', $header);
-        $this->assertContains('style-src \'self\' \'unsafe-inline\'', $header);
+        $this->assertStringContainsString('self', $header);
+        $this->assertStringContainsString('style-src \'self\' \'unsafe-inline\'', $header);
 
         // Should add CSP if enabled (and build headers not requested)
         $config['enabled'] = true;

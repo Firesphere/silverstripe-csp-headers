@@ -60,13 +60,13 @@ class CSSBuilderTest extends SapphireTest
         $builder = $owner->getCSSBuilder();
 
         $tag = $builder->buildTags('file', [], [], '');
-        $this->assertContains('link', $tag);
+        $this->assertStringContainsString('link', $tag[0]);
 
         CSPBackend::config()->set('useNonce', false);
         $controller->onBeforeInit();
 
         $tag = $builder->buildTags('file', [], [], '');
-        $this->assertNotContains('nonce=', $tag);
+        $this->assertNotContains('nonce=', $tag[0]);
     }
 
     public function testGetHeadTagsUseNonce()
@@ -80,7 +80,7 @@ class CSSBuilderTest extends SapphireTest
 
         $req = [];
         $tag = $builder->getHeadTags($req);
-        $this->assertContains('nonce=', $req[0]);
+        $this->assertStringContainsString('nonce=', $req[0]);
 
         CSPBackend::config()->set('useNonce', false);
         $controller->onBeforeInit();
@@ -100,13 +100,13 @@ class CSSBuilderTest extends SapphireTest
         Requirements::customCSS('test');
 
         $tag = $builder->getCustomTags([]);
-        $this->assertContains('nonce=', $tag);
+        $this->assertStringContainsString('nonce=', $tag[0]);
 
         CSPBackend::config()->set('useNonce', false);
         $controller->onBeforeInit();
 
         $tag = $builder->getCustomTags([]);
-        $this->assertNotContains('nonce=', $tag);
+        $this->assertNotContains('nonce=', $tag[0]);
     }
 
     public function testDisableBuildTags()
@@ -118,7 +118,7 @@ class CSSBuilderTest extends SapphireTest
         CSPBackend::config()->merge('cssSRI', true);
         $this->assertTrue(CSPBackend::isCssSRI());
         $requirements = $builder->buildTags('composer.json', [], [], '/');
-        $this->assertContains('integrity=', $requirements[0]);
+        $this->assertStringContainsString('integrity=', $requirements[0]);
         // Shouldn't add integrity if not enabled
         CSPBackend::config()->merge('cssSRI', false);
         $this->assertFalse(CSPBackend::isCssSRI());
@@ -132,7 +132,7 @@ class CSSBuilderTest extends SapphireTest
         $controller->onBeforeInit();
         $this->assertFalse(CSPBackend::isCssSRI());
         $requirements = $builder->buildTags('composer.json', [], [], '/');
-        $this->assertContains('integrity=', $requirements[0]);
+        $this->assertStringContainsString('integrity=', $requirements[0]);
         $request->offsetUnset('build-headers');
         Cookie::force_expiry('buildHeaders');
     }
