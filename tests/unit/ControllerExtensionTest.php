@@ -17,7 +17,7 @@ use SilverStripe\Security\Security;
 
 class ControllerExtensionTest extends SapphireTest
 {
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         CSPBackend::config()->update('useNonce', false);

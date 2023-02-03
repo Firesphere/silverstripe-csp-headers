@@ -11,7 +11,7 @@ use SilverStripe\Dev\SapphireTest;
 
 class CSPBackendTest extends SapphireTest
 {
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         CSPBackend::config()->update('useNonce', false);
@@ -87,7 +87,7 @@ body {background-color: red;}
 
         $tags = $backend->getCustomScripts();
 
-        $this->assertContains('alert("hello world");', $tags[0]);
+        $this->assertContains('alert("hello world");', $tags);
         $this->assertContains($js, ControllerCSPExtension::getInlineJS());
     }
 
@@ -102,7 +102,7 @@ body {background-color: red;}
 
         $tags = $backend->getCustomCSS();
 
-        $this->assertContains('body { color: red; }', $tags[0]);
+        $this->assertContains('body { color: red; }', $tags);
         $this->assertContains($css, ControllerCSPExtension::getInlineCSS());
     }
 
