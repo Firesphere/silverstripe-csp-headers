@@ -83,7 +83,7 @@ class CSSBuilderTest extends SapphireTest
         $tag = $builder->getHeadTags($req);
         $this->assertStringContainsString('nonce=', $req[0]);
 
-        CSPBackend::config()->set('useNonce', true);
+        CSPBackend::config()->set('useNonce', false);
         CSPBackend::setUsesNonce(false);
         $controller->onBeforeInit();
 

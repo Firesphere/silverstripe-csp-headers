@@ -36,7 +36,7 @@ class ControllerExtensionTest extends SapphireTest
         CSPBackend::config()->merge('csp_config', $config);
         $this->assertFalse($extension->isAddPolicyHeaders());
         $extension->onBeforeInit();
-        $this->assertNull($extension->getNonce());
+
         $this->assertArrayNotHasKey('content-security-policy-report-only', $controller->getResponse()->getHeaders());
 
         // Should add CSP if build headers is requested

@@ -107,7 +107,7 @@ class JSBuilderTest extends SapphireTest
         $tag = $builder->getCustomTags([]);
         $this->assertStringContainsString('nonce=', $tag[0]);
 
-        CSPBackend::config()->set('useNonce', true);
+        CSPBackend::config()->set('useNonce', false);
         CSPBackend::setUsesNonce(false);
         $controller->onBeforeInit();
 
