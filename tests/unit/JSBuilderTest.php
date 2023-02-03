@@ -55,15 +55,17 @@ class JSBuilderTest extends SapphireTest
     public function testBuildTagsUseNonce()
     {
         CSPBackend::config()->set('useNonce', true);
-
+        CSPBackend::setUsesNonce(true);
         $controller = $this->buildController();
         $owner = Requirements::backend();
+        /** @var JSBuilder $builder */
         $builder = $owner->getJsBuilder();
 
         $tag = $builder->buildTags('file', [], [], '');
         $this->assertStringContainsString('nonce=', $tag[0]);
 
         CSPBackend::config()->set('useNonce', false);
+        CSPBackend::setUsesNonce(false);
         $controller->onBeforeInit();
 
         $tag = $builder->buildTags('file', [], [], '');
@@ -95,6 +97,7 @@ class JSBuilderTest extends SapphireTest
     public function testGetCustomTagsUseNonce()
     {
         CSPBackend::config()->set('useNonce', true);
+        CSPBackend::setUsesNonce(true);
 
         $controller = $this->buildController();
         $owner = Requirements::backend();
@@ -104,7 +107,8 @@ class JSBuilderTest extends SapphireTest
         $tag = $builder->getCustomTags([]);
         $this->assertStringContainsString('nonce=', $tag[0]);
 
-        CSPBackend::config()->set('useNonce', false);
+        CSPBackend::config()->set('useNonce', true);
+        CSPBackend::setUsesNonce(false);
         $controller->onBeforeInit();
 
         $tag = $builder->getCustomTags([]);
