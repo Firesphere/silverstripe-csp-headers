@@ -88,7 +88,7 @@ body {background-color: red;}
         $tags = $backend->getCustomScripts();
 
         $this->assertStringContainsString('alert("hello world");', $tags[0]);
-        $this->assertStringContainsString($js, ControllerCSPExtension::getInlineJS());
+        $this->assertContains($js, ControllerCSPExtension::getInlineJS());
     }
 
     public function testInsertCSSTag()
@@ -103,7 +103,7 @@ body {background-color: red;}
         $tags = $backend->getCustomCSS();
 
         $this->assertStringContainsString('body { color: red; }', $tags[0]);
-        $this->assertStringContainsString($css, ControllerCSPExtension::getInlineCSS());
+        $this->assertContains($css, ControllerCSPExtension::getInlineCSS());
     }
 
     public function testInsertHeadTags()
