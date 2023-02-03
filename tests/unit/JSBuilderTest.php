@@ -73,6 +73,7 @@ class JSBuilderTest extends SapphireTest
     public function testGetHeadTagsUseNonce()
     {
         CSPBackend::config()->set('useNonce', true);
+        CSPBackend::setUsesNonce(true);
 
         $controller = $this->buildController();
         $owner = Requirements::backend();
@@ -83,6 +84,7 @@ class JSBuilderTest extends SapphireTest
         $this->assertStringContainsString('nonce=', $req[0]);
 
         CSPBackend::config()->set('useNonce', false);
+        CSPBackend::setUsesNonce(false);
         $controller->onBeforeInit();
 
         $req = [];
