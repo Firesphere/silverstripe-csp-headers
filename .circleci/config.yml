@@ -44,7 +44,6 @@ jobs:
             curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
             chmod +x ./cc-test-reporter
             ./cc-test-reporter before-build
-            wget https://scrutinizer-ci.com/ocular.phar
 
       # run tests!
       - run: until nc -z -v -w30 127.0.0.1 3306; do sleep 1; done
@@ -53,10 +52,6 @@ jobs:
       - run:
           name: Code coverage reports
           command: |
-            echo "---"
-            echo "Scrutinizer:"
-            echo "---"
-            php ocular.phar code-coverage:upload --format=php-clover clover.xml
             echo "---"
             echo "CodeCov:"
             echo "---"
