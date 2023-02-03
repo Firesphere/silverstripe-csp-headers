@@ -67,7 +67,7 @@ class JSBuilderTest extends SapphireTest
         $controller->onBeforeInit();
 
         $tag = $builder->buildTags('file', [], [], '');
-        $this->assertNotContains('nonce=', $tag);
+        $this->assertStringNotContainsString('nonce=', $tag);
     }
 
     public function testGetHeadTagsUseNonce()
@@ -87,7 +87,7 @@ class JSBuilderTest extends SapphireTest
 
         $req = [];
         $tag = $builder->getHeadTags($req);
-        $this->assertNotContains('nonce=', $req[0]);
+        $this->assertStringNotContainsString('nonce=', $req[0]);
     }
 
     public function testGetCustomTagsUseNonce()
@@ -106,7 +106,7 @@ class JSBuilderTest extends SapphireTest
         $controller->onBeforeInit();
 
         $tag = $builder->getCustomTags([]);
-        $this->assertNotContains('nonce=', $tag);
+        $this->assertStringNotContainsString('nonce=', $tag);
     }
 
     public function testDisableBuildTags()
@@ -124,7 +124,7 @@ class JSBuilderTest extends SapphireTest
         $this->assertFalse(CSPBackend::isJsSRI());
         $controller->onBeforeInit();
         $requirements = $builder->buildTags('composer.json', [], [], '/');
-        $this->assertNotContains('integrity=', $requirements[0]);
+        $this->assertStringNotContainsString('integrity=', $requirements[0]);
 
         // Should add integrity if not enabled but forced by build headers in request
         $request = Controller::curr()->getRequest();
