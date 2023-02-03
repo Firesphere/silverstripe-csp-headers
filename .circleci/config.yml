@@ -4,7 +4,7 @@ jobs:
     environment:
       CC_TEST_REPORTER_ID: 8fc82e19673fd65485d0f66a05d94bad2d3da1df8a848349fcdabab0767f452b
     docker:
-      - image: brettt89/silverstripe-web:8.1-cli-buster
+      - image: cimg/php:8.1
         environment:
           - SS_DATABASE_CLASS=MySQLPDODatabase
           - SS_DATABASE_SERVER=127.0.0.1
@@ -26,7 +26,6 @@ jobs:
     steps:
       - run: DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --force-yes apt-transport-https lsb-release netcat wget
       # Install additional requirements
-      - run: composer self-update
       - checkout
       - restore_cache:
           keys:
