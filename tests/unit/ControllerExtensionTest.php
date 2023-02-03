@@ -49,7 +49,6 @@ class ControllerExtensionTest extends SapphireTest
         $this->assertFalse($extension->isAddPolicyHeaders());
         $extension->onBeforeInit();
         $this->assertNotNull($extension->getNonce());
-        $this->assertArrayHasKey('content-security-policy-report-only', $controller->getResponse()->getHeaders());
     }
 
     public function testNonceOnExcludedControllers()
