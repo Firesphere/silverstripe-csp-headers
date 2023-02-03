@@ -116,11 +116,11 @@ trait CSPBackendTrait
      */
     public static function isUsesNonce(): bool
     {
-        return CSPBackend::config()->get('useNonce') || self::$useNonce;
+        return (CSPBackend::config()->get('useNonce') || self::$useNonce);
     }
 
     /**
-     * @param bool static::isUseNonce()
+     * @param bool $useNonce static::isUseNonce()
      */
     public static function setUsesNonce(bool $useNonce): void
     {

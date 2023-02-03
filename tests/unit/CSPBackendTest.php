@@ -14,7 +14,7 @@ class CSPBackendTest extends SapphireTest
     public function setUp(): void
     {
         parent::setUp();
-        CSPBackend::config()->update('useNonce', false);
+        CSPBackend::config()->merge('useNonce', false);
     }
     public function testSet()
     {
@@ -87,7 +87,7 @@ body {background-color: red;}
 
         $tags = $backend->getCustomScripts();
 
-        $this->assertContains('alert("hello world");', $tags);
+        $this->assertStringContainsString('alert("hello world");', $tags[0]);
         $this->assertContains($js, ControllerCSPExtension::getInlineJS());
     }
 
@@ -102,7 +102,7 @@ body {background-color: red;}
 
         $tags = $backend->getCustomCSS();
 
-        $this->assertContains('body { color: red; }', $tags);
+        $this->assertStringContainsString('body { color: red; }', $tags[0]);
         $this->assertContains($css, ControllerCSPExtension::getInlineCSS());
     }
 

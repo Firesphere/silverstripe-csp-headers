@@ -55,24 +55,27 @@ class JSBuilderTest extends SapphireTest
     public function testBuildTagsUseNonce()
     {
         CSPBackend::config()->set('useNonce', true);
-
+        CSPBackend::setUsesNonce(true);
         $controller = $this->buildController();
         $owner = Requirements::backend();
+        /** @var JSBuilder $builder */
         $builder = $owner->getJsBuilder();
 
         $tag = $builder->buildTags('file', [], [], '');
-        $this->assertContains('nonce=', $tag[0]);
+        $this->assertStringContainsString('nonce=', $tag[0]);
 
         CSPBackend::config()->set('useNonce', false);
+        CSPBackend::setUsesNonce(false);
         $controller->onBeforeInit();
 
         $tag = $builder->buildTags('file', [], [], '');
-        $this->assertNotContains('nonce=', $tag[0]);
+        $this->assertStringNotContainsString('nonce=', $tag[0]);
     }
 
     public function testGetHeadTagsUseNonce()
     {
         CSPBackend::config()->set('useNonce', true);
+        CSPBackend::setUsesNonce(true);
 
         $controller = $this->buildController();
         $owner = Requirements::backend();
@@ -80,19 +83,21 @@ class JSBuilderTest extends SapphireTest
         Requirements::insertHeadTags('<script type="application/javascript">test</script>');
         $req = [];
         $tag = $builder->getHeadTags($req);
-        $this->assertContains('nonce=', $req[0]);
+        $this->assertStringContainsString('nonce=', $req[0]);
 
         CSPBackend::config()->set('useNonce', false);
+        CSPBackend::setUsesNonce(false);
         $controller->onBeforeInit();
 
         $req = [];
         $tag = $builder->getHeadTags($req);
-        $this->assertNotContains('nonce=', $req[0]);
+        $this->assertStringNotContainsString('nonce=', $req[0]);
     }
 
     public function testGetCustomTagsUseNonce()
     {
         CSPBackend::config()->set('useNonce', true);
+        CSPBackend::setUsesNonce(true);
 
         $controller = $this->buildController();
         $owner = Requirements::backend();
@@ -100,13 +105,14 @@ class JSBuilderTest extends SapphireTest
         Requirements::customScript('test');
 
         $tag = $builder->getCustomTags([]);
-        $this->assertContains('nonce=', $tag[0]);
+        $this->assertStringContainsString('nonce=', $tag[0]);
 
         CSPBackend::config()->set('useNonce', false);
+        CSPBackend::setUsesNonce(false);
         $controller->onBeforeInit();
 
         $tag = $builder->getCustomTags([]);
-        $this->assertNotContains('nonce=', $tag[0]);
+        $this->assertStringNotContainsString('nonce=', $tag[0]);
     }
 
     public function testDisableBuildTags()
@@ -117,14 +123,14 @@ class JSBuilderTest extends SapphireTest
         // Should add integrity
         $this->assertTrue(CSPBackend::isJsSRI());
         $requirements = $builder->buildTags('composer.json', [], [], '/');
-        $this->assertContains('integrity=', $requirements[0]);
+        $this->assertStringContainsString('integrity=', $requirements[0]);
 
         // Shouldn't add integrity if not enabled
-        CSPBackend::config()->update('jsSRI', false);
+        CSPBackend::config()->merge('jsSRI', false);
         $this->assertFalse(CSPBackend::isJsSRI());
         $controller->onBeforeInit();
         $requirements = $builder->buildTags('composer.json', [], [], '/');
-        $this->assertNotContains('integrity=', $requirements[0]);
+        $this->assertStringNotContainsString('integrity=', $requirements[0]);
 
         // Should add integrity if not enabled but forced by build headers in request
         $request = Controller::curr()->getRequest();
@@ -132,8 +138,8 @@ class JSBuilderTest extends SapphireTest
         $this->assertFalse(CSPBackend::isJsSRI());
         $controller->onBeforeInit();
         $requirements = $builder->buildTags('composer.json', [], [], '/');
-        $this->assertContains('integrity=', $requirements[0]);
-        CSPBackend::config()->update('jsSRI', true);
+        $this->assertStringContainsString('integrity=', $requirements[0]);
+        CSPBackend::config()->merge('jsSRI', true);
         $request->offsetUnset('build-headers');
         Cookie::force_expiry('buildHeaders');
     }

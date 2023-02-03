@@ -17,7 +17,7 @@
         }
     ],
     "require": {
-        "php": ">=7.0",
+        "php": ">=7.4",
         "ext-simplexml": "*",
         "silverstripe/cms": "^4",
         "paragonie/csp-builder": "^2",
