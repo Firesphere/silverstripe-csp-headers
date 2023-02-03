@@ -136,6 +136,7 @@ class ControllerCSPExtension extends Extension
      */
     public static function checkCookie($request): bool
     {
+        print_r($request->getVars());
         if ($request->getVar('build-headers')) {
             Cookie::set('buildHeaders', $request->getVar('build-headers'));
         }
