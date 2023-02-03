@@ -107,9 +107,6 @@ class ControllerCSPExtension extends Extension
         /** @var Controller $owner */
         $owner = $this->owner;
         if ($this->addPolicyHeaders) {
-            if (!$this->getNonce() && CSPBackend::isUsesNonce()) {
-                $this->nonce = Base64::encode(hash('sha512', uniqid('nonce', true) . time()));
-            }
             $config = Injector::inst()->convertServiceProperty($ymlConfig);
             $legacy = $config['legacy'] ?? true;
 
@@ -151,6 +148,9 @@ class ControllerCSPExtension extends Extension
      */
     public function getNonce()
     {
+        if (!$this->nonce) {
+            $this->nonce = Base64::encode(hash('sha512', uniqid('nonce', false)));
+        }
         return $this->nonce;
     }
 

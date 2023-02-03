@@ -21,7 +21,6 @@ class BaseBuilder
             $content = array_keys($script)[0];
             $options = $script[$content] ?? [];
             self::getNonce($options);
-            print_r($options);
 
             $content = "\n{$content}\n";
             // Wrap in CDATA if it's a script tag.
