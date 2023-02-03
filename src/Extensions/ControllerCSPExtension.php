@@ -15,10 +15,11 @@ use SilverStripe\Control\Controller;
 use SilverStripe\Control\Cookie;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Extension;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\ORM\DatabaseAdmin;
 use SilverStripe\ORM\DataList;
+use SilverStripe\ORM\DB;
 use function hash;
 
 /**
@@ -120,7 +121,7 @@ class ControllerCSPExtension extends Extension
             // When in dev, add the debugbar nonce, requires a change to the lib
             if (Director::isDev() && class_exists('LeKoala\DebugBar\DebugBar')) {
                 $bar = \LeKoala\DebugBar\DebugBar::getDebugBar();
-                
+
                 if ($bar) {
                     $bar->getJavascriptRenderer()->setCspNonce('debugbar');
                     $policy->nonce('script-src', 'debugbar');
