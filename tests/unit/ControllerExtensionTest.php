@@ -20,7 +20,7 @@ class ControllerExtensionTest extends SapphireTest
     public function setUp(): void
     {
         parent::setUp();
-        CSPBackend::config()->update('useNonce', false);
+        CSPBackend::config()->merge('useNonce', false);
     }
     public function testInit()
     {
@@ -33,7 +33,7 @@ class ControllerExtensionTest extends SapphireTest
         $extension->setOwner($controller);
         $config = CSPBackend::config()->get('csp_config');
         $config['enabled'] = false;
-        CSPBackend::config()->update('csp_config', $config);
+        CSPBackend::config()->merge('csp_config', $config);
         $this->assertFalse($extension->isAddPolicyHeaders());
         $extension->onBeforeInit();
         $this->assertNull($extension->getNonce());
@@ -60,7 +60,7 @@ class ControllerExtensionTest extends SapphireTest
 
         // Should add CSP if enabled (and build headers not requested)
         $config['enabled'] = true;
-        CSPBackend::config()->update('csp_config', $config);
+        CSPBackend::config()->merge('csp_config', $config);
         $request = new HTTPRequest('GET', '/');
         $controller->setRequest($request);
         $extension = new ControllerCSPExtension();

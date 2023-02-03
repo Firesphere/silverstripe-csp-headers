@@ -60,13 +60,13 @@ class CSSBuilderTest extends SapphireTest
         $builder = $owner->getCSSBuilder();
 
         $tag = $builder->buildTags('file', [], [], '');
-        $this->assertContains('link', $tag[0]);
+        $this->assertContains('link', $tag);
 
         CSPBackend::config()->set('useNonce', false);
         $controller->onBeforeInit();
 
         $tag = $builder->buildTags('file', [], [], '');
-        $this->assertNotContains('nonce=', $tag[0]);
+        $this->assertNotContains('nonce=', $tag);
     }
 
     public function testGetHeadTagsUseNonce()
@@ -100,13 +100,13 @@ class CSSBuilderTest extends SapphireTest
         Requirements::customCSS('test');
 
         $tag = $builder->getCustomTags([]);
-        $this->assertContains('nonce=', $tag[0]);
+        $this->assertContains('nonce=', $tag);
 
         CSPBackend::config()->set('useNonce', false);
         $controller->onBeforeInit();
 
         $tag = $builder->getCustomTags([]);
-        $this->assertNotContains('nonce=', $tag[0]);
+        $this->assertNotContains('nonce=', $tag);
     }
 
     public function testDisableBuildTags()
@@ -115,12 +115,12 @@ class CSSBuilderTest extends SapphireTest
         $owner = Requirements::backend();
         $builder = $owner->getCSSBuilder();
         // Should add integrity
-        CSPBackend::config()->update('cssSRI', true);
+        CSPBackend::config()->merge('cssSRI', true);
         $this->assertTrue(CSPBackend::isCssSRI());
         $requirements = $builder->buildTags('composer.json', [], [], '/');
         $this->assertContains('integrity=', $requirements[0]);
         // Shouldn't add integrity if not enabled
-        CSPBackend::config()->update('cssSRI', false);
+        CSPBackend::config()->merge('cssSRI', false);
         $this->assertFalse(CSPBackend::isCssSRI());
         $controller->onBeforeInit();
         $requirements = $builder->buildTags('composer.json', [], [], '/');

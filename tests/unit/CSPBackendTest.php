@@ -14,7 +14,7 @@ class CSPBackendTest extends SapphireTest
     public function setUp(): void
     {
         parent::setUp();
-        CSPBackend::config()->update('useNonce', false);
+        CSPBackend::config()->merge('useNonce', false);
     }
     public function testSet()
     {
