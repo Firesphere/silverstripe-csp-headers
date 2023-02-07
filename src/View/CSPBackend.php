@@ -4,7 +4,6 @@ namespace Firesphere\CSPHeaders\View;
 
 use Firesphere\CSPHeaders\Builders\CSSBuilder;
 use Firesphere\CSPHeaders\Builders\JSBuilder;
-use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
 use Firesphere\CSPHeaders\Middlewares\CSPMiddleware;
 use Firesphere\CSPHeaders\Traits\CSPBackendTrait;
 use SilverStripe\Core\Config\Configurable;
@@ -35,7 +34,7 @@ class CSPBackend extends Requirements_Backend
      */
     public function customScript($js, $uniquenessID = null): void
     {
-        ControllerCSPExtension::addJS($js);
+        CSPMiddleware::addJS($js);
 
         parent::customScript($js, $uniquenessID);
     }
@@ -46,7 +45,7 @@ class CSPBackend extends Requirements_Backend
      */
     public function customCSS($css, $uniquenessID = null): void
     {
-        ControllerCSPExtension::addCSS($css);
+        CSPMiddleware::addCSS($css);
 
         parent::customCSS($css, $uniquenessID);
     }
@@ -65,7 +64,7 @@ class CSPBackend extends Requirements_Backend
             static::$headJS[$uniquenessID] = [strip_tags($html) => $options];
             CSPMiddleware::addJS(strip_tags($html));
         } elseif ($type === 'css') {
-            $options = $this->getOptions($html); // SimpleXML does it's job here, we see the outcome
+            $options = $this->getOptions($html); // SimpleXML does its job here, we see the outcome
             static::$headCSS[$uniquenessID] = [strip_tags($html) => $options];
             CSPMiddleware::addCSS(strip_tags($html));
         } else {
@@ -146,7 +145,7 @@ class CSPBackend extends Requirements_Backend
     {
         // make sure that async/defer is set if it is set once even if file is included multiple times
         return (
-            (isset($options['async']) && isset($options['async']) === true)
+            (isset($options['async']) && $options['async'] === true)
             || (isset($this->javascript[$file]['async']) && $this->javascript[$file]['async'] === true)
         );
     }
@@ -159,7 +158,7 @@ class CSPBackend extends Requirements_Backend
     protected function isDefer($file, $options): bool
     {
         return (
-            (isset($options['defer']) && isset($options['defer']) === true)
+            (isset($options['defer']) && $options['defer'] === true)
             || (isset($this->javascript[$file]['defer']) && $this->javascript[$file]['defer'] === true)
         );
     }
