@@ -1,0 +1,11 @@
+---
+Name: 'cspcache'
+After:
+  - '#versionedcache'
+  - 'corecache'
+---
+SilverStripe\Core\Injector\Injector:
+  Psr\SimpleCache\CacheInterface.cspheaders:
+    factory: SilverStripe\Core\Cache\CacheFactory
+    constructor:
+      namespace: "cspheaders"

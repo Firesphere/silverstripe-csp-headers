@@ -47,21 +47,21 @@ class SRIBuilder
                 return $htmlAttributes;
             }
         }
-        // If an update is needed, set the SRI to null
-        $sri = SRI::findOrCreate($file);
-        if ($this->shouldUpdateSRI()) {
-            $sri->SRI = null;
-            $sri->forceChange();
-            $sri->write();
-        }
-
         if (!self::$sri) {
             self::$sri = ArrayList::create(SRI::get()->toArray());
         }
+        // If an update is needed, set the SRI to null
         $sri = self::$sri->find('File', $file);
+        $fresh = false;
         if (!$sri) {
             $sri = SRI::findOrCreate($file);
             self::$sri->push($sri);
+            $fresh = true;
+        }
+        if (!$fresh && $this->shouldUpdateSRI()) {
+            $sri->SRI = null;
+            $sri->forceChange();
+            $sri->write();
         }
 
         // To skip applying SRI for an environment use yml to disable jsSRI or cssSRI within chosen envs

@@ -5,6 +5,7 @@ namespace Firesphere\CSPHeaders\Builders;
 
 use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
 use Firesphere\CSPHeaders\Interfaces\BuilderInterface;
+use Firesphere\CSPHeaders\Middlewares\CSPMiddleware;
 use Firesphere\CSPHeaders\View\CSPBackend;
 use SilverStripe\Control\Controller;
 use SilverStripe\Core\Injector\Injector;
@@ -50,7 +51,7 @@ class CSSBuilder extends BaseBuilder implements BuilderInterface
 
 
         $request = Controller::has_curr() ? Controller::curr()->getRequest() : null;
-        $cookieSet = $request ? ControllerCSPExtension::checkCookie($request) : false;
+        $cookieSet = $request && CSPMiddleware::checkCookie($request);
         if (CSPBackend::isCssSRI() || $cookieSet) {
             $htmlAttributes = $this->getSriBuilder()->buildSRI($file, $htmlAttributes);
         }

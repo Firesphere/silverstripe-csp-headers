@@ -5,6 +5,7 @@ namespace Firesphere\CSPHeaders\View;
 use Firesphere\CSPHeaders\Builders\CSSBuilder;
 use Firesphere\CSPHeaders\Builders\JSBuilder;
 use Firesphere\CSPHeaders\Extensions\ControllerCSPExtension;
+use Firesphere\CSPHeaders\Middlewares\CSPMiddleware;
 use Firesphere\CSPHeaders\Traits\CSPBackendTrait;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Manifest\ModuleResourceLoader;
@@ -62,11 +63,11 @@ class CSPBackend extends Requirements_Backend
         if ($type === 'javascript') {
             $options = $this->getOptions($html);
             static::$headJS[$uniquenessID] = [strip_tags($html) => $options];
-            ControllerCSPExtension::addJS(strip_tags($html));
+            CSPMiddleware::addJS(strip_tags($html));
         } elseif ($type === 'css') {
             $options = $this->getOptions($html); // SimpleXML does it's job here, we see the outcome
             static::$headCSS[$uniquenessID] = [strip_tags($html) => $options];
-            ControllerCSPExtension::addCSS(strip_tags($html));
+            CSPMiddleware::addCSS(strip_tags($html));
         } else {
             $this->customHeadTags[$uniquenessID] = $html;
         }

@@ -16,7 +16,6 @@ use SilverStripe\ORM\ManyManyList;
 /**
  * Class \Firesphere\CSPHeaders\Extensions\SiteTreeExtension
  *
- * @property Page|PageExtension $owner
  * @method ManyManyList|CSPDomain[] CSPDomains()
  */
 class PageExtension extends DataExtension

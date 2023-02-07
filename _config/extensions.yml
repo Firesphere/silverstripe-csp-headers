@@ -1,9 +1,3 @@
-PageController:
-  extensions:
-    - Firesphere\CSPHeaders\Extensions\ControllerCSPExtension
-Page:
-  extensions:
-    - Firesphere\CSPHeaders\Extensions\PageExtension
 SilverStripe\Dev\DevBuildController:
   extensions:
     - Firesphere\CSPHeaders\Extensions\CSPBuildExtension

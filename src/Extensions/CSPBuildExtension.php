@@ -12,7 +12,6 @@ use SilverStripe\ORM\DB;
  *
  * Runs on dev/build to remove all known SRIs
  *
- * @property DevBuildController|CSPBuildExtension $owner
  */
 class CSPBuildExtension extends Extension
 {
