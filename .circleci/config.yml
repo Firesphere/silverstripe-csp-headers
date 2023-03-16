@@ -24,9 +24,9 @@ jobs:
     steps:
       # Install additional requirements
       - checkout
-#      - run: composer config --no-plugins --no-interaction allow-plugins.composer/installers true
-#      - run: composer config --no-plugins --no-interaction allow-plugins.silverstripe/vendor-plugin true
-#      - run: composer config --no-plugins --no-interaction allow-plugins.silverstripe/recipe-plugin true
+      - run: composer config --no-plugins --no-interaction allow-plugins.composer/installers true
+      - run: composer config --no-plugins --no-interaction allow-plugins.silverstripe/vendor-plugin true
+      - run: composer config --no-plugins --no-interaction allow-plugins.silverstripe/recipe-plugin true
       - run: composer require silverstripe/recipe-cms -n
       - run: composer install -n
       # Save all dependencies to cache
