@@ -20,7 +20,7 @@
         "php": ">=7.4",
         "ext-simplexml": "*",
         "silverstripe/cms": "^4",
-        "paragonie/csp-builder": "dev-Firesphere-patch-1 as 2.9",
+        "paragonie/csp-builder": "dev-Firesphere-patch-1 as 2.9 || v2.7.0",
         "guzzlehttp/guzzle": ">=6"
     },
     "repositories": [
