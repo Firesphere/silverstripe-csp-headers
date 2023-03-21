@@ -109,7 +109,7 @@ class ControllerCSPExtension extends Extension
             $config = Injector::inst()->convertServiceProperty($ymlConfig);
             $legacy = $config['legacy'] ?? true;
             $unsafeCSSInline = $config['style-src']['unsafe-inline'];
-            $config['style-src']['unsafe-inline'] = $unsafeCSSInline || $owner->dataRecord->AllowJSInline;
+            $config['style-src']['unsafe-inline'] = $unsafeCSSInline || $owner->dataRecord->AllowCSSInline;
             $unsafeCSSInline = $config['script-src']['unsafe-inline'];
             $config['script-src']['unsafe-inline'] = $unsafeCSSInline || $owner->dataRecord->AllowJSInline;
 
