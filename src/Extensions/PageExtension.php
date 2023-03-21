@@ -6,11 +6,13 @@ namespace Firesphere\CSPHeaders\Extensions;
 use Firesphere\CSPHeaders\Models\CSPDomain;
 use Page;
 use SilverStripe\CMS\Model\SiteTree;
+use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig_RelationEditor;
 use SilverStripe\Forms\Tab;
 use SilverStripe\ORM\DataExtension;
+use SilverStripe\ORM\FieldType\DBBoolean;
 use SilverStripe\ORM\ManyManyList;
 
 /**
@@ -21,8 +23,19 @@ use SilverStripe\ORM\ManyManyList;
  */
 class PageExtension extends DataExtension
 {
+
+    private static $db = [
+        'AllowCSSInline' => DBBoolean::class,
+        'AllowJSInline'  => DBBoolean::class,
+    ];
+
     private static $many_many = [
         'CSPDomains' => CSPDomain::class
+    ];
+
+    private static $defaults = [
+        'AllowCSSInline' => false,
+        'AllowJSInline'  => false,
     ];
 
     public function updateSettingsFields(FieldList $fields)
@@ -39,6 +52,10 @@ class PageExtension extends DataExtension
             $this->owner->CSPDomains(),
             $config
         );
-        $fields->addFieldToTab('Root.CSP', $gridfield);
+        $fields->addFieldsToTab('Root.CSP', [
+            CheckboxField::create('AllowCSSInline', 'Allow CSS inline'),
+            CheckboxField::create('AllowJSInline', 'Allow JS inline'),
+            $gridfield
+        ]);
     }
 }

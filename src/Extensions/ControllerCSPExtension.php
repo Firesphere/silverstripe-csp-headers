@@ -105,10 +105,13 @@ class ControllerCSPExtension extends Extension
         $ymlConfig = CSPBackend::config()->get('csp_config');
         $this->addPolicyHeaders = ($ymlConfig['enabled'] ?? false) || static::checkCookie($owner->getRequest());
         /** @var Controller $owner */
-        $owner = $this->owner;
         if ($this->addPolicyHeaders) {
             $config = Injector::inst()->convertServiceProperty($ymlConfig);
             $legacy = $config['legacy'] ?? true;
+            $unsafeCSSInline = $config['style-src']['unsafe-inline'];
+            $config['style-src']['unsafe-inline'] = $unsafeCSSInline || $owner->dataRecord->AllowJSInline;
+            $unsafeCSSInline = $config['script-src']['unsafe-inline'];
+            $config['script-src']['unsafe-inline'] = $unsafeCSSInline || $owner->dataRecord->AllowJSInline;
 
             $policy = CSPBuilder::fromArray($config);
 
