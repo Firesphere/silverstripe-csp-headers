@@ -14,8 +14,8 @@ Adds CSP headers to your request, based on configuration in a yml file.
 
 # Requirements
 
-SilverStripe Framework 4.x
-PHP 5.6+
+SilverStripe Framework 4.x+
+PHP 8.0+
 
 # Installation
 
@@ -39,7 +39,7 @@ Firesphere\CSPHeaders\View\CSPBackend:
   csp_config:
     enabled: true
     report-only: false
-    report-uri: "https://mydomain.report-uri.com"
+    report-uri: "https://your.report-uri.com/here/with/path"
     base-uri:
       allow: []
       self: true
@@ -96,7 +96,8 @@ Setting the legacy headers flag to true, will add the IE legacy headers like `X-
 
 ## report_to
 
-When you enable the Reporting API you will receive deprecation, intervention and crash reports from the browser. To enable this you need to set a HTTP response header with the following name and value.
+Not yet implemented as not all browsers support it yet
+
 
 ## csp_config
 
