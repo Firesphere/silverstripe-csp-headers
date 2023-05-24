@@ -29,13 +29,6 @@ jobs:
       - run: composer config --no-plugins --no-interaction allow-plugins.silverstripe/recipe-plugin true
       - run: composer require silverstripe/recipe-cms:^4 -n
       - run: composer install -n
-      # Save all dependencies to cache
-      - save_cache:
-          key: v2-cache-{{ checksum "composer.lock" }}
-          paths:
-            - vendor
-            - app
-            - public
       - run: cp .circleci/circleci.env .env
       - run: cp .circleci/jstest.js.circleci jstest.js
 
