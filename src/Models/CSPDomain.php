@@ -26,7 +26,7 @@ class CSPDomain extends DataObject implements PermissionProvider
 
     private static $db = [
         'Domain' => 'Varchar(255)',
-        'Source' => 'Enum("default,script,style,img,media,font,form,frame,ancestor")'
+        'Source' => 'Enum("default,script,style,img,media,font,form,frame,ancestor,woorker")'
     ];
 
     private static $belongs_many_many = [
@@ -54,7 +54,8 @@ class CSPDomain extends DataObject implements PermissionProvider
         'media'   => 'Embedded media (e.g. YouTube)',
         'font'    => 'Fonts',
         'form'    => 'Forms',
-        'frame'   => 'Iframes'
+        'frame'   => 'Iframes',
+        'worker'  => 'Worker'
     ];
 
     private static $searchable_fields = [
