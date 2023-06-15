@@ -107,30 +107,7 @@ class ControllerCSPExtension extends Extension
         $this->addPolicyHeaders = ($ymlConfig['enabled'] ?? false) || static::checkCookie($owner->getRequest());
         /** @var Controller $owner */
         if ($this->addPolicyHeaders) {
-            $config = Injector::inst()->convertServiceProperty($ymlConfig);
-            $legacy = $config['legacy'] ?? true;
-            $unsafeCSSInline = $config['style-src']['unsafe-inline'];
-            $config['style-src']['unsafe-inline'] = $unsafeCSSInline || $owner->dataRecord->AllowCSSInline;
-            $unsafeCSSInline = $config['script-src']['unsafe-inline'];
-            $config['script-src']['unsafe-inline'] = $unsafeCSSInline || $owner->dataRecord->AllowJSInline;
-
-            $policy = CSPBuilder::fromArray($config);
-
-            $this->addCSP($policy, $owner);
-            $this->addInlineJSPolicy($policy, $config);
-            $this->addInlineCSSPolicy($policy, $config);
-            // When in dev, add the debugbar nonce, requires a change to the lib
-            if (Director::isDev() && class_exists('LeKoala\DebugBar\DebugBar')) {
-                $bar = \LeKoala\DebugBar\DebugBar::getDebugBar();
-
-                if ($bar) {
-                    $bar->getJavascriptRenderer()->setCspNonce('debugbar');
-                    $policy->nonce('script-src', 'debugbar');
-                }
-            }
-
-            $headers = $policy->getHeaderArray($legacy);
-            $this->addResponseHeaders($headers, $owner);
+            $this->addHeaders($ymlConfig, $owner);
         }
     }
 
@@ -234,5 +211,39 @@ class ControllerCSPExtension extends Extension
     public function isAddPolicyHeaders(): bool
     {
         return $this->addPolicyHeaders ?? false;
+    }
+
+    /**
+     * @param mixed $ymlConfig
+     * @param Controller|ContentController $owner
+     * @return void
+     * @throws Exception
+     */
+    private function addHeaders(mixed $ymlConfig, Controller|ContentController $owner): void
+    {
+        $config = Injector::inst()->convertServiceProperty($ymlConfig);
+        $legacy = $config['legacy'] ?? true;
+        $unsafeCSSInline = $config['style-src']['unsafe-inline'];
+        $config['style-src']['unsafe-inline'] = $unsafeCSSInline || $owner->dataRecord->AllowCSSInline;
+        $unsafeCSSInline = $config['script-src']['unsafe-inline'];
+        $config['script-src']['unsafe-inline'] = $unsafeCSSInline || $owner->dataRecord->AllowJSInline;
+
+        $policy = CSPBuilder::fromArray($config);
+
+        $this->addCSP($policy, $owner);
+        $this->addInlineJSPolicy($policy, $config);
+        $this->addInlineCSSPolicy($policy, $config);
+        // When in dev, add the debugbar nonce, requires a change to the lib
+        if (Director::isDev() && class_exists('LeKoala\DebugBar\DebugBar')) {
+            $bar = \LeKoala\DebugBar\DebugBar::getDebugBar();
+
+            if ($bar) {
+                $bar->getJavascriptRenderer()->setCspNonce('debugbar');
+                $policy->nonce('script-src', 'debugbar');
+            }
+        }
+
+        $headers = $policy->getHeaderArray($legacy);
+        $this->addResponseHeaders($headers, $owner);
     }
 }
