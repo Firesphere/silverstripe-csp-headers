@@ -29,7 +29,7 @@ class CSPConvertorTest extends SapphireTest
         $this->assertStringContainsStringIgnoringCase("firesphere.dev", $yml);
         $this->assertStringContainsStringIgnoringCase('script-src:', $yml);
         $this->assertStringContainsStringIgnoringCase("self: true", $yml);
-        $this->assertStringContainsStringIgnoringCase('unsafe-inline: true', $yml);
+        $this->assertStringContainsStringIgnoringCase('unsafe-eval: true', $yml);
         $this->assertEquals(1, $array['default-src']['self']);
         $this->assertEquals(1, $array['script-src']['self']);
         $this->assertEquals(1, $array['script-src']['unsafe-eval']);
