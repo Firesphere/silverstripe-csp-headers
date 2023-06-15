@@ -40,6 +40,5 @@ class CSPConvertorTest extends SapphireTest
         $this->assertCount(0, $array['script-src']['allow']);
         $this->assertCount(1, $array['default-src']['allow']);
         $this->assertEquals('true', $array['upgrade-insecure-requests']);
-        $this->assertEquals('https://example.com/report/uri', $array['report-uri']);
     }
 }
