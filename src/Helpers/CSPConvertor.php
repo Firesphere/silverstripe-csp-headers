@@ -59,9 +59,9 @@ class CSPConvertor
 
     /**
      * @param HTTPResponse $response
-     * @return void
+     * @return string|void
      */
-    public static function toYml($response)
+    public static function toYml($response, $return = false)
     {
         $cspHeader = $response->getHeader('content-security-policy') ?? $response->getHeader('content-security-policy-report-only');
 
@@ -94,6 +94,9 @@ class CSPConvertor
             $arrayHeader[$key]['allow'] = $parts;
         }
         $yaml = Yaml::dump($arrayHeader);
+        if ($return) {
+            return $yaml;
+        }
         print_r("<pre>");
         print_r($yaml);
         print_r("</pre>");
