@@ -19,7 +19,7 @@ class CSPConvertorTest extends SapphireTest
 
         $yml = CSPConvertor::toYml($response, true);
 
-        $this->assertContains('default-src:', $yml);
-        $this->assertContains("self: true", $yml);
+        $this->assertStringContainsStringIgnoringCase('default-src:', $yml);
+        $this->assertStringContainsStringIgnoringCase("self: true", $yml);
     }
 }
