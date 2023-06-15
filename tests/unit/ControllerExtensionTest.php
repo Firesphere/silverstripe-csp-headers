@@ -21,7 +21,6 @@ class ControllerExtensionTest extends SapphireTest
     {
         parent::setUp();
         CSPBackend::config()->merge('useNonce', false);
-
     }
     public function testInit()
     {

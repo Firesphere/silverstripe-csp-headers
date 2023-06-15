@@ -16,7 +16,8 @@ class CSPConvertorTest extends SapphireTest
     public function testToYml()
     {
         $response = new HTTPResponse([], 200);
-        $response->addHeader('content-security-policy',
+        $response->addHeader(
+            'content-security-policy',
             'default-src "self" firesphere.dev https://firesphere.dev; script-src "self" unsafe-eval;
             report-uri: https://example.com/report/uri; upgrade-insecure-requests'
         );
