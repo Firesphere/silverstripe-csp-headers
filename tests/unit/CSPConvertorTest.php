@@ -21,9 +21,7 @@ class CSPConvertorTest extends SapphireTest
         $yml = CSPConvertor::toYml($response, true);
 
         $array = Yaml::parse($yml);
-
-        print_r($array);
-
+        
         $this->assertStringContainsStringIgnoringCase('default-src:', $yml);
         $this->assertStringContainsStringIgnoringCase("self: true", $yml);
         $this->assertStringContainsStringIgnoringCase("firesphere.dev", $yml);
