@@ -98,6 +98,11 @@ Setting the legacy headers flag to true, will add the IE legacy headers like `X-
 
 Not yet implemented as not all browsers support it yet
 
+### Generating the YML
+
+A helper class is included to take your existing headers and convert them to a workable starting point as YML.
+
+Usage: `CSPConvertor::toYml(Controller::curr()->getResponse());`
 
 ## csp_config
 
