@@ -32,7 +32,7 @@ use function hash;
  */
 class ControllerCSPExtension extends Extension
 {
-    public $isTesting = false;
+    public static $isTesting = false;
     /**
      * Base CSP configuration
      * @var array
@@ -98,7 +98,7 @@ class ControllerCSPExtension extends Extension
      */
     public function onBeforeInit()
     {
-        if (!$this->isTesting && !DB::is_active() || !ClassInfo::hasTable('Member') || Director::is_cli()) {
+        if (!self::$isTesting && !DB::is_active() || !ClassInfo::hasTable('Member') || Director::is_cli()) {
             return;
         }
         /** @var ContentController $owner */
