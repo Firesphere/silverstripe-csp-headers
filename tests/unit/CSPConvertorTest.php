@@ -16,7 +16,7 @@ class CSPConvertorTest extends SapphireTest
     public function testToYml()
     {
         $response = new HTTPResponse([], 200);
-        $response->addHeader('content-security-policy', 'default-src "self" firesphere.dev https://firesphere.dev; script-src "self" unsafe-eval;');
+        $response->addHeader('content-security-policy', 'default-src "self" firesphere.dev https://firesphere.dev; script-src "self" unsafe-eval');
 
         $yml = CSPConvertor::toYml($response, true);
 
@@ -30,5 +30,10 @@ class CSPConvertorTest extends SapphireTest
         $this->assertStringContainsStringIgnoringCase('script-src:', $yml);
         $this->assertStringContainsStringIgnoringCase("self: true", $yml);
         $this->assertStringContainsStringIgnoringCase('unsafe-inline: true', $yml);
+        $this->assertEquals(1, $array['default-src']['self']);
+        $this->assertEquals(1, $array['script-src']['self']);
+        $this->assertEquals(1, $array['script-src']['unsafe-eval']);
+        $this->assertCount(0, $array['script-src']['allow']);
+        $this->assertCount(1, $array['default-src']['allow']);
     }
 }
