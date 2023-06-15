@@ -31,6 +31,7 @@ jobs:
       - run: composer install -n
       - run: cp .circleci/circleci.env .env
       - run: cp .circleci/jstest.js.circleci jstest.js
+      - run: apt update;apt install php8.1-xdebug
 
       # run tests!
       - run: until nc -z -v -w30 127.0.0.1 3306; do sleep 1; done
