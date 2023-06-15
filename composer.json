@@ -28,6 +28,16 @@
         "phpunit/phpunit": "^9",
         "squizlabs/php_codesniffer": "3.*"
     },
+    "config": {
+        "process-timeout": 600,
+        "allow-plugins": {
+            "composer/installers": true,
+            "silverstripe/vendor-plugin": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "silverstripe/recipe-plugin": true,
+            "php-http/discovery": true
+        }
+    },
     "prefer-stable": true,
     "minimum-stability": "dev"
 }
