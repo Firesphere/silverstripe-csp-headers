@@ -21,6 +21,7 @@ class ControllerExtensionTest extends SapphireTest
     {
         parent::setUp();
         CSPBackend::config()->merge('useNonce', false);
+
     }
     public function testInit()
     {
@@ -30,6 +31,7 @@ class ControllerExtensionTest extends SapphireTest
 
         // Shouldn't add CSP if not enabled
         $extension = new ControllerCSPExtension();
+        $extension->isTesting = true;
         $extension->setOwner($controller);
         $config = CSPBackend::config()->get('csp_config');
         $config['enabled'] = false;
@@ -45,6 +47,8 @@ class ControllerExtensionTest extends SapphireTest
         $request = new HTTPRequest('GET', '/');
         $controller->setRequest($request);
         $extension = new ControllerCSPExtension();
+        $extension->isTesting = true;
+
         $extension->setOwner($controller);
         $this->assertFalse($extension->isAddPolicyHeaders());
         $extension->onBeforeInit();
@@ -59,6 +63,8 @@ class ControllerExtensionTest extends SapphireTest
         $page = new Page();
         $controller = new PageController($page);
         $extension = new ControllerCSPExtension();
+        $extension->isTesting = true;
+
         $extension->setOwner($controller);
 
         //useNonce is set but only applies on the PageController.
@@ -74,10 +80,14 @@ class ControllerExtensionTest extends SapphireTest
 
         //now apply the extension, getNonce should not be null
         $extension2 = new ControllerCSPExtension();
+        $extension2->isTesting = true;
+
         $extension2->setOwner($secController);
         $this->assertNotNull($secController->getNonce());
 
         $extension3 = new ControllerCSPExtension();
+        $extension3->isTesting = true;
+
         $extension3->setOwner($cmsController);
         $this->assertNotNull($cmsController->getNonce());
     }
