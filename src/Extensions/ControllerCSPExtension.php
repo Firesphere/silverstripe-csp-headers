@@ -98,7 +98,7 @@ class ControllerCSPExtension extends Extension
      */
     public function onBeforeInit()
     {
-        if (!self::$isTesting || !DB::is_active() || !ClassInfo::hasTable('Member') || Director::is_cli()) {
+        if (self::$isTesting || !DB::is_active() || !ClassInfo::hasTable('Member') || Director::is_cli()) {
             return;
         }
         /** @var ContentController $owner */
