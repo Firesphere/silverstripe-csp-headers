@@ -66,8 +66,10 @@ class CSPConvertor
         $cspHeader = $response->getHeader('content-security-policy') ?? $response->getHeader('content-security-policy-report-only');
 
         $asArray = explode(';', $cspHeader);
-        $arrayHeader = [];
+        $arrayHeader = ['enabled' => true];
+
         foreach ($asArray as $headerPart) {
+            if (empty($headerPart)) continue;
             $parts = explode(' ', trim($headerPart));
             $key = array_shift($parts);
             $arrayHeader[$key] = [];
@@ -80,11 +82,12 @@ class CSPConvertor
                 continue;
             }
             $allowedKeys = array_merge(static::$non_url_defaults, static::$non_url_args[$key] ?? []);
-            foreach ($parts as $partkey => $part) {
-                $part = trim(trim($part, '"'), "'");
-                $part = str_replace('*', 'www', $part); // little hack for `https://*.google.com` etc.
-                if (!filter_var($part, FILTER_VALIDATE_URL) && $part !== 'none') {
+            foreach ($parts as $partkey => &$part) {
+                $part = trim(str_replace(['"', "'"], '', $part));
+                $asUrl = str_replace('*', 'www', $part); // little hack for `https://*.google.com` etc.
+                if (!filter_var($asUrl, FILTER_VALIDATE_URL) && $part !== 'none') {
                     if (in_array($part, $allowedKeys)) {
+                        $part = rtrim($part, ':');
                         $arrayHeader[$key][$part] = true;
                     }
                     unset($parts[$partkey]);
@@ -93,7 +96,12 @@ class CSPConvertor
             rsort($parts);
             $arrayHeader[$key]['allow'] = $parts;
         }
-        $yaml = Yaml::dump($arrayHeader);
+        $data = [
+            CSPBackend::class => [
+                'csp_config' => $arrayHeader
+            ]
+        ];
+        $yaml = Yaml::dump($data, 5, 2);
         if ($return) {
             return $yaml;
         }
