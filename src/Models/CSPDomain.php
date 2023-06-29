@@ -5,6 +5,8 @@ namespace Firesphere\CSPHeaders\Models;
 use Page;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\FieldType\DBEnum;
+use SilverStripe\ORM\FieldType\DBVarchar;
 use SilverStripe\ORM\ManyManyList;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
@@ -25,8 +27,8 @@ class CSPDomain extends DataObject implements PermissionProvider
     private static $table_name = 'CSPDomain';
 
     private static $db = [
-        'Domain' => 'Varchar(255)',
-        'Source' => 'Enum("default,script,style,img,media,font,form,frame,ancestor,worker")'
+        'Domain' => DBVarchar::class,
+        'Source' => DBEnum::class . '("default,script,style,img,media,font,form,frame,ancestor,worker,connect")'
     ];
 
     private static $belongs_many_many = [
@@ -55,11 +57,13 @@ class CSPDomain extends DataObject implements PermissionProvider
         'font'    => 'Fonts',
         'form'    => 'Forms',
         'frame'   => 'Iframes',
-        'worker'  => 'Worker'
+        'worker'  => 'Worker',
+        'connect' => 'Connect'
     ];
 
     private static $searchable_fields = [
         'Domain',
+        'Source'
     ];
 
     /**
