@@ -2,6 +2,7 @@
 
 namespace Firesphere\CSPHeaders\Helpers;
 
+use Firesphere\CSPHeaders\View\CSPBackend;
 use SilverStripe\Control\HTTPResponse;
 use Symfony\Component\Yaml\Yaml;
 
