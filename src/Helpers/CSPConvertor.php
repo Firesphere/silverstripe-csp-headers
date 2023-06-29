@@ -96,6 +96,7 @@ class CSPConvertor
             rsort($parts);
             $arrayHeader[$key]['allow'] = $parts;
         }
+        $arrayHeader['default-src']['self'] = true; // Always allow self
         $data = [
             CSPBackend::class => [
                 'csp_config' => $arrayHeader
