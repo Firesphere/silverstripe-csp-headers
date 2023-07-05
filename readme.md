@@ -31,6 +31,12 @@ Same goes for javascripts. Javascripts specifically should live either in a sepa
 
 Default for css is therefore `false`, javascript however defaults to `true` for security reasons.
 
+**WARNING 2**
+
+When using Incapsula or Imperva (and potentially other CDN providers), your CSS and Javascripts may be altered by the CDN, and therefore never compute correctly.
+
+The only solution is to disable the SRI's for css and javascript on these providers.
+
 # Configuration
 
 ```yaml
