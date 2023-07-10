@@ -68,9 +68,14 @@ class CSPConvertor
 
         $asArray = explode(';', $cspHeader);
         $arrayHeader = ['enabled' => true];
-
+        if (!$return) {
+            echo "<h3>Original headers</h3>";
+        }
         foreach ($asArray as $headerPart) {
             if (empty($headerPart)) continue;
+            if (!$return) {
+                print_r(sprintf('%s<br />',));
+            }
             $parts = explode(' ', trim($headerPart));
             $key = array_shift($parts);
             $arrayHeader[$key] = [];
@@ -107,7 +112,7 @@ class CSPConvertor
         if ($return) {
             return $yaml;
         }
-        print_r("<pre>");
+        print_r("<pre><br />---");
         print_r($yaml);
         print_r("</pre>");
         exit;
