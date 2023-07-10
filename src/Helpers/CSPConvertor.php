@@ -72,9 +72,11 @@ class CSPConvertor
             echo "<h3>Original headers</h3>";
         }
         foreach ($asArray as $headerPart) {
-            if (empty($headerPart)) continue;
+            if (empty($headerPart)) {
+                continue;
+            }
             if (!$return) {
-                print_r(sprintf('%s<br />',));
+                print_r(sprintf('%s<br />', $headerPart));
             }
             $parts = explode(' ', trim($headerPart));
             $key = array_shift($parts);
