@@ -3,6 +3,7 @@
 namespace Firesphere\CSPHeaders\Tests;
 
 use Firesphere\CSPHeaders\Helpers\CSPConvertor;
+use Firesphere\CSPHeaders\View\CSPBackend;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Dev\SapphireTest;
 use Symfony\Component\Yaml\Yaml;
@@ -25,6 +26,8 @@ class CSPConvertorTest extends SapphireTest
         $yml = CSPConvertor::toYml($response, true);
 
         $array = Yaml::parse($yml);
+
+        $array = $array[CSPBackend::class]['csp_config'];
 
         $this->assertStringContainsStringIgnoringCase('default-src:', $yml);
         $this->assertStringContainsStringIgnoringCase("self: true", $yml);
