@@ -6,10 +6,9 @@ namespace Firesphere\CSPHeaders\Extensions;
 use Exception;
 use Firesphere\CSPHeaders\Models\CSPDomain;
 use Firesphere\CSPHeaders\View\CSPBackend;
-use PageController;
 use ParagonIE\ConstantTime\Base64;
 use ParagonIE\CSPBuilder\CSPBuilder;
-use SilverStripe\CMS\Controllers\ContentController;
+use phpDocumentor\Reflection\Types\Boolean;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Cookie;
@@ -28,7 +27,7 @@ use function hash;
  * This extension is applied to the PageController, to avoid duplicates.
  * Any duplicates may be caused by extended classes. It should however, not affect the outcome
  *
- * @property PageController|ControllerCSPExtension $owner
+ * @property Controller|ControllerCSPExtension $owner
  */
 class ControllerCSPExtension extends Extension
 {
@@ -51,6 +50,12 @@ class ControllerCSPExtension extends Extension
      * @var bool
      */
     protected $addPolicyHeaders;
+
+    /**
+     * Should permission policies be added
+     * @var bool
+     */
+    protected $addPermissionHeaders;
     /**
      * @var string randomised sha512 nonce for enabling scripts if you don't want to use validating of the full script
      */
@@ -101,13 +106,40 @@ class ControllerCSPExtension extends Extension
         if (self::$isTesting || !DB::is_active() || !ClassInfo::hasTable('Member') || Director::is_cli()) {
             return;
         }
-        /** @var ContentController $owner */
-        $owner = $this->owner;
-        $ymlConfig = CSPBackend::config()->get('csp_config');
-        $this->addPolicyHeaders = ($ymlConfig['enabled'] ?? false) || static::checkCookie($owner->getRequest());
         /** @var Controller $owner */
+        $owner = $this->owner;
+        $cspConfig = CSPBackend::config()->get('csp_config');
+        $permissionConfig = CSPBackend::config()->get('permissions_config');
+        $this->addPolicyHeaders = ($cspConfig['enabled'] ?? false) || static::checkCookie($owner->getRequest());
+        $this->addPermissionHeaders = $permissionConfig['enabled'] ?? false;
+        $this->addCSPHeaders($cspConfig, $owner);
+        /** @var Controller $owner */
+        // Policy-headers
         if ($this->addPolicyHeaders) {
-            $this->addHeaders($ymlConfig, $owner);
+            $this->addCSPHeaders($cspConfig, $owner);
+        }
+        // Permission-policy
+        if ($this->addPermissionHeaders) {
+            $this->addPermissionsHeaders($permissionConfig, $owner);
+        }
+        // Referrer-Policy
+        if ($referrerPolicy = CSPBackend::config()->get('referrer')) {
+            $this->addResponseHeaders(['Referrer-Policy' => $referrerPolicy], $owner);
+        }
+        // X-Frame-Options
+        if ($frameOptions = CSPBackend::config()->get('frame-options')) {
+            $this->addResponseHeaders(['X-Frame-Options' => $frameOptions], $owner);
+        }
+        // X-Content-Type-Options
+        if ($ContentTypeOptions = CSPBackend::config()->get('content-type-options')) {
+            $this->addResponseHeaders(['X-Content-Type-Options' => $ContentTypeOptions], $owner);
+        }
+        // Strict-Transport-Security
+        $hsts = CSPBackend::config()->get('HSTS');
+        if ($hsts && $hsts['enabled']) {
+            $header = $hsts['max-age'] ? sprintf('max-age=%s; ', $hsts['max-age']) : '';
+            $header .= $hsts['include_subdomains'] ? 'includeSubDomains' : '';
+            $this->addResponseHeaders(['Strict-Transport-Security' => trim($header)], $owner);
         }
     }
 
@@ -137,13 +169,15 @@ class ControllerCSPExtension extends Extension
 
     /**
      * @param CSPBuilder $policy
-     * @param SiteTree|Controller $owner
+     * @param Controller $owner
      */
     protected function addCSP($policy, $owner): void
     {
         /** @var DataList|CSPDomain[] $cspDomains */
-        $cspDomains = CSPDomain::get()->filterAny(['Pages.ID' => [null, $owner->ID]]);
-
+        $cspDomains = CSPDomain::get();
+        if (class_exists('\Page')) {
+            $cspDomains = $cspDomains->filterAny(['Pages.ID' => [null, $owner->ID]]);
+        }
         foreach ($cspDomains as $domain) {
             $policy->addSource($domain->Source, $domain->Domain);
         }
@@ -215,19 +249,20 @@ class ControllerCSPExtension extends Extension
 
     /**
      * @param mixed $ymlConfig
-     * @param Controller|ContentController $owner
+     * @param Controller $owner
      * @return void
      * @throws Exception
      */
-    private function addHeaders(mixed $ymlConfig, Controller|ContentController $owner): void
+    private function addCSPHeaders(mixed $ymlConfig, Controller $owner): void
     {
         $config = Injector::inst()->convertServiceProperty($ymlConfig);
         $legacy = $config['legacy'] ?? true;
         $unsafeCSSInline = $config['style-src']['unsafe-inline'];
-        $config['style-src']['unsafe-inline'] = $unsafeCSSInline || $owner->dataRecord->AllowCSSInline;
-        $unsafeCSSInline = $config['script-src']['unsafe-inline'];
-        $config['script-src']['unsafe-inline'] = $unsafeCSSInline || $owner->dataRecord->AllowJSInline;
-
+        $unsafeJsInline = $config['script-src']['unsafe-inline'];
+        if (class_exists('\Page')) {
+            $config['style-src']['unsafe-inline'] = $unsafeCSSInline || $owner->dataRecord->AllowCSSInline;
+            $config['script-src']['unsafe-inline'] = $unsafeJsInline || $owner->dataRecord->AllowJSInline;
+        }
         $policy = CSPBuilder::fromArray($config);
 
         $this->addCSP($policy, $owner);
@@ -245,5 +280,91 @@ class ControllerCSPExtension extends Extension
 
         $headers = $policy->getHeaderArray($legacy);
         $this->addResponseHeaders($headers, $owner);
+    }
+
+    /**
+     * Add the Permissions-Policy header
+     * @param array $ymlConfig
+     * @param Controller $controller
+     * @return void
+     */
+    private function addPermissionsHeaders(mixed $ymlConfig, Controller $controller)
+    {
+        $config = Injector::inst()->convertServiceProperty($ymlConfig);
+        $policies = [];
+        foreach ($config as $key => $value) {
+            switch ($key) {
+                case 'accelerator':
+                case 'accelerator_policy':
+                    $policy ='accelerator';
+                    break;
+                case 'ambient-light-sensor':
+                case 'ambient_light_sensor':
+                case 'ambientLightSensor':
+                    $policy ='ambient-light-sensor';
+                    break;
+                case 'autoplay':
+                case 'autoPlay':
+                    $policy = 'autoplay';
+                    break;
+                case 'battery':
+                    $policy = 'battery';
+                    break;
+                case 'camera':
+                    $policy = 'camera';
+                    break;
+                case 'display-capture':
+                case 'display_capture':
+                case 'displayCapture':
+                    $policy = 'display-capture';
+                    break;
+                case 'encrypted-media':
+                case 'encrypted_media':
+                case 'encryptedMedia':
+                    $policy = 'encrypted-media';
+                    break;
+                case 'fullscreen':
+                case 'fullScreen':
+                    $policy = 'fullscreen';
+                    break;
+                case 'geolocation':
+                case 'geoLocation':
+                    $policy = 'geolocation';
+                    break;
+                case 'interest-cohort':
+                case 'interest_cohort':
+                case 'interestCohort':
+                    $policy = 'interest-cohort';
+                    break;
+                case 'microphone':
+                    $policy = 'microphone';
+                    break;
+                default:
+                    $policy = false;
+            }
+            if ($policy) {
+                $policies[] = $this->ymlToPolicy($policy, $value);
+            }
+        }
+        $headerAsArray = ['Permissions-Policy' => implode(', ', $policies)];
+
+        $this->addResponseHeaders($headerAsArray, $controller);
+    }
+
+    private function ymlToPolicy($key, $yml)
+    {
+        $value = [];
+        if (!empty($yml['self'])) {
+            $value[] = "'self'";
+        }
+        if (!empty($yml['allow']) && !in_array('none', $yml['allow'])) {
+            $value[] = implode(', ', $yml['allow']);
+        }
+        // If it's none, then anything else we did is useless
+        if (in_array('none', $yml['allow'])) {
+            $value = ["'none'"];
+        }
+
+        return sprintf('%s=(%s)', $key, implode(' ', $value));
     }
 }

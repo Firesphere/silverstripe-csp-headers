@@ -1,4 +1,4 @@
-PageController:
+SilverStripe\Control\Controller:
   extensions:
     - Firesphere\CSPHeaders\Extensions\ControllerCSPExtension
 Page:

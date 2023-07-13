@@ -2,6 +2,41 @@
 Name: CSPHeaders
 ---
 Firesphere\CSPHeaders\View\CSPBackend:
+  permissions_config:
+    enabled: false
+    accelerator:
+      allow: [none]
+    ambient-light-sensor:
+      allow: [none]
+    autoplay:
+      self: true
+      allow: []
+    battery:
+      allow: [none]
+    camera:
+      allow: [none]
+    display-capture:
+      self: true
+      allow: ['*']
+    encrypted-media:
+      self: true
+      allow: []
+    fullscreen:
+      self: true
+      allow: []
+    geolocation:
+      allow: [none]
+    interest-cohort:
+      allow: [none]
+    microphone:
+      allow: [none]
+  referrer: same-origin
+  frame-options: SAMEORIGIN
+  content-type-options: nosniff
+  HSTS:
+    enabled: false
+    max-age: 31536000
+    include_subdomains: true
   csp_config:
     enabled: true
     report-only: false
