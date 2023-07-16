@@ -21,6 +21,10 @@ PHP 8.0+
 
 `composer require firesphere/cspheaders`
 
+## Configuration and usage
+
+[See the documentation](docs/readme.md)
+
 # WARNING
 
 When using this module and have CSS hashes or nonces enabled, any inline styles declared on HTML Elements themselves will not work anymore.
@@ -37,10 +41,6 @@ When using Incapsula or Imperva (and potentially other CDN providers),
 your CSS and JavaScripts may be altered by the CDN, and therefore never compute correctly.
 
 The only solution is to disable the SRI's for css and javascript on these providers.
-
-## Configuration and usage
-
-[See the documentation](docs/readme.md)
 
 ## .htaccess
 
