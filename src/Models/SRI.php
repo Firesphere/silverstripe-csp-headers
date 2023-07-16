@@ -10,6 +10,7 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Core\Manifest\ModuleResourceLoader;
 use SilverStripe\Core\Path;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\FieldType\DBVarchar;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
@@ -37,8 +38,8 @@ class SRI extends DataObject implements PermissionProvider
     private static $clear_sri_on_build = false;
 
     private static $db = [
-        'File' => 'Varchar(255)',
-        'SRI'  => 'Varchar(255)'
+        'File' => DBVarchar::class,
+        'SRI'  => DBVarchar::class
     ];
 
     private static $summary_fields = [

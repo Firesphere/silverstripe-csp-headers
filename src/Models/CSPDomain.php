@@ -67,6 +67,29 @@ class CSPDomain extends DataObject implements PermissionProvider
     ];
 
     /**
+     * @return array|string[]
+     */
+    protected static function getSourceMap(): array
+    {
+        $map = self::$sourceMap;
+        foreach ($map as $key => &$value) {
+            [$translateKey] = explode(' ', strtoupper($value));
+            $translateString = sprintf('%s.%s', __CLASS__, $translateKey);
+            $value = _t($translateString, $value);
+        }
+
+        return $map;
+    }
+
+    /**
+     * @param array|string[] $sourceMap
+     */
+    public static function setSourceMap(array $sourceMap): void
+    {
+        self::$sourceMap = $sourceMap;
+    }
+
+    /**
      * @return string
      */
     public function getTitle()
@@ -82,7 +105,7 @@ class CSPDomain extends DataObject implements PermissionProvider
         $fields = parent::getCMSFields();
         $fields->removeByName(['SiteConfigID']);
 
-        $fields->dataFieldByName('Source')->setSource(self::$sourceMap);
+        $fields->dataFieldByName('Source')->setSource(self::getSourceMap());
 
         return $fields;
     }

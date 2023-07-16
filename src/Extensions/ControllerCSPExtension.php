@@ -106,10 +106,11 @@ class ControllerCSPExtension extends Extension
         if (self::$isTesting || !DB::is_active() || !ClassInfo::hasTable('Member') || Director::is_cli()) {
             return;
         }
+        $config = CSPBackend::config();
         /** @var Controller $owner */
         $owner = $this->owner;
-        $cspConfig = CSPBackend::config()->get('csp_config');
-        $permissionConfig = CSPBackend::config()->get('permissions_config');
+        $cspConfig = $config->get('csp_config');
+        $permissionConfig = $config->get('permissions_config');
         $this->addPolicyHeaders = ($cspConfig['enabled'] ?? false) || static::checkCookie($owner->getRequest());
         $this->addPermissionHeaders = $permissionConfig['enabled'] ?? false;
         $this->addCSPHeaders($cspConfig, $owner);
@@ -123,21 +124,21 @@ class ControllerCSPExtension extends Extension
             $this->addPermissionsHeaders($permissionConfig, $owner);
         }
         // Referrer-Policy
-        if ($referrerPolicy = CSPBackend::config()->get('referrer')) {
+        if ($referrerPolicy = $config->get('referrer')) {
             $this->addResponseHeaders(['Referrer-Policy' => $referrerPolicy], $owner);
         }
         // X-Frame-Options
-        if ($frameOptions = CSPBackend::config()->get('frame-options')) {
+        if ($frameOptions = $config->get('frame-options')) {
             $this->addResponseHeaders(['X-Frame-Options' => $frameOptions], $owner);
         }
         // X-Content-Type-Options
-        if ($ContentTypeOptions = CSPBackend::config()->get('content-type-options')) {
+        if ($ContentTypeOptions = $config->get('content-type-options')) {
             $this->addResponseHeaders(['X-Content-Type-Options' => $ContentTypeOptions], $owner);
         }
         // Strict-Transport-Security
-        $hsts = CSPBackend::config()->get('HSTS');
+        $hsts = $config->get('HSTS');
         if ($hsts && $hsts['enabled']) {
-            $header = $hsts['max-age'] ? sprintf('max-age=%s; ', $hsts['max-age']) : '';
+            $header = $hsts['max-age'] ? sprintf('max-age=%s; ', $hsts['max-age']) : '0';
             $header .= $hsts['include_subdomains'] ? 'includeSubDomains' : '';
             $this->addResponseHeaders(['Strict-Transport-Security' => trim($header)], $owner);
         }

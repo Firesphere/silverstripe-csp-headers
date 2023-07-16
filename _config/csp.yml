@@ -3,7 +3,7 @@ Name: CSPHeaders
 ---
 Firesphere\CSPHeaders\View\CSPBackend:
   permissions_config:
-    enabled: false
+    enabled: true
     accelerator:
       allow: [none]
     ambient-light-sensor:

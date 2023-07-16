@@ -42,19 +42,19 @@ class PageExtension extends DataExtension
     {
         $fields->addFieldToTab('Root', Tab::create(
             'CSP',
-            _t(SiteTree::class . '.CSP', 'Content Security Policies')
+            _t(__CLASS__ . '.CSP', 'Content Security Policies')
         ));
 
         $config = GridFieldConfig_RelationEditor::create();
         $gridfield = GridField::create(
             'CSPDomains',
-            _t(SiteTree::class . '.CSP', 'Content Security Policy Domains'),
+            _t(__CLASS__ . '.CSP_DOMAINS', 'Content Security Policy Domains'),
             $this->owner->CSPDomains(),
             $config
         );
         $fields->addFieldsToTab('Root.CSP', [
-            CheckboxField::create('AllowCSSInline', 'Allow CSS inline'),
-            CheckboxField::create('AllowJSInline', 'Allow JS inline'),
+            CheckboxField::create('AllowCSSInline', _t(__CLASS__ . '.ALLOWCSSINLINE', 'Allow CSS inline')),
+            CheckboxField::create('AllowJSInline', _t(__CLASS__ . '.ALLOWJSINLINE', 'Allow JS inline')),
             $gridfield
         ]);
     }

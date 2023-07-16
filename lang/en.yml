@@ -1,0 +1,44 @@
+en:
+  Firesphere\CSPHeaders\Admins\SRIAdmin:
+    MENUTITLE: 'SRI & CSP'
+  Firesphere\CSPHeaders\Extensions\PageExtension:
+    ALLOWCSSINLINE: 'Allow inline CSS'
+    ALLOWJSINLINE: 'Allow inline JavaScript'
+    CSP: 'Content Security Policies'
+    CSP_DOMAIN: 'Content Security Policy Domains'
+    CSP_DOMAINS: 'Content Security Policy Domains'
+  Firesphere\CSPHeaders\Models\CSPDomain:
+    ALL: All
+    CONNECT: Connect
+    EMBEDDED: 'Embedded media (e.g. YouTube)'
+    FONTS: Fonts
+    FORMS: Forms
+    IFRAMES: Iframes
+    IMAGES: Images
+    JAVASCRIPTS: JavaScripts
+    PERMISSION_CREATE_DESCRIPTION: 'Create CSP Domains'
+    PERMISSION_CREATE_HELP: 'Permission required to create new CSP Domains.'
+    PERMISSION_DELETE_DESCRIPTION: 'Delete CSP Domains'
+    PERMISSION_DELETE_HELP: 'Permission required to delete existing CSP Domains.'
+    PERMISSION_EDIT_DESCRIPTION: 'Edit CSP Domains'
+    PERMISSION_EDIT_HELP: 'Permission required to edit existing CSP Domains.'
+    PERMISSION_VIEW_DESCRIPTION: 'View CSP Domains'
+    PERMISSION_VIEW_HELP: 'Permission required to view existing CSP Domains.'
+    PLURALNAME: 'Content Security Policy Domains'
+    PLURALS:
+      one: 'A Content Security Policy Domain'
+      other: '{count} Content Security Policy Domains'
+    SINGULARNAME: 'Content Security Policy Domain'
+    STYLING: Styling
+    WORKER: Worker
+  Firesphere\CSPHeaders\Models\SRI:
+    PERMISSION_DELETE_DESCRIPTION: 'Delete SRI'
+    PERMISSION_DELETE_HELP: "Permission required to delete existing SRI's."
+    PLURALNAME: 'Subresource Integrities'
+    PLURALS:
+      one: 'A Subresource Integrity'
+      other: '{count} Subresource Integrities'
+    SINGULARNAME: 'Subresource Integrity'
+  Permissions:
+    CSPDOMAINS_CATEGORY: 'CSP Permissions'
+    TOPICS_CATEGORY: 'SRI permissions'
