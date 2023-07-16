@@ -21,3 +21,8 @@ on only that page.
 ## Caching
 
 The headers are generated on the fly and currently not cached.
+
+## jonom/betternavigator
+
+If you have Jono's Better Navigator module installed, 2 extra buttons will show for developers,
+which will allow the clearing of SRIs and forcefully enabling the security headers.
