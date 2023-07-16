@@ -56,7 +56,7 @@ class ControllerExtensionTest extends SapphireTest
     public function testNonceOnExcludedControllers()
     {
         //when CSPBackend.useNonce is true, it should only apply to controllers
-        //with the extension applied. By default, this is page controller
+        //with the extension applied. By default, this is root controller
         CSPBackend::setUsesNonce(true);
         $page = new Page();
         $controller = new PageController($page);
@@ -64,26 +64,12 @@ class ControllerExtensionTest extends SapphireTest
 
         $extension->setOwner($controller);
 
-        //useNonce is set but only applies on the PageController.
-        //let's check Security controller for logins: it should be absent
+        //let's check Security controller for logins: it should be there
         $secController = new Security();
-        $this->expectException('BadMethodCallException');
-        $this->assertNull($secController->getNonce());
+        $this->assertNotNull($secController->getNonce());
 
         //also check CMS-level controllers
         $cmsController = new LeftAndMain();
-        $this->expectException('BadMethodCallException');
-        $this->assertNull($secController->getNonce());
-
-        //now apply the extension, getNonce should not be null
-        $extension2 = new ControllerCSPExtension();
-
-        $extension2->setOwner($secController);
         $this->assertNotNull($secController->getNonce());
-
-        $extension3 = new ControllerCSPExtension();
-
-        $extension3->setOwner($cmsController);
-        $this->assertNotNull($cmsController->getNonce());
     }
 }
