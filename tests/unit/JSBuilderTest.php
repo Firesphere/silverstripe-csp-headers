@@ -28,15 +28,19 @@ class JSBuilderTest extends SapphireTest
         CSPBackend::setUsesNonce(false);
         $backend = Injector::inst()->get(CSPBackend::class);
         Requirements::set_backend($backend);
+        Controller::add_extension(Controller::class, ControllerCSPExtension::class);
 
-        $page = new Page();
-        $request = new HTTPRequest('GET', '/');
-        $request->setSession(new Session('test'));
+        if (class_exists('\Page')) {
+            $page = new Page();
+            $request = new HTTPRequest('GET', '/');
+            $request->setSession(new Session('test'));
 
-        PageController::add_extension(Controller::class, ControllerCSPExtension::class);
-        $controller = new PageController($page);
-        $controller->setRequest($request);
-        $controller->pushCurrent();
+            $controller = new PageController($page);
+            $controller->setRequest($request);
+            $controller->pushCurrent();
+        } else {
+            $controller = new Controller();
+        }
         $controller->onBeforeInit();
         return $controller;
     }
@@ -120,13 +124,16 @@ class JSBuilderTest extends SapphireTest
         $controller = $this->buildController();
         $owner = Requirements::backend();
         $builder = $owner->getJsBuilder();
+        CSPBackend::config()->set('jsSRI', true);
+        CSPBackend::setJsSRI(true);
         // Should add integrity
         $this->assertTrue(CSPBackend::isJsSRI());
         $requirements = $builder->buildTags('composer.json', [], [], '/');
         $this->assertStringContainsString('integrity=', $requirements[0]);
 
         // Shouldn't add integrity if not enabled
-        CSPBackend::config()->merge('jsSRI', false);
+        CSPBackend::config()->set('jsSRI', false);
+        CSPBackend::setJsSRI(false);
         $this->assertFalse(CSPBackend::isJsSRI());
         $controller->onBeforeInit();
         $requirements = $builder->buildTags('composer.json', [], [], '/');
@@ -139,7 +146,7 @@ class JSBuilderTest extends SapphireTest
         $controller->onBeforeInit();
         $requirements = $builder->buildTags('composer.json', [], [], '/');
         $this->assertStringContainsString('integrity=', $requirements[0]);
-        CSPBackend::config()->merge('jsSRI', true);
+        CSPBackend::config()->set('jsSRI', true);
         $request->offsetUnset('build-headers');
         Cookie::force_expiry('buildHeaders');
     }

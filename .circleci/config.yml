@@ -1,8 +1,6 @@
 version: 2
 jobs:
-  build:
-    environment:
-      CC_TEST_REPORTER_ID: 8fc82e19673fd65485d0f66a05d94bad2d3da1df8a848349fcdabab0767f452b
+  cms4:
     docker:
       - image: cimg/php:8.1
         environment:
@@ -37,6 +35,46 @@ jobs:
       # run tests!
       - run: until nc -z -v -w30 127.0.0.1 3306; do sleep 1; done
       - run: vendor/bin/sake dev/build flush=all skipannotation=true
+      - run: vendor/bin/phpunit -d memory_limit=512M tests/unit
+
+  cms5:
+    environment:
+      CC_TEST_REPORTER_ID: 8fc82e19673fd65485d0f66a05d94bad2d3da1df8a848349fcdabab0767f452b
+    docker:
+      - image: cimg/php:8.1
+        environment:
+          - SS_DATABASE_CLASS=MySQLDatabase
+          - SS_DATABASE_SERVER=127.0.0.1
+          - SS_DATABASE_USERNAME=root
+          - SS_DATABASE_PASSWORD=ubuntu
+          - SS_DATABASE_NAME=circle_test
+          - SS_ENVIRONMENT_TYPE=test
+          - SS_DEFAULT_ADMIN_USERNAME=admin
+          - SS_DEFAULT_ADMIN_PASSWORD=password
+      - image: cimg/mariadb:10.6.4
+        environment:
+          - MYSQL_USER=user
+          - MYSQL_ROOT_PASSWORD=ubuntu
+          - MYSQL_DATABASE=circle_test
+          - MYSQL_HOST=127.0.0.1
+
+    steps:
+      # Install additional requirements
+      - checkout
+      - run: composer config --no-plugins --no-interaction allow-plugins.composer/installers true
+      - run: composer config --no-plugins --no-interaction allow-plugins.silverstripe/vendor-plugin true
+      - run: composer config --no-plugins --no-interaction allow-plugins.silverstripe/recipe-plugin true
+      - run: composer require silverstripe/recipe-cms:^5 -n
+      - run: composer install -n
+      - run: cp .circleci/circleci.env .env
+      - run: cp .circleci/jstest.js.circleci jstest.js
+#      - run: cp .circleci/circleci.csp.yml _config/circlecsp.yml
+      - run: sudo pecl install pcov
+      - run: sudo docker-php-ext-enable pcov
+
+      # run tests!
+      - run: until nc -z -v -w30 127.0.0.1 3306; do sleep 1; done
+      - run: vendor/bin/sake dev/build flush=all skipannotation=true
       - run: vendor/bin/phpunit --coverage-clover=./clover.xml --log-junit ./coverage/junit.xml -d memory_limit=512M tests/unit
       - run:
           name: Code coverage reports
@@ -46,4 +84,47 @@ jobs:
             echo "---"
             bash <(curl -s https://codecov.io/bash) -f clover.xml
       - run: vendor/bin/phpcs --standard=phpcs.xml.dist src tests/unit
+  framework:
+    docker:
+      - image: cimg/php:8.1
+        environment:
+          - SS_DATABASE_CLASS=MySQLDatabase
+          - SS_DATABASE_SERVER=127.0.0.1
+          - SS_DATABASE_USERNAME=root
+          - SS_DATABASE_PASSWORD=ubuntu
+          - SS_DATABASE_NAME=circle_test
+          - SS_ENVIRONMENT_TYPE=test
+          - SS_DEFAULT_ADMIN_USERNAME=admin
+          - SS_DEFAULT_ADMIN_PASSWORD=password
+      - image: cimg/mariadb:10.6.4
+        environment:
+          - MYSQL_USER=user
+          - MYSQL_ROOT_PASSWORD=ubuntu
+          - MYSQL_DATABASE=circle_test
+          - MYSQL_HOST=127.0.0.1
 
+    steps:
+      # Install additional requirements
+      - checkout
+      - run: composer config --no-plugins --no-interaction allow-plugins.composer/installers true
+      - run: composer config --no-plugins --no-interaction allow-plugins.silverstripe/vendor-plugin true
+      - run: composer config --no-plugins --no-interaction allow-plugins.silverstripe/recipe-plugin true
+      - run: composer install -n
+      - run: cp .circleci/circleci.env .env
+      - run: cp .circleci/jstest.js.circleci jstest.js
+#      - run: cp .circleci/circleci.csp.yml _config/circlecsp.yml
+      - run: sudo pecl install pcov
+      - run: sudo docker-php-ext-enable pcov
+
+      # run tests!
+      - run: until nc -z -v -w30 127.0.0.1 3306; do sleep 1; done
+      - run: vendor/bin/sake dev/build flush=all skipannotation=true
+      - run: vendor/bin/phpunit -d memory_limit=512M tests/unit
+
+workflows:
+  version: 2
+  dobuild:
+    jobs:
+      - cms4
+      - cms5
+      - framework

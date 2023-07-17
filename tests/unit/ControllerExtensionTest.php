@@ -9,6 +9,7 @@ use Firesphere\CSPHeaders\View\CSPBackend;
 use Page;
 use PageController;
 use SilverStripe\Admin\LeftAndMain;
+use SilverStripe\Control\Controller;
 use SilverStripe\Control\Cookie;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\NullHTTPRequest;
@@ -20,21 +21,24 @@ class ControllerExtensionTest extends SapphireTest
     public function setUp(): void
     {
         parent::setUp();
-        CSPBackend::config()->merge('useNonce', false);
+        CSPBackend::config()->set('useNonce', false);
         ControllerCSPExtension::$isTesting = true;
     }
     public function testInit()
     {
         $this->assertFalse(ControllerCSPExtension::checkCookie(new NullHTTPRequest()));
-        $page = new Page();
-        $controller = new PageController($page);
-
+        if (class_exists('\Page')) {
+            $page = new Page();
+            $controller = new PageController($page);
+        } else {
+            $controller = new Controller();
+        }
         // Shouldn't add CSP if not enabled
         $extension = new ControllerCSPExtension();
         $extension->setOwner($controller);
         $config = CSPBackend::config()->get('csp_config');
         $config['enabled'] = false;
-        CSPBackend::config()->merge('csp_config', $config);
+        CSPBackend::config()->set('csp_config', $config);
         $this->assertFalse($extension->isAddPolicyHeaders());
         $extension->onBeforeInit();
 
@@ -42,7 +46,7 @@ class ControllerExtensionTest extends SapphireTest
 
         // Should add CSP if enabled (and build headers not requested)
         $config['enabled'] = true;
-        CSPBackend::config()->merge('csp_config', $config);
+        CSPBackend::config()->set('csp_config', $config);
         $request = new HTTPRequest('GET', '/');
         $controller->setRequest($request);
         $extension = new ControllerCSPExtension();
@@ -58,8 +62,12 @@ class ControllerExtensionTest extends SapphireTest
         //when CSPBackend.useNonce is true, it should only apply to controllers
         //with the extension applied. By default, this is root controller
         CSPBackend::setUsesNonce(true);
-        $page = new Page();
-        $controller = new PageController($page);
+        if (class_exists('\Page')) {
+            $page = new Page();
+            $controller = new PageController($page);
+        } else {
+            $controller = new Controller();
+        }
         $extension = new ControllerCSPExtension();
 
         $extension->setOwner($controller);

@@ -52,7 +52,11 @@ trait CSPBackendTrait
      */
     public static function isJsSRI(): bool
     {
-        return CSPBackend::config()->get('jsSRI') || self::$jsSRI;
+        if (self::$jsSRI === null) {
+            self::$jsSRI = CSPBackend::config()->get('jsSRI');
+        }
+
+        return self::$jsSRI;
     }
 
     /**
@@ -68,7 +72,11 @@ trait CSPBackendTrait
      */
     public static function isCssSRI(): bool
     {
-        return CSPBackend::config()->get('cssSRI') || self::$cssSRI;
+        if (self::$cssSRI === null) {
+            self::$cssSRI = CSPBackend::config()->get('cssSRI');
+        }
+
+        return self::$cssSRI;
     }
 
     /**
