@@ -113,7 +113,6 @@ class ControllerCSPExtension extends Extension
         $permissionConfig = $config->get('permissions_config');
         $this->addPolicyHeaders = ($cspConfig['enabled'] ?? false) || static::checkCookie($owner->getRequest());
         $this->addPermissionHeaders = $permissionConfig['enabled'] ?? false;
-        $this->addCSPHeaders($cspConfig, $owner);
         /** @var Controller $owner */
         // Policy-headers
         if ($this->addPolicyHeaders) {
