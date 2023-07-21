@@ -260,7 +260,7 @@ class ControllerCSPExtension extends Extension
         $legacy = $config['legacy'] ?? true;
         $unsafeCSSInline = $config['style-src']['unsafe-inline'];
         $unsafeJsInline = $config['script-src']['unsafe-inline'];
-        if (class_exists('\Page')) {
+        if (class_exists('\Page') && $owner && $owner->dataRecord) {
             $config['style-src']['unsafe-inline'] = $unsafeCSSInline || $owner->dataRecord->AllowCSSInline;
             $config['script-src']['unsafe-inline'] = $unsafeJsInline || $owner->dataRecord->AllowJSInline;
         }
