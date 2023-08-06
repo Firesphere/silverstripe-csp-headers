@@ -83,6 +83,13 @@ Firesphere\CSPHeaders\View\CSPBackend:
     enabled: false
 ```
 
+## Disable in CMS
+
+```yaml
+Firesphere\CSPHeaders\View\CSPBackend:
+  csp_config:
+    in_cms: false
+```
 
 ## legacy_headers
 
