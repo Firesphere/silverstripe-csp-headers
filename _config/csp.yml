@@ -39,6 +39,7 @@ Firesphere\CSPHeaders\View\CSPBackend:
     include_subdomains: true
   csp_config:
     enabled: true
+    in_cms: false
     report-only: false
     report-uri: "https://127.0.0.1/r/d/csp/enforce"
     base-uri:
