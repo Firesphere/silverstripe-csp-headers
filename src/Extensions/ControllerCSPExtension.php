@@ -9,6 +9,7 @@ use Firesphere\CSPHeaders\View\CSPBackend;
 use ParagonIE\ConstantTime\Base64;
 use ParagonIE\CSPBuilder\CSPBuilder;
 use phpDocumentor\Reflection\Types\Boolean;
+use SilverStripe\Admin\LeftAndMain;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Cookie;
@@ -110,7 +111,11 @@ class ControllerCSPExtension extends Extension
         /** @var Controller $owner */
         $owner = $this->owner;
         $cspConfig = $config->get('csp_config');
-        $permissionConfig = $config->get('permissions_config');
+        if ($this->owner instanceof LeftAndMain && $cspConfig['in_cms'] === false) {
+            return;
+        }
+
+            $permissionConfig = $config->get('permissions_config');
         $this->addPolicyHeaders = ($cspConfig['enabled'] ?? false) || static::checkCookie($owner->getRequest());
         $this->addPermissionHeaders = $permissionConfig['enabled'] ?? false;
         /** @var Controller $owner */
