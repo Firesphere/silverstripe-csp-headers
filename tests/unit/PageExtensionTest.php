@@ -12,13 +12,17 @@ class PageExtensionTest extends SapphireTest
 {
     public function testUpdateSettingsFields()
     {
-        $page = new Page();
-        $extension = new PageExtension();
-        $extension->setOwner($page);
+        if (class_exists('\Page')) {
+            $page = new Page();
+            $extension = new PageExtension();
+            $extension->setOwner($page);
 
-        $fields = $page->getSettingsFields();
-        $extension->updateSettingsFields($fields);
+            $fields = $page->getSettingsFields();
+            $extension->updateSettingsFields($fields);
 
-        $this->assertInstanceOf(GridField::class, $fields->dataFieldByName('CSPDomains'));
+            $this->assertInstanceOf(GridField::class, $fields->dataFieldByName('CSPDomains'));
+        } else {
+            $this->assertTrue(true); // noop
+        }
     }
 }

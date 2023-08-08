@@ -1,4 +1,4 @@
-<phpunit bootstrap="vendor/silverstripe/cms/tests/bootstrap.php"
+<phpunit bootstrap="vendor/silverstripe/framework/tests/bootstrap.php"
          colors="true">
 
     <testsuite name="Default">

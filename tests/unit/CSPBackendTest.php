@@ -14,7 +14,7 @@ class CSPBackendTest extends SapphireTest
     public function setUp(): void
     {
         parent::setUp();
-        CSPBackend::config()->merge('useNonce', false);
+        CSPBackend::config()->set('useNonce', false);
     }
     public function testSet()
     {
@@ -219,7 +219,7 @@ body {background-color: red;}
         CSPBackend::setJsSRI(true);
         $this->assertEquals(true, CSPBackend::isJsSRI());
         CSPBackend::setJsSRI(false);
-        $this->assertEquals($isSRI, CSPBackend::isJsSRI());
+        $this->assertEquals(false, CSPBackend::isJsSRI());
 
         $isSRI = CSPBackend::config()->get('cssSRI');
         $this->assertEquals($isSRI, CSPBackend::isCssSRI());
@@ -227,6 +227,6 @@ body {background-color: red;}
         CSPBackend::setCssSri(true);
         $this->assertEquals(true, CSPBackend::isCssSRI());
         CSPBackend::setCssSri(false);
-        $this->assertEquals($isSRI, CSPBackend::isCssSRI());
+        $this->assertEquals(false, CSPBackend::isCssSRI());
     }
 }

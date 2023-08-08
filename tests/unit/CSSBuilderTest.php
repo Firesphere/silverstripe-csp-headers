@@ -28,6 +28,10 @@ class CSSBuilderTest extends SapphireTest
         CSPBackend::setUsesNonce(false);
         $backend = Injector::inst()->get(CSPBackend::class);
         Requirements::set_backend($backend);
+        if (!class_exists('\Page')) {
+            Controller::add_extension(Controller::class, ControllerCSPExtension::class);
+            return new Controller();
+        }
 
         $page = new Page();
         $request = new HTTPRequest('GET', '/');
@@ -119,12 +123,14 @@ class CSSBuilderTest extends SapphireTest
         $owner = Requirements::backend();
         $builder = $owner->getCSSBuilder();
         // Should add integrity
-        CSPBackend::config()->merge('cssSRI', true);
+        CSPBackend::config()->set('cssSRI', true);
+        CSPBackend::setCssSRI(true);
         $this->assertTrue(CSPBackend::isCssSRI());
         $requirements = $builder->buildTags('composer.json', [], [], '/');
         $this->assertStringContainsString('integrity=', $requirements[0]);
         // Shouldn't add integrity if not enabled
-        CSPBackend::config()->merge('cssSRI', false);
+        CSPBackend::config()->set('cssSRI', false);
+        CSPBackend::setCssSRI(false);
         $this->assertFalse(CSPBackend::isCssSRI());
         $controller->onBeforeInit();
         $requirements = $builder->buildTags('composer.json', [], [], '/');

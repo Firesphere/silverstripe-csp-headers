@@ -1,0 +1,7 @@
+---
+name: circlecitestyml
+after:
+  - CSPHeaders
+---
+Firesphere\CSPHeaders\View\CSPBackend:
+  useNonce: false
