@@ -61,8 +61,11 @@ class CSPBackend extends Requirements_Backend
         $type = $this->getTagType($html);
         if ($type === 'javascript') {
             $options = $this->getOptions($html);
-            static::$headJS[$uniquenessID] = [strip_tags($html) => $options];
-            ControllerCSPExtension::addJS(strip_tags($html));
+            // Grab everything between the script tags. All matches are okay, but the last one is the actual script content
+            preg_match('/<script (.*?)>(.*?)<\/script>/s', $html, $match);
+            $scriptContent = end($match);
+            static::$headJS[$uniquenessID] = [$scriptContent => $options];
+            ControllerCSPExtension::addJS($scriptContent);
         } elseif ($type === 'css') {
             $options = $this->getOptions($html); // SimpleXML does it's job here, we see the outcome
             static::$headCSS[$uniquenessID] = [strip_tags($html) => $options];
@@ -96,7 +99,7 @@ class CSPBackend extends Requirements_Backend
      */
     protected function getOptions($html): array
     {
-        $doc = simplexml_load_string($html); // SimpleXML does it's job here, we see the outcome
+        $doc = simplexml_load_string(str_replace('\\', '', $html)); // SimpleXML does it's job here, we see the outcome
         $option = [];
         foreach ($doc->attributes() as $key => $attribute) {
             $option[$key] = (string)$attribute; // Add each option as a string
