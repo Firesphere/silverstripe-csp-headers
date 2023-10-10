@@ -79,6 +79,7 @@ Firesphere\CSPHeaders\View\CSPBackend:
   cssSRI: false
   useNonce: false
 ---
+Name: CSPHeadersDev
 Only:
   environment: 'dev'
 ---
