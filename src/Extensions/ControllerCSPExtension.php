@@ -169,7 +169,6 @@ class ControllerCSPExtension extends Extension
             }
             $this->addResponseHeaders($responseHeaders, $owner);
         }
-
     }
 
     /**
