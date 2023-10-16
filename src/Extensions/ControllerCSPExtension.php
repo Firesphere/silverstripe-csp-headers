@@ -6,6 +6,7 @@ namespace Firesphere\CSPHeaders\Extensions;
 use Exception;
 use Firesphere\CSPHeaders\Models\CSPDomain;
 use Firesphere\CSPHeaders\View\CSPBackend;
+use LeKoala\DebugBar\DebugBar;
 use ParagonIE\ConstantTime\Base64;
 use ParagonIE\CSPBuilder\CSPBuilder;
 use phpDocumentor\Reflection\Types\Boolean;
@@ -16,6 +17,7 @@ use SilverStripe\Control\Cookie;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\ClassInfo;
+use SilverStripe\Core\Environment;
 use SilverStripe\Core\Extension;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\DataList;
@@ -115,7 +117,7 @@ class ControllerCSPExtension extends Extension
             return;
         }
 
-            $permissionConfig = $config->get('permissions_config');
+        $permissionConfig = $config->get('permissions_config');
         $this->addPolicyHeaders = ($cspConfig['enabled'] ?? false) || static::checkCookie($owner->getRequest());
         $this->addPermissionHeaders = $permissionConfig['enabled'] ?? false;
         /** @var Controller $owner */
@@ -146,6 +148,27 @@ class ControllerCSPExtension extends Extension
             $header .= $hsts['include_subdomains'] ? 'includeSubDomains' : '';
             $this->addResponseHeaders(['Strict-Transport-Security' => trim($header)], $owner);
         }
+        // Access-Control-Allow-Origin
+        $cors = $config->get('CORS');
+        if ($cors && $cors['enabled']) {
+            $responseHeaders = ['Access-Control-Allow-Methods' => implode(',', $cors['methods'])];
+            if (in_array('*', $cors['allow'])) {
+                $responseHeaders['Access-Control-Allow-Origin'] = '*';
+            } else {
+                $origin = (string)$owner->getRequest()->getHeader('origin');
+                $base = Director::absoluteBaseURL();
+                $trimmedOrigin = $this->trimDomain($origin);
+                $trimmedBase = $this->trimDomain($base);
+                $domains = explode(',', (string)Environment::getEnv('SS_ALLOWED_HOSTS'));
+                $domains = array_merge($domains, $cors['allow'], [$trimmedBase]);
+
+                if (in_array($trimmedOrigin, $domains)) {
+                    $allow = strlen($trimmedOrigin) ? $origin : $base;
+                    $responseHeaders['Access-Control-Allow-Origin'] = $allow;
+                }
+            }
+            $this->addResponseHeaders($responseHeaders, $owner);
+        }
     }
 
     /**
@@ -162,14 +185,38 @@ class ControllerCSPExtension extends Extension
     }
 
     /**
-     * @return null|string
+     * @param mixed $ymlConfig
+     * @param Controller $owner
+     * @return void
+     * @throws Exception
      */
-    public function getNonce()
+    private function addCSPHeaders(mixed $ymlConfig, Controller $owner): void
     {
-        if (!$this->nonce) {
-            $this->nonce = Base64::encode(hash('sha512', uniqid('nonce', false)));
+        $config = Injector::inst()->convertServiceProperty($ymlConfig);
+        $legacy = $config['legacy'] ?? true;
+        $unsafeCSSInline = $config['style-src']['unsafe-inline'];
+        $unsafeJsInline = $config['script-src']['unsafe-inline'];
+        if (class_exists('\Page') && $owner && $owner->dataRecord) {
+            $config['style-src']['unsafe-inline'] = $unsafeCSSInline || $owner->dataRecord->AllowCSSInline;
+            $config['script-src']['unsafe-inline'] = $unsafeJsInline || $owner->dataRecord->AllowJSInline;
         }
-        return $this->nonce;
+        $policy = CSPBuilder::fromArray($config);
+
+        $this->addCSP($policy, $owner);
+        $this->addInlineJSPolicy($policy, $config);
+        $this->addInlineCSSPolicy($policy, $config);
+        // When in dev, add the debugbar nonce, requires a change to the lib
+        if (Director::isDev() && class_exists('LeKoala\DebugBar\DebugBar')) {
+            $bar = DebugBar::getDebugBar();
+
+            if ($bar) {
+                $bar->getJavascriptRenderer()->setCspNonce('debugbar');
+                $policy->nonce('script-src', 'debugbar');
+            }
+        }
+
+        $headers = $policy->getHeaderArray($legacy);
+        $this->addResponseHeaders($headers, $owner);
     }
 
     /**
@@ -210,6 +257,18 @@ class ControllerCSPExtension extends Extension
     }
 
     /**
+     * @return null|string
+     */
+    public function getNonce()
+    {
+        if (!$this->nonce) {
+            $this->nonce = Base64::encode(hash('sha512', uniqid('nonce', false)));
+        }
+
+        return $this->nonce;
+    }
+
+    /**
      * @param CSPBuilder $policy
      * @param array $config
      * @throws Exception
@@ -245,49 +304,6 @@ class ControllerCSPExtension extends Extension
     }
 
     /**
-     * @return bool
-     */
-    public function isAddPolicyHeaders(): bool
-    {
-        return $this->addPolicyHeaders ?? false;
-    }
-
-    /**
-     * @param mixed $ymlConfig
-     * @param Controller $owner
-     * @return void
-     * @throws Exception
-     */
-    private function addCSPHeaders(mixed $ymlConfig, Controller $owner): void
-    {
-        $config = Injector::inst()->convertServiceProperty($ymlConfig);
-        $legacy = $config['legacy'] ?? true;
-        $unsafeCSSInline = $config['style-src']['unsafe-inline'];
-        $unsafeJsInline = $config['script-src']['unsafe-inline'];
-        if (class_exists('\Page') && $owner && $owner->dataRecord) {
-            $config['style-src']['unsafe-inline'] = $unsafeCSSInline || $owner->dataRecord->AllowCSSInline;
-            $config['script-src']['unsafe-inline'] = $unsafeJsInline || $owner->dataRecord->AllowJSInline;
-        }
-        $policy = CSPBuilder::fromArray($config);
-
-        $this->addCSP($policy, $owner);
-        $this->addInlineJSPolicy($policy, $config);
-        $this->addInlineCSSPolicy($policy, $config);
-        // When in dev, add the debugbar nonce, requires a change to the lib
-        if (Director::isDev() && class_exists('LeKoala\DebugBar\DebugBar')) {
-            $bar = \LeKoala\DebugBar\DebugBar::getDebugBar();
-
-            if ($bar) {
-                $bar->getJavascriptRenderer()->setCspNonce('debugbar');
-                $policy->nonce('script-src', 'debugbar');
-            }
-        }
-
-        $headers = $policy->getHeaderArray($legacy);
-        $this->addResponseHeaders($headers, $owner);
-    }
-
-    /**
      * Add the Permissions-Policy header
      * @param array $ymlConfig
      * @param Controller $controller
@@ -301,12 +317,12 @@ class ControllerCSPExtension extends Extension
             switch ($key) {
                 case 'accelerator':
                 case 'accelerator_policy':
-                    $policy ='accelerator';
+                    $policy = 'accelerator';
                     break;
                 case 'ambient-light-sensor':
                 case 'ambient_light_sensor':
                 case 'ambientLightSensor':
-                    $policy ='ambient-light-sensor';
+                    $policy = 'ambient-light-sensor';
                     break;
                 case 'autoplay':
                 case 'autoPlay':
@@ -371,5 +387,27 @@ class ControllerCSPExtension extends Extension
         }
 
         return sprintf('%s=(%s)', $key, implode(' ', $value));
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAddPolicyHeaders(): bool
+    {
+        return $this->addPolicyHeaders ?? false;
+    }
+
+    /**
+     * Remove https://, trailing slash, etc.
+     * @param $domain
+     * @return string
+     */
+    private function trimDomain($domain)
+    {
+        $domain = explode('//', $domain);
+        $domain = end($domain);
+        [$domain] = explode('/', $domain);
+
+        return $domain;
     }
 }

@@ -33,6 +33,18 @@ Firesphere\CSPHeaders\View\CSPBackend:
   referrer: same-origin
   frame-options: SAMEORIGIN
   content-type-options: nosniff
+  CORS:
+    enabled: false
+    allow: []
+    self: true
+    methods:
+      - GET
+      - HEAD
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+      - CONNECT
   HSTS:
     enabled: false
     max-age: 31536000
