@@ -63,7 +63,6 @@ class CSPDomain extends DataObject implements PermissionProvider
 
     private static $searchable_fields = [
         'Domain',
-        'Source'
     ];
 
     /**
