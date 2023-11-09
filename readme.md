@@ -1,3 +1,7 @@
+# IMPORTANT #
+
+[In an effort to get away from GitHub, this package's primary location is now on Codeberg](https://codeberg.org/Firesphere/silverstripe-csp-headers)
+
 # Security headers for Silverstripe
 
 # License
