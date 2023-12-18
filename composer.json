@@ -21,7 +21,7 @@
         "ext-simplexml": "*",
         "silverstripe/framework": "^4|^5",
         "silverstripe/admin": "^1|^2",
-        "paragonie/csp-builder": "^2.9",
+        "paragonie/csp-builder": "^3.0",
         "guzzlehttp/guzzle": ">=6",
         "symfony/yaml": ">=4"
     },
